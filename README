@@ -1,0 +1,22 @@
+Welcome to the 3rd major release series of GNU Bayonne.  This release series is
+dedicated to improving the use of bayonne as a script driven telephony
+integration and application services platform in conjunction with an existing
+telephony infrastructure. Common uses include voice messaging, voice broadcast,
+and prepaid calling in conjunction with a SIP server or H323 gatekeeper such as
+Ser, SipX, GNU SIP Witch or GNU Gate Keeper; for offering IMS services and for
+carrier hosted applications; and for integration with legacy digital and analog
+key telephone systems. These use cases imply that Bayonne will also assume the
+goals and functionality of the original Babylon PBX integration server as well.
+
+GNU Bayonne traditionally operates as a generic script driven telephony server
+that can operate with existing third party telephony api kits, such as those
+produced by Intel-Dialogic, Aculab, Pika (montecarlo), or Voicetronix.  GNU
+Bayonne also includes pure network drivers for SIP and H323.  Specific drivers
+and api adaptions offer features unique and targetted to those environments.
+For example, some telephony api's support various forms of conferencing, and
+these features are available in Bayonne adaptions for those api's.  Other
+drivers will be created to support unique features of specific telephony
+platforms, such as for sipxpbx which uses html initiated app services, the
+panasonic DBS driver that would use the Panasonic DBS serial API, or sipwitch
+which offers presense and instant messaging through simple.
+

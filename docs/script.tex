@@ -1,0 +1,512 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{html}
+\usepackage[english]{babel}
+\usepackage{makeidx}
+
+\makeindex
+
+\selectlanguage{english}
+
+%\pagestyle{empty}
+\setlength{\parindent}{0pc}
+\setlength{\parskip}{\baselineskip}
+
+% Command without and with index
+\newcommand{\cmdn}[1]{\textbf{#1}}
+\newcommand{\cmd}[1]{\cmdn{#1}\index{Command!#1}}
+
+\date{2008-08-20}
+\title{GNU ccScript Scripting Guide IV}
+\author{
+David Sugar \\
+{\em GNU Telephony.}\\
+{\normalsize sugar@gnu.org, http://www.gnutelephony.org} \\
+}
+
+\begin{document}
+%\renewcommand{\thepage}{}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+This document covers the "4th" major release of the GNU ccScript engine.  GNU
+ccScript is a and highly specialized embedded scripting engine and virtual
+execution environment for creating applications that may be automated through
+scripting.  This system is a C++ class library which allows one to derive
+application specific dialects of the core language as needed through
+subclassing.   GNU ccScript is not meant to run as a "shell" or offer
+interactive user sessions.  \\
+
+Where ccScript differs from similar packages is both in determinstic
+runtime, and it's use of step execution for integrating with realtime
+state-transition and callback event driven systems.  That is, rather 
+than invoke a function which then parses an interpreter, one executes a 
+single "step" statement. This is useful when a callback service thread 
+is monitoring multiple devices; each device can have a ccscript 
+interpreter instance, and a single thread can dispatch events upon 
+demand. \\
+
+GNU ccScript is also meant to script systems without downtime.  This has
+one curious effect; when ccscript is started, a core script is converted
+into a reference counted object.  When an interpreter instance is connected
+to process script requests, it attaches a reference.  If an active script 
+is modified and reloaded, a new "image" is created, and new requests are 
+then given this new image.  When the last reference against an old 
+script image is terminated, the image is also purged.  This allows one 
+to compile and rebuild scripts on the fly and load them into memory even 
+while active interpreter instances are running. \\
+
+A number of specialized optimizations also exist in GNU ccScript to greatly
+reduce runtime heap management, especially for running massivily concurrent
+instances of the interpreter.  Another core feature of the GNU ccScript
+system is support for extensive compile-time script analsysis.  This reduces
+the need for runtime error checking and usage of incorrect scripts. \\
+
+\section{Script file layout}
+
+A single text file is used to represent an application "script".  This text
+file is compiled into a reference counted image that is then executed at
+runtime.  The form and layout of a script application has been defined in
+release IV as follows: \\
+
+First, there is an initialization block.  This appears at the start of the
+script file without a label.  The initialization block is called anytime a
+runtime script is ``attached'', whether one starts by calling @main, or another
+program section.  Only certain statements can be used in the initialization
+block, and are generally related to defining and setting global applications
+and constants. \\
+
+There can be special commands defined that must appear at the very start of
+a script file.  The ``strict'' command is implimented this way.  Derived
+application servers may have other special commands which have this
+requirement or other special commands that can only be placed in an
+initialization block. \\
+
+Following the initialization block can appear ``define'' statements and
+scripts, along with ``template'' statements and handlers.  The defines are used
+to create user defined ``functions'' that operate as if they are like new
+``builtin'' script commands, by using the scripting language.  Variables can be
+scoped to a function, and there is both call by value and call by reference
+argument passing possible.   ``templates'' are used to apply event handlers
+to script ``\@sections'' so they do not have to be individually recoded.  \\
+
+After any defines and templates appear there are script sections.  Each section
+begins with a \@ and a label.  There are two special labels, ``\@main'', which
+is the default entry point for starting a script application unless the attach
+method chose a different script, and the ``\@exit'' label, which is used when
+the application service script terminates. \\
+
+Each script section can have under it one or more named event handlers, each of
+which have script statements.  Multiple event handlers can be listed next to
+each other directly, and thereby share the same script statements.  These are
+now all defined free-form.  The exact meaning or use of predefined event
+handlers will depend on the derived application service.  The \^error event
+however is always used when the script engine finds a runtime error, and the
+\^exit handler, if found for the currently running script, is called before the
+\@exit script on termination events. \\
+
+Each script may also have a special ``\^init'' event handler.  This is called
+each time a script is started, whether from initial attach of ``\@main'', or
+the result of a goto or gosub.  The ``\^init'' section is called before the
+main part of the script.  Any events that occur will be blocked until
+``\^init'' completes, and so this can be used to complete initialization of all
+variables before the script, which itself can otherwise be interrupted by an
+event, actually starts, or, for example, in the case of Bayonne, to play
+prompts that are not interrupted in a script that also has key events. \\
+
+Starting with ccscript 4.0.1, ``templates'' can be created which can then be
+applied to existing ``\@script'' sections.  When this is done, the ``\^event''
+handlers of the template will be added to the script ``\@section'' they are
+applied to.  If the script ``\@section'' has defined it's own local handlers,
+then these will override the ones from the template. \\
+
+Templating allows one to define a script to hold common event handlers which
+can then be used in multiple sections, rather than having to repeatibly re-code
+each handler in each section.  A script can only have one template applied, and
+the ``apply'' command must be the first command of the script ``\@section''. \\
+
+Templates can be applied to definition blocks as well as to script
+``\@sections''.  The only requirement is that the template must appear in the
+script file before it is applied.  An ``apply'' command can also be used within
+a template itself.  This can be used to compose a template from event handlers
+from multiple templates which can then be collectivily applied to a script
+``\@section'' or definition block. \\
+
+Starting with ccscript 4.0.3, conditional compilation is supported using one
+or more ``requires'' blocks.  The conditional section is ended with a ``endreq''
+statement.  The ``requires'' statement tests for the presense of keywords in
+the interpreter and/or definition blocks.  If the required commands are not
+found, then compilation is skipped until the next ``requires'' statement can
+be tested or an ``endreq'' statement is used.  A ``requires'' statement can
+make any part of a script file conditional, including labels and event
+handlers. \\
+
+Testing for the absense of a command can be done using ``!token''.  Hence,
+a conditional block can be started with a ``requires token'', and alternate
+code can be substituted using a ``requires !token''.  The entire block can
+then be ended with a ``endreq''.  If multiple command tokens are listed, then
+the presense (or absense) of all the listed tokens must be true for the
+``requires'' block to conditionally compile. \\ 
+
+\section{Statements and syntax}
+
+Each script statement is a single input line in a script file.  A script
+statement is composed of a script command statement, any script command
+arguments that might be used, and any keyword value pairs.  White spaces are
+used to seperate each part part of the command statement, and white spaces are
+also used to seperate each command argument.  The newline terminates a
+script statement. \\
+
+GNU ccScript IV is case sensisive.  All built-in keywords are lower case.
+Symbol names and defines which are in mixed case have to be used in the same
+manner and case they are defined.  Hence ``sET'' WOULD NOT BE the same command
+as ``set''. \\
+
+Command  are composed of, and keywords can be assigned with, either of literal
+strings, integer or decimal numbers, or of references to symbols. \\
+
+String literales may be enclosed in single quotes, double quotes, or a pair of
+{} braces.   Literals can also be a single integer or decimal number. \\
+
+Symbols arenormally referenced by starting with the ``\%'' character.  Special variable
+formatting rules may be specified with the ``\$'' character followed by the
+format option, a ``:'', and the symbol name, such as ``\$len:string'' to
+retrieve the length of the variable ``\%string''.  Symbols, when used to
+define or assign new symbols, usually are specified without any prefix, but
+may contain a ``:'' suffix with a size or type field. \\
+
+Symbols may be scoped.  If a symbol comes into existance as part of a statement
+in a ``defined'' block, or as part of the arguments of the command which
+invoked the define block, that symbol can only be referenced from within that
+block.  All other symbols are exposed and scoped globally.  Locally scoped
+symbols in a define block can hide/have the same name as a global one. \\
+
+Some statements may be conditional statements.  These may use either tests,
+which contain a single test, named with a ``-'' or ``!'', the latter being
+to verify if the test fails rather than successful, or two values joined
+by an expression, such as ``%myvar = 2''.  Multiple conditions can be joined
+together with either ``and'' or ``or'' into a more complex expression. \\
+
+``If'' is a special command where two statements may exist on one line.  This
+happens when if is used with a conditional expression followed by a ``then''
+clause.  Any single script statement may then appear, and will be executed
+if the expression is true.  If there is no ``then'' clause following the
+``if'' statement, then a multi-line if block is assumed, which may include
+``elif'' and ``else`` sections, and requires an explit ``endif'' line.  \\
+
+\section{Loops and conditionals}
+
+Scripts can be broken down into blocks of conditional code.  To support 
+this, we have both if-then-else-endif constructs, and case blocks.  In 
+addition, blocks of code can be enclosed in loops, and the loops
+themselves can be controlled by conditionals. \\
+
+All conditional statements use one of two forms; either two arguments 
+seperated by a conditional test operator, or a test condition and a single 
+argument.  Multiple conditions can be chained together with the ``and'' 
+and ``or'' keyword. \\
+
+Conditional operators include \verb|=| and \verb|<>|, which
+provide numeric comparison of two arguments, along with \verb|>|,
+\verb|<|, \verb|<=|, and \verb|>=|, which also perform comparison of
+integer values.  A simple conditional expression of this form might be
+something like \verb|if \%val < 3 then break|, which tests to see if \%val is
+less than 3, and if so, breaks a loop. \\
+
+Conditional operators also include string comparisons.  These differ in
+that they do not operate on the interger value of a string, but on it's
+effective sort order.  The most basic string operators include \verb|==|
+and \verb|!=| which test if two arguments are equal or not.  All comparisons 
+are done case sensitive. \\
+
+A special operator, \verb|?|, can be used to determine if one substring is
+contained within another comma separated string.  This can be used to see if
+the first argument is contained in the second.  For example, a test like ``th
+\verb|?| fr,th,is'' would be true, since ``th'' is in the list.  Similar to perl, the
+``~'' operator may also be used.  This will test if a regular expression can be
+matched with the contents of an argument. \\
+
+A special string ``match'' function is defined with the \verb|$| and \verb|!$|
+operators.  This may depend on the derived application service, but by
+default may be used to perform a case insensitive search. \\
+
+In addition to the conditional operators, variables may be used in special 
+conditional tests.  These tests are named -xxx, where ``-xxx argument'' 
+will check if the argument meets the specified condition, and ``!xxx 
+argument'', where the argument will be tested to not meed the condition.  
+The following conditional tests are defined in ccscript, additional ones
+may exist in an implimented application service: \\
+
+\begin{tabular}{|l|l|}
+\hline
+\textbf{conditional}      & \textbf{description} \\
+\hline
+-defined        & tests if a given argument is a defined variable \\
+-empty          & tests if the argument or variable is empty or not \\
+-const          & tests if a given argument is a constant variable \\
+-modify			& tests if a given argument is a modifiable variable \\
+-integer		& tests if a given argument is an integer number \\
+-digits			& tests if a given argument is only composed of digits \\
+-number			& tests if a given argument is an integer or decimal number \\
+\hline
+\end{tabular}
+
+The ``if'' expression can take two forms.  It can be used as a ``if ...expr...
+then ...'', where the then clause is executed if the condition is true.  It can
+be in the form ``if ...expr...'' by itself.  The if block then block continues
+until an ``endif'' command, and may support an ``elif'' and ``else'' option as
+well.  This form is similar to the bash shell if-then-fi conditional.  \\
+
+The ``case'' statement is followed immediately by a conditional
+expression, and can be used multiple times to break a group of lines up
+until the ``endcase'' is used or a loop exits.  The ``otherwise'' keyword 
+is the same as the default case in C.  The ``break'' command can force a 
+case block to immediately exit through it's ``endcase'' statement.
+
+The ``do'' statement can be used to enclose a loop.  This loop can be ended
+either with the ``loop'' statement, or ``until''.  ``until'' supports a
+conditional clause.  A ``do'' ... ``loop'' block will loop infinately.
+However, all loops, including ``do'', may also be exited with a ``break''
+statement, or repeated again with the ``continue'' statement. \\
+
+The ``while expression'' can be used to together with ``loop'' to form a
+conditional looping block of code so long as the while condition is true.  A
+``for var values...'' loop can be used to assign a variable a list of values.
+The ``foreach var value'' is used to assign a variable from a comma deliminated
+list or comman deliminated contents from a symbol.  All loops other than
+case blocks, and the if-xxx-endif clauses may be nested. \\
+
+\section{Symbol Formatting}
+
+Symbol formatting allows the value of a symbol to be transformed, or accessed
+in a manner different from the default content.  This can be useful for
+extracting fields from a comma deliminated keyword list, to get the length of
+a symbol, or other even to create special rules, such as phrasebook
+expressions.  
+
+The rule is in the form ``\$rule[/option]:symbol''.  If there is no rule
+specified, then ``\$symbol'' by itself is the same as ``\%symbol''.  The actual
+ruleset can be extended in application services, but the following are
+predefined:
+
+\begin{tabular}{l l}
+\$bool: & get symbol as true/false boolean \\
+\$dec: & decrement symbol and return next value \\
+\$find/name: & get named member from comma deliminated content \\
+\$head: & get first item in a comma deliminted list \\
+\$inc: & incremenet symbol and return next value \\
+\$index/val: & get partial string by offset index \\
+\$int: & get symbol as integer value \\
+\$key: & get keyword of a key/value pair \\
+\$len: & get length of symbol \\
+\$lower: & convert symbol to lower case \\
+\$map/sym: & map a symbol to use as find or offset \\
+\$num: & get numeric symbol to decimal precision of runtime \\
+\$pop: & pop last item from a comma deliminted list \\
+\$pull: & pull first item from a comma deliminted list \\
+\$offset/val: & get tuples from specified offset \\
+\$size: & get storage size of symbol, 0 if const \\
+\$tail: & get last item in a comma deliminted list \\
+\$unquote: & remove quoting from symbol \\
+\$upper: & convert symbol to upper case \\
+\$val: & get value of a key/value pair or unquote a list item \\
+\end{tabular}
+
+\section{Command Reference}
+
+These are the initial built-in commands of the core ccscript engine.
+Application servers may add further commands of their own. \\
+
+\cmd{add} {\it symbol[:type or size]} {\it value ...} \\
+	Set an existing symbol or create a new global symbol.  If the symbol
+	exists, values will be appended to it.
+
+\cmd{apply} {\it definition} \\
+	Apply the event handlers of a script definition to the current script
+	section.  If used, this must be the first statement in a section.
+
+\cmd{break} \\
+	Exit a ``case'', ``do'', ``while'', ``for'' or ``foreach'' block.
+
+\cmd{case} {\it condition}
+	Execute block of code if the condition is true.  Otherwise try next
+	case section, an ``otherwise'' block, or reach ``endcase''.
+
+\cmd{clear} {\it \%symbol ...} \\
+	Clear one or more symbols.
+
+\cmd{const} {\it symbol=initial ...} \\
+	Initialize one or more read-only constants.  If the const is in a 
+	defined block, the symbol is created in local scope.
+
+\cmd{continue} \\
+	Repeat a ``do'', ``while'', ``for'' or ``foreach'' block.
+
+\cmd{do} \\
+	Begin a do-loop block.  This can be ended either with a ``loop'' or
+	``until'' statement.
+
+\cmd{elif} {\it condition} \\
+	Enters section of an if block if the condition is true, and no
+	other ``elif'' section has been entered.  Hence, if a ``if''
+	statement is true, and executes lines, when the ``elif'' is
+	reached, control skips to the ``endif''
+
+\cmd{else} \\
+	Used for ``else'' section of an if block.
+
+\cmd{endcase} \\
+	End of a case block.
+
+\cmd{endif} \\
+	End of an ``if'' block.
+
+\cmd{error} {\it text..} \\
+	Generate a runtime error.  The text is copied into the internal
+	\%error symbol, and the scripts \^error handler, if it exists,
+	will be called.
+
+\cmd{exit} \\
+	Exit the script.  Call a \^exit handler if there is one, or the
+	\@exit section of the script.
+
+\cmd{expand} {\it tuples} {\it symbol[:type or size] ...} \\
+	Expand a variable or literal holding a list of tuples into a list of 
+	symbols.  If there are nested tuples, then the nested set is assigned 
+	as a new tuple list to a symbol.
+
+\cmd{expr} {\it symbol[:type or size]} {\it = value [op value] ...} \\
+	Used to assign a symbol from a simple math expression, such as
+	``expr \%myvar = 3.5 \* \%somevar''.  The decimal precision can
+	be overriden with the ``decimals='' keyword.  ``decimals=0'' assures
+	integer results.  One can also perform expressions in assignment, for
+	example, to increment an existing variable with a ``+='' or decrement
+	with a ``-=''.  Hence, one can use ``expr \%myvar += 3.5'' for example.
+
+\cmd{for} {\it symbol[:type or size]} {\it value ...} \\
+	Begin a for block of code, assigning each value to the symbol
+	in turn and calling the statements in the block until ``loop''.
+
+\cmd{foreach} {\it symbol[:type or size]} {\it value} {\it [offset]} \\
+	Begin a for block of code, assigning each member of a comma deliminated 
+	value to the symbol in turn and calling the statements in the block 
+	until ``loop''.  Optionally, a number of entries may be skipped at the
+	start of the loop.  This optional offer, if offered, and is a variable, 
+    is also automatically reset to 0 when the ``foreach'' loop is entered.
+
+\cmd{goto} {\it @label or \^event}
+	Transfer control to a new label or an event handler in the current
+	script.
+
+\cmd{gosub} {\it @label}
+	Call a script label as a subroutine.
+
+\cmd{if} {\it condition} \cmd{then} {\it statement} \\
+	If the specified condition expression is true, the statement after the
+	``then'' is executed.
+
+\cmd{if} {\it condition} \\
+	Used to start an if block when the condition is true.  If false, the
+	``elif`` may be tried, and finally either the ``else`` clause will
+	execute, or the ``endif'' will be reached. 
+
+\cmd{index} {\it value or expression} \\
+	Set the current index of a ``for'' or ``foreach'' loop to an absolute
+	position, and then restart the loop.  If the index position is past the 
+	limit of the loop, or evalutes to 0, then the command acts like ``break''.
+	The ``continue'' command can be simulated with ``index \%index + 1'', the
+	``previous'' command can be simulated with ``index \%index - 1'', and
+	the same item can be repeated over again with ``index \%index''.
+
+\cmd{loop} \\
+	Repeat a ``do'', ``while'', ``for'' or ``foreach'' block.
+
+\cmd{nop} \\
+	Does nothing.
+
+\cmd{otherwise} \\
+	Used as a default for a ``case'' block when no case conditions are
+	entered.	
+
+\cmd{pack} {\it symbol[:type or size]} {\it value|key=value ...} \\
+	Set an existing symbol or create a new global symbol and pack it
+	with a comma deliminated list of values.  If the symbol exists, values 
+	will be appended to it.
+
+\cmd{push} {\it symbol[:type or size]} {\it [key]} {\it value} \\
+	Append a (optional key paired) data value to a symbol list.  if the
+	list does not exist, it is created.  Member values are normally single 
+	quoted.
+
+\cmd{pause} \\
+	Used to gaurentee a "scheduler" pause in the stepping engine.
+
+\cmd{previous} \\
+	Restarts a ``for'' or ``foreach'' loop using the prior element in the
+	list.  If already at the first index element, then the command will
+	``break'' the loop, exiting at the ``loop'' statement.
+
+\cmd{repeat} \\
+	Restarts a ``for'' or ``foreach'' loop using the same index over again.
+	This can be thought of as similar to ``continue''.
+
+\cmd{restart} \\
+	Restart the current labelled script \@section.  This is convenient
+	since if you are in a defined function, you can still identify the
+	parent script.  Restart does NOT re-execute the \^init handler, as
+	the state of the script \@section is already presumed to be initialized.
+	For this reason, restart can also be used together with ``if'' to 
+	conditionally end an active \^init segment early.
+
+\cmd{return} \\
+	Return from a script section subroutine (see ``gosub'') or a ``define''
+	script.  Scripts also automatically return when the end of the current
+	section, define, or event handler is reached.
+
+\cmd{set} {\it symbol[:type or size]} {\it [assignment]} {\it value ...} \\
+	Set an existing symbol or create a new global symbol.  If the symbol
+	exists, it's content will be replaced with the list of values.
+	Alternately, an assignment operator can be used before the list of
+	values.  The two assignment operators supported are ``:='' and ``+=''.
+	If ``+='' is used, then ``set'' becomes the same as ``add''.
+
+\cmd{strict} {\it var ...} \\
+	Must be first statement and specifies strict compile mode.  In strict
+	compile mode, all symbols must be defined before used, and this is
+	verified at compile-time.  Additional vars can be specified to be
+	defined.  At minimum, one must use ``strict error'' to enable the use
+	of the internal ``\%error'' symbol.  Some application servers may define
+	additional ``internal'' symbols which should be stated in strict otherwise
+	their use will generate a compile-time error.
+
+\cmd{until} {\it condition} \\
+	Repeat a ``do'' block until the condition becomes true.
+
+\cmd{var} {\it symbol[:size|type][=initial] ...} \\
+	Initialize one or more symbols.  If var is used in a defined block,
+	the symbol is created in local scope.
+
+\cmd{while} {\it condition} \\
+	While condition, enter a loop block.  If the condition is false, then
+	falls through the ``loop'' command like ``break''.
+
+\section{Copyright}
+Copyright (c) 2005-2008 David Sugar, Tycho Softworks.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or any
+later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts
+
+\printindex
+
+\end{document}
+
+
+
+

@@ -1,0 +1,42 @@
+
+
+
+@main
+	var local="initial"
+	var list={charlie='head',backer='middle',tail='john'}
+
+	if $tail:list == "tail='john'" then check.manip
+	set %tuple $tail:list
+	if $key:tuple eq "tail" then check.manip
+	if $val:tuple eq "john" then check.manip
+	if $pop:list eq "tail='john'" then check.manip
+	if $list == {charlie='head',backer='middle'} then check.manip
+	if $pull:list == {charlie='head'} then check.manip
+	if $list == {backer='middle'} then check.manip
+	push %list last unicorn
+	if $list == {backer='middle',last='unicorn'} then check.manip
+
+	gosub @other
+	reftest vars="test of define 1"
+	reftest vars="test of define 2" "arg 1 set"
+	reftest vars="test of define 3" %local
+	if %local == "result" then check.refs
+	
+	check.main
+	nop
+	exit
+	check
+	check.main
+
+^event
+	check.event
+	var counter:int
+	do
+		if $inc:counter > 3 then break
+		check.loop
+	loop
+	check
+
+@exit
+	check.exit
+
