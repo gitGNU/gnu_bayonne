@@ -191,10 +191,10 @@ endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-file(GLOB engine_src engine/*.cpp)
-file(GLOB engine_inc inc/bayonne.h)
+file(GLOB runtime_src runtime/*.cpp)
+file(GLOB runtime_inc inc/bayonne.h)
 
-add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${engine_src} ${engine_inc})
+add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ucommon)
 target_link_libraries(bayonne-runtime ${USES_UCOMMON_LIBRARIES})
