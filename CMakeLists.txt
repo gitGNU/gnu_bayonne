@@ -161,6 +161,11 @@ check_function_exists(setpgrp HAVE_SETPGRP)
 check_function_exists(getuid HAVE_GETUID)
 check_function_exists(mkfifo HAVE_MKFIFO)
 
+check_library_exists(m sqrt "" MATH_LIB)
+if(MATH_LIB)
+    set(MATH_LIB m)
+endif()
+
 if(NOT HAVE_EXOSIP2)
     set(EXOSIP2_TLS OFF CACHE BOOL "no tls if no exosip2" FORCE)
     MARK_AS_ADVANCED(EXOSIP2_TLS)
@@ -197,7 +202,7 @@ file(GLOB runtime_inc inc/bayonne.h)
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ucommon)
-target_link_libraries(bayonne-runtime ${USES_UCOMMON_LIBRARIES})
+target_link_libraries(bayonne-runtime ${MATH_LIB} ${USES_UCOMMON_LIBRARIES})
 
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
 

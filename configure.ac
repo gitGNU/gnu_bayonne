@@ -141,6 +141,8 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 AC_CHECK_HEADERS(sys/resource.h pwd.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
+AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
+
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
 
 PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
