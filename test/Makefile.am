@@ -10,7 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-LDADD = ../engine/libbayonne.la @BAYONNE_LIBS@
+LDADD = ../runtime/libbayonne.la @BAYONNE_LIBS@
 EXTRA_DIST = *.cpp testscript.scr mergescript.scr
 
 TESTS = bayonneScript
