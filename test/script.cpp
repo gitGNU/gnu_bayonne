@@ -43,7 +43,7 @@ public:
     virtual void print(void);
 };
 
-class testing : public debug, public script::interp
+class testing : public debug, public Script::interp
 {
 public:
     bool scrCheck(void);
@@ -127,7 +127,7 @@ bool testing::scrCheck(void)
 bool testing::scrArgs(void)
 {
     unsigned index = 0;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
 
     while(index < line->argc) {
         const char *cp = getContent(line->argv[index]);
@@ -150,17 +150,17 @@ int main(int argc, char **argv)
     testing interp;
     unsigned errors;
 
-    static script::keyword_t keywords[] = {
-        {"check", (script::method_t)&testing::scrCheck, &script::checks::chkNop},
-        {"check.exit", (script::method_t)&testing::scrCheckExit, &script::checks::chkNop},
-        {"check.main", (script::method_t)&testing::scrCheckMain, &script::checks::chkNop},
-        {"check.event", (script::method_t)&testing::scrCheckEvent, &script::checks::chkNop},
-        {"check.loop", (script::method_t)&testing::scrCheckLoop, &script::checks::chkNop},
-        {"check.refs", (script::method_t)&testing::scrCheckRefs, &script::checks::chkNop},
-        {"check.manip", (script::method_t)&testing::scrCheckManip, &script::checks::chkNop},
-        {"ignore", (script::method_t)&script::methods::scrNop, &script::checks::chkIgnore},
-        {"args", (script::method_t)&testing::scrArgs, &script::checks::chkIgnore},
-        {"sleep", (script::method_t)&testing::scrSleep, &script::checks::chkNop},
+    static Script::keyword_t keywords[] = {
+        {"check", (Script::method_t)&testing::scrCheck, &Script::checks::chkNop},
+        {"check.exit", (Script::method_t)&testing::scrCheckExit, &Script::checks::chkNop},
+        {"check.main", (Script::method_t)&testing::scrCheckMain, &Script::checks::chkNop},
+        {"check.event", (Script::method_t)&testing::scrCheckEvent, &Script::checks::chkNop},
+        {"check.loop", (Script::method_t)&testing::scrCheckLoop, &Script::checks::chkNop},
+        {"check.refs", (Script::method_t)&testing::scrCheckRefs, &Script::checks::chkNop},
+        {"check.manip", (Script::method_t)&testing::scrCheckManip, &Script::checks::chkNop},
+        {"ignore", (Script::method_t)&Script::methods::scrNop, &Script::checks::chkIgnore},
+        {"args", (Script::method_t)&testing::scrArgs, &Script::checks::chkIgnore},
+        {"sleep", (Script::method_t)&testing::scrSleep, &Script::checks::chkNop},
         {NULL}};
 
     const char *filename = "testscript.scr";
@@ -176,17 +176,17 @@ int main(int argc, char **argv)
         filename = argv[1];
     }
 
-    script::init();
-    script::assign(keywords);
+    Script::init();
+    Script::assign(keywords);
 
-    script *image;
+    Script *image;
 
     if(mergename) {
-        image = script::compile(mergename);
-        image = script::append(image, filename);
+        image = Script::compile(mergename);
+        image = Script::append(image, filename);
     }
     else
-        image = script::compile(filename);
+        image = Script::compile(filename);
 
     if(!image) {
         fprintf(stderr, "*** failed to load %s\n", filename);
@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     errors = image->getErrors();
     if(errors) {
         fprintf(stderr, "*** %d total errors in %s\n", errors, filename);
-        linked_pointer<script::error> ep = image->getListing();
+        linked_pointer<Script::error> ep = image->getListing();
         while(is(ep)) {
             fprintf(stderr, "*** %s(%d): %s\n", image->getFilename(), ep->errline, ep->errmsg);
             ep.next();

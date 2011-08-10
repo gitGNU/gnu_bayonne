@@ -1,21 +1,21 @@
 // Copyright (C) 1995-1999 David Sugar, Tycho Softworks.
 // Copyright (C) 1999-2005 Open Source Telecom Corp.
-// Copyright (C) 2005-2010 David Sugar, Tycho Softworks.
+// Copyright (C) 2005-2011 David Sugar, Tycho Softworks.
 //
-// This file is part of GNU uCommon C++.
+// This file is part of GNU Bayonne.
 //
-// GNU uCommon C++ is free software; you can redistribute it and/or modify
+// GNU Bayonne is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
-// GNU uCommon C++ is distributed in the hope that it will be useful,
+// GNU Bayonne is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
+// along with GNU Bayonne.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
 #include <ucommon/ucommon.h>
@@ -36,17 +36,17 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-script::interp::interp() :
-memalloc(script::paging)
+Script::interp::interp() :
+memalloc(Script::paging)
 {
 }
 
-script::interp::~interp()
+Script::interp::~interp()
 {
     detach();
 }
 
-void script::interp::initialize(void)
+void Script::interp::initialize(void)
 {
     unsigned tempcount = sizeof(temps) / sizeof(char *);
     unsigned pos = 0;;
@@ -57,19 +57,19 @@ void script::interp::initialize(void)
     purge();
 
     image = NULL;
-    stack = (script::stack_t *)alloc(sizeof(script::stack_t) * script::stacking);
-    syms = (LinkedObject **)alloc(sizeof(LinkedObject *) * script::indexing);
-    memset(syms, 0, sizeof(script::symbol *) * script::indexing);
+    stack = (Script::stack_t *)alloc(sizeof(Script::stack_t) * Script::stacking);
+    syms = (LinkedObject **)alloc(sizeof(LinkedObject *) * Script::indexing);
+    memset(syms, 0, sizeof(Script::symbol *) * Script::indexing);
     while(pos < tempcount)
-        temps[pos++] = (char *)alloc(script::sizing + 1);
+        temps[pos++] = (char *)alloc(Script::sizing + 1);
 
     errmsg = NULL;
-    script::symbol *err = createSymbol("error:64");
+    Script::symbol *err = createSymbol("error:64");
     if(err)
         errmsg = err->data;
 }
 
-bool script::interp::error(const char *msg)
+bool Script::interp::error(const char *msg)
 {
 #ifndef _MSWINDOWS_
     if(getppid() > 1)
@@ -88,7 +88,7 @@ bool script::interp::error(const char *msg)
     return true;
 }
 
-char *script::interp::getTemp(void)
+char *Script::interp::getTemp(void)
 {
     unsigned tempcount = sizeof(temps) / sizeof(char *);
 
@@ -98,7 +98,7 @@ char *script::interp::getTemp(void)
     return ptr;
 }
 
-const char *script::interp::getFormat(script::symbol *sym, const char *id, char *tp)
+const char *Script::interp::getFormat(Script::symbol *sym, const char *id, char *tp)
 {
 #ifdef  __MINGW32__
     long long val;
@@ -114,7 +114,7 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
     char idbuf[32];
     unsigned len;
     char quote = 0;
-    script::symbol *index = NULL;
+    Script::symbol *index = NULL;
     unsigned paren = 0;
 
     cp = sym->data;
@@ -122,9 +122,9 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
         ++cp;
 
     if(eq(id, "len:", 4))
-        snprintf(tp, script::sizing + 1, "%u", (unsigned)strlen(sym->data));
+        snprintf(tp, Script::sizing + 1, "%u", (unsigned)strlen(sym->data));
     else if(eq(id, "key:", 4)) {
-        String::set(tp, script::sizing + 1, cp);
+        String::set(tp, Script::sizing + 1, cp);
         ep = strchr(tp, '=');
         if(ep)
             *ep = 0;
@@ -132,24 +132,24 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
             String::set(tp, 2, "-");
     }
     else if(eq(id, "tail:", 5)) {
-        dcount = script::count(sym->data);
+        dcount = Script::count(sym->data);
         if(dcount)
-            String::set(tp, script::sizing + 1, script::get(cp, --dcount));
+            String::set(tp, Script::sizing + 1, Script::get(cp, --dcount));
         else
             tp[0] = 0;
     }
     else if(eq(id, "head:", 5)) {
-        String::set(tp, script::sizing + 1, sym->data);
-        if(script::count(tp) > 1) {
-            dcount = script::offset(tp, 1);
+        String::set(tp, Script::sizing + 1, sym->data);
+        if(Script::count(tp) > 1) {
+            dcount = Script::offset(tp, 1);
             if(dcount)
                 tp[--dcount] = 0;
         }
     }
     else if(eq(id, "pull:", 5) || eq(id, "<<:", 3)) {
-        String::set(tp, script::sizing + 1, sym->data);
-        if(script::count(tp) > 1) {
-            dcount = script::offset(tp, 1);
+        String::set(tp, Script::sizing + 1, sym->data);
+        if(Script::count(tp) > 1) {
+            dcount = Script::offset(tp, 1);
             if(dcount) {
                 memcpy(sym->data, sym->data + dcount, strlen(sym->data + dcount) + 1);
                 tp[--dcount] = 0;
@@ -157,11 +157,11 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
         }
     }
     else if(eq(id, "pop:", 4) || eq(id, ">>:", 3)) {
-        dcount = script::count(sym->data);
+        dcount = Script::count(sym->data);
         if(dcount) {
-            String::set(tp, script::sizing + 1, script::get(sym->data, --dcount));
+            String::set(tp, Script::sizing + 1, Script::get(sym->data, --dcount));
             if(dcount) {
-                dcount = script::offset(sym->data, dcount);
+                dcount = Script::offset(sym->data, dcount);
                 sym->data[--dcount] = 0;
             }
             else
@@ -171,7 +171,7 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
             tp[0] = 0;
     }
     else if(eq(id, "val:", 4) && (*cp == '\'' || *cp == '\"' || *cp == '(')) {
-        String::set(tp, script::sizing + 1, cp + 1);
+        String::set(tp, Script::sizing + 1, cp + 1);
         if(*cp == '(')
             ep = strrchr(tp, ')');
         else
@@ -182,13 +182,13 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
     else if(eq(id, "val:", 4) && strchr(sym->data, '=')) {
         cp = strchr(sym->data, '=') + 1;
         if(*cp == '\"' || *cp == '\'') {
-            String::set(tp, script::sizing + 1, cp + 1);
+            String::set(tp, Script::sizing + 1, cp + 1);
             ep = strchr(tp, *cp);
             if(ep)
                 *ep = 0;
         }
         else {
-            String::set(tp, script::sizing + 1, cp);
+            String::set(tp, Script::sizing + 1, cp);
             ep = strchr(tp, ',');
             if(ep)
                 *ep = 0;
@@ -227,7 +227,7 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
         return sym->data;
     }
     else if(eq(id, "count:", 6))
-        snprintf(tp, script::sizing + 1, "%u", script::count(sym->data));
+        snprintf(tp, Script::sizing + 1, "%u", Script::count(sym->data));
     else if(eq(id, "index/", 6)) {
         id += 6;
         pos = atoi(id);
@@ -239,7 +239,7 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
             cp = sym->data + pos;
         else
             cp = null;
-        script::copy(cp, tp, script::sizing);
+        Script::copy(cp, tp, Script::sizing);
     }
     else if(eq(id, "offset/", 7)) {
         id += 7;
@@ -249,8 +249,8 @@ const char *script::interp::getFormat(script::symbol *sym, const char *id, char 
         else
             return "";
 offset:
-        cp = script::get(sym->data, pos);
-        script::copy(cp, tp, script::sizing);
+        cp = Script::get(sym->data, pos);
+        Script::copy(cp, tp, Script::sizing);
     }
     else if((eq(id, "dec:", 4) || eq(id, "--:", 3)) && sym->size) {
         val = atoi(cp);
@@ -258,23 +258,23 @@ offset:
         return sym->data;
     }
     else if(eq(id, "size:", 5))
-        snprintf(tp, script::sizing + 1, "%d", sym->size);
+        snprintf(tp, Script::sizing + 1, "%d", sym->size);
     else if(eq(id, "val:", 4) || eq(id, "int:", 4)) {
         val = atol(cp);
-        snprintf(tp, script::sizing + 1, NUM_FORMAT, val);
+        snprintf(tp, Script::sizing + 1, NUM_FORMAT, val);
     }
     else if(eq(id, "num:", 4)) {
         val = atol(cp);
-        snprintf(tp, script::sizing + 1, NUM_FORMAT, val);
-        if(script::decimals)
-            String::add(tp, script::sizing + 1, ".");
+        snprintf(tp, Script::sizing + 1, NUM_FORMAT, val);
+        if(Script::decimals)
+            String::add(tp, Script::sizing + 1, ".");
         pos = strlen(tp);
         cp = strchr(sym->data, '.');
         if(cp)
             ++cp;
         else
             cp = null;
-        while(dcount++ < script::decimals && pos < script::sizing) {
+        while(dcount++ < Script::decimals && pos < Script::sizing) {
             if(*cp && isdigit(*cp))
                 tp[pos++] = *(cp++);
             else
@@ -327,7 +327,7 @@ search:
         }
         else
             quote=',';
-        while(dcount < script::sizing && *cp && *cp != quote) {
+        while(dcount < Script::sizing && *cp && *cp != quote) {
             if(*cp == '(' && paren)
                 ++paren;
             if(*cp == ')' && paren) {
@@ -345,16 +345,16 @@ search:
     }
     else if(eq(id, "bool:", 5)) {
         if(atoi(sym->data) > 0 || tolower(sym->data[0]) == 't' || tolower(sym->data[0] == 'y'))
-            snprintf(tp, script::sizing + 1, "true");
+            snprintf(tp, Script::sizing + 1, "true");
         else
-            snprintf(tp, script::sizing + 1, "false");
+            snprintf(tp, Script::sizing + 1, "false");
     }
     return tp;
 }
 
-const char *script::interp::getContent(const char *cp)
+const char *Script::interp::getContent(const char *cp)
 {
-    script::symbol *sym;
+    Script::symbol *sym;
     const char *id;
     char *tp;
 
@@ -389,7 +389,7 @@ const char *script::interp::getContent(const char *cp)
     return cp;
 }
 
-const char *script::interp::getKeyword(const char *id)
+const char *Script::interp::getKeyword(const char *id)
 {
     line_t *line = stack[frame].line;
     unsigned index = 0;
@@ -406,23 +406,23 @@ const char *script::interp::getKeyword(const char *id)
     return NULL;
 }
 
-const char *script::interp::getIndex(void)
+const char *Script::interp::getIndex(void)
 {
     method_t method;
 
     unsigned pos = frame;
     while(pos) {
         method = stack[--pos].line->method;
-        if(method == (method_t)&script::methods::scrForeach) {
+        if(method == (method_t)&Script::methods::scrForeach) {
             char *temp = getTemp();
-            snprintf(temp, script::sizing, "%d", stack[pos].index);
+            snprintf(temp, Script::sizing, "%d", stack[pos].index);
             return temp;
         }
     }
     return "0";
 }
 
-script::method_t script::interp::getLooping(void)
+Script::method_t Script::interp::getLooping(void)
 {
     if(!frame)
         return (method_t)NULL;
@@ -430,7 +430,7 @@ script::method_t script::interp::getLooping(void)
     return stack[frame - 1].line->method;
 }
 
-const char *script::interp::getContent(void)
+const char *Script::interp::getContent(void)
 {
     const char *cp;
     line_t *line = stack[frame].line;
@@ -447,7 +447,7 @@ const char *script::interp::getContent(void)
     return NULL;
 }
 
-const char *script::interp::getValue(void)
+const char *Script::interp::getValue(void)
 {
     const char *cp;
     line_t *line = stack[frame].line;
@@ -464,11 +464,11 @@ const char *script::interp::getValue(void)
     return NULL;
 }
 
-bool script::interp::setConst(const char *id, const char *value)
+bool Script::interp::setConst(const char *id, const char *value)
 {
     unsigned path;
-    linked_pointer<script::symbol> sp;
-    script::symbol *var = NULL;
+    linked_pointer<Script::symbol> sp;
+    Script::symbol *var = NULL;
 
     if(*id == '=' || *id == '%')
         ++id;
@@ -476,7 +476,7 @@ bool script::interp::setConst(const char *id, const char *value)
     if(!isalnum(*id))
         return false;
 
-    path = NamedObject::keyindex(id, script::indexing);
+    path = NamedObject::keyindex(id, Script::indexing);
     sp = syms[path];
 
     while(is(sp)) {
@@ -485,7 +485,7 @@ bool script::interp::setConst(const char *id, const char *value)
         sp.next();
     }
 
-    var = (script::symbol *)alloc(sizeof(script::symbol));
+    var = (Script::symbol *)alloc(sizeof(Script::symbol));
 
     var->name = dup(id);
     var->scope = stack[frame].scope;
@@ -495,12 +495,12 @@ bool script::interp::setConst(const char *id, const char *value)
     return true;
 }
 
-script::symbol *script::interp::createSymbol(const char *id)
+Script::symbol *Script::interp::createSymbol(const char *id)
 {
     unsigned path;
-    linked_pointer<script::symbol> sp;
-    script::symbol *var = NULL, *local = NULL;
-    unsigned size = script::sizing;
+    linked_pointer<Script::symbol> sp;
+    Script::symbol *var = NULL, *local = NULL;
+    unsigned size = Script::sizing;
     char *cp;
 
     if(*id == '=' || *id == '%')
@@ -512,7 +512,7 @@ script::symbol *script::interp::createSymbol(const char *id)
     if(strchr(id, ':')) {
         char *temp = getTemp();
 
-        String::set(temp, script::sizing + 1, id);
+        String::set(temp, Script::sizing + 1, id);
         cp = strchr(temp, ':');
         if(cp) {
             *(cp++) = 0;
@@ -521,11 +521,11 @@ script::symbol *script::interp::createSymbol(const char *id)
         }
     }
 
-    path = NamedObject::keyindex(id, script::indexing);
+    path = NamedObject::keyindex(id, Script::indexing);
     sp = syms[path];
 
     if(!size)
-        size = script::sizing;
+        size = Script::sizing;
 
     while(is(sp)) {
         if(eq(sp->name, id) && sp->scope == NULL)
@@ -539,7 +539,7 @@ script::symbol *script::interp::createSymbol(const char *id)
         var = local;
 
     if(!var) {
-        var = (script::symbol *)alloc(sizeof(script::symbol));
+        var = (Script::symbol *)alloc(sizeof(Script::symbol));
 
         var->name = dup(id);
 
@@ -552,7 +552,7 @@ script::symbol *script::interp::createSymbol(const char *id)
     return var;
 }
 
-unsigned script::interp::getTypesize(const char *type_id)
+unsigned Script::interp::getTypesize(const char *type_id)
 {
     if(!type_id)
         return 0;
@@ -569,7 +569,7 @@ unsigned script::interp::getTypesize(const char *type_id)
     return 0;
 }
 
-const char *script::interp::getTypeinit(const char *type_id)
+const char *Script::interp::getTypeinit(const char *type_id)
 {
     if(!type_id)
         return NULL;
@@ -583,14 +583,14 @@ const char *script::interp::getTypeinit(const char *type_id)
     return NULL;
 }
 
-void script::interp::getParams(script::header *scope, script::line_t *line)
+void Script::interp::getParams(Script::header *scope, Script::line_t *line)
 {
     unsigned index = 0;
     const char *cp;
     const char *id;
     unsigned param = 0;
     char pbuf[8];
-    script::symbol *sym;
+    Script::symbol *sym;
 
     while(index < line->argc) {
         cp = line->argv[index++];
@@ -621,11 +621,11 @@ void script::interp::getParams(script::header *scope, script::line_t *line)
     }
 }
 
-void script::interp::setRef(script::header *scope, const char *id, char *value, unsigned size)
+void Script::interp::setRef(Script::header *scope, const char *id, char *value, unsigned size)
 {
     unsigned path;
-    linked_pointer<script::symbol> sp;
-    script::symbol *var = NULL;
+    linked_pointer<Script::symbol> sp;
+    Script::symbol *var = NULL;
 
     if(*id == '=' || *id == '%')
         ++id;
@@ -633,7 +633,7 @@ void script::interp::setRef(script::header *scope, const char *id, char *value, 
     if(!isalnum(*id))
         return;
 
-    path =  NamedObject::keyindex(id, script::indexing);
+    path =  NamedObject::keyindex(id, Script::indexing);
     sp = syms[path];
 
     while(is(sp)) {
@@ -645,7 +645,7 @@ void script::interp::setRef(script::header *scope, const char *id, char *value, 
     }
 
     if(!var) {
-        var = (script::symbol *)alloc(sizeof(script::symbol));
+        var = (Script::symbol *)alloc(sizeof(Script::symbol));
 
         var->name = dup(id);
 
@@ -657,12 +657,12 @@ void script::interp::setRef(script::header *scope, const char *id, char *value, 
     var->data = value;
 }
 
-script::symbol *script::interp::getVar(const char *id, const char *value)
+Script::symbol *Script::interp::getVar(const char *id, const char *value)
 {
     unsigned path;
-    linked_pointer<script::symbol> sp;
-    script::symbol *var = NULL;
-    unsigned size = script::sizing;
+    linked_pointer<Script::symbol> sp;
+    Script::symbol *var = NULL;
+    unsigned size = Script::sizing;
     char *cp;
 
     if(*id == '=' || *id == '%')
@@ -674,7 +674,7 @@ script::symbol *script::interp::getVar(const char *id, const char *value)
     if(strchr(id, ':')) {
         char *temp = getTemp();
 
-        String::set(temp, script::sizing + 1, id);
+        String::set(temp, Script::sizing + 1, id);
         cp = strchr(temp, ':');
         if(cp) {
             *(cp++) = 0;
@@ -687,11 +687,11 @@ script::symbol *script::interp::getVar(const char *id, const char *value)
         }
     }
 
-    path = NamedObject::keyindex(id, script::indexing);
+    path = NamedObject::keyindex(id, Script::indexing);
     sp = syms[path];
 
     if(!size)
-        size = script::sizing;
+        size = Script::sizing;
 
     while(is(sp)) {
         if(eq(sp->name, id) && sp->scope == stack[frame].scope) {
@@ -702,7 +702,7 @@ script::symbol *script::interp::getVar(const char *id, const char *value)
     }
 
     if(!var) {
-        var = (script::symbol *)alloc(sizeof(script::symbol));
+        var = (Script::symbol *)alloc(sizeof(Script::symbol));
 
         var->name = dup(id);
 
@@ -725,11 +725,11 @@ script::symbol *script::interp::getVar(const char *id, const char *value)
     return var;
 }
 
-script::symbol *script::interp::find(const char *id)
+Script::symbol *Script::interp::find(const char *id)
 {
-    unsigned path = NamedObject::keyindex(id, script::indexing);
-    linked_pointer<script::symbol> sp = syms[path];
-    script::symbol *global = NULL, *local = NULL;
+    unsigned path = NamedObject::keyindex(id, Script::indexing);
+    linked_pointer<Script::symbol> sp = syms[path];
+    Script::symbol *global = NULL, *local = NULL;
 
     while(is(sp)) {
         if(eq(sp->name, id)) {
@@ -747,14 +747,14 @@ script::symbol *script::interp::find(const char *id)
     return global;
 }
 
-void script::interp::detach(void)
+void Script::interp::detach(void)
 {
     image = NULL;
 }
 
-void script::interp::startScript(script::header *scr)
+void Script::interp::startScript(Script::header *scr)
 {
-    linked_pointer<script::event> ep = scr->events;
+    linked_pointer<Script::event> ep = scr->events;
 
     while(is(ep)) {
         if(eq(ep->name, "init")) {
@@ -767,10 +767,10 @@ void script::interp::startScript(script::header *scr)
     }
 }
 
-bool script::interp::attach(script *img, const char *entry)
+bool Script::interp::attach(Script *img, const char *entry)
 {
-    script::header *main = NULL;
-    linked_pointer<script::header> hp;
+    Script::header *main = NULL;
+    linked_pointer<Script::header> hp;
     unsigned path = 0;
     const char *cp;
 
@@ -780,8 +780,8 @@ bool script::interp::attach(script *img, const char *entry)
         return false;
 
     if(entry && *entry == '@')
-        main = script::find(img, entry);
-    else while(entry && main == NULL && path < script::indexing) {
+        main = Script::find(img, entry);
+    else while(entry && main == NULL && path < Script::indexing) {
         hp = img->scripts[path++];
         while(is(hp)) {
             cp = hp->name;
@@ -794,7 +794,7 @@ bool script::interp::attach(script *img, const char *entry)
     }
 
     if(!main)
-        main = script::find(img, "@main");
+        main = Script::find(img, "@main");
 
     if(main) {
         setStack(main);
@@ -819,12 +819,12 @@ bool script::interp::attach(script *img, const char *entry)
     return false;
 }
 
-void script::interp::skip(void)
+void Script::interp::skip(void)
 {
     stack[frame].line = stack[frame].line->next;
 }
 
-bool script::interp::match(const char *found, const char *name)
+bool Script::interp::match(const char *found, const char *name)
 {
     assert(found != NULL);
     assert(name != NULL);
@@ -835,14 +835,14 @@ bool script::interp::match(const char *found, const char *name)
     return !stricmp(found, name);
 }
 
-bool script::interp::isInherited(const char *name)
+bool Script::interp::isInherited(const char *name)
 {
     return true;
 }
 
-script::event *script::interp::scriptMethod(const char *name)
+Script::event *Script::interp::scriptMethod(const char *name)
 {
-    linked_pointer<script::event> mp = stack[frame].scr->methods;
+    linked_pointer<Script::event> mp = stack[frame].scr->methods;
 
     while(is(mp)) {
         if(match(mp->name, name))
@@ -852,9 +852,9 @@ script::event *script::interp::scriptMethod(const char *name)
     return NULL;
 }
 
-bool script::interp::scriptEvent(const char *name)
+bool Script::interp::scriptEvent(const char *name)
 {
-    linked_pointer<script::event> ep;
+    linked_pointer<Script::event> ep;
     bool inherit = isInherited(name);
     unsigned stackp = frame;
 
@@ -893,7 +893,7 @@ bool script::interp::scriptEvent(const char *name)
     }
 }
 
-void script::interp::setStack(script::header *scr, script::event *ev)
+void Script::interp::setStack(Script::header *scr, Script::event *ev)
 {
     stack[frame].scr = scr;
     stack[frame].event = ev;
@@ -906,19 +906,19 @@ void script::interp::setStack(script::header *scr, script::event *ev)
         stack[frame].line = scr->first;
 }
 
-void script::interp::pullBase(void)
+void Script::interp::pullBase(void)
 {
     while(frame && stack[frame - 1].base == stack[frame].base)
         --frame;
 }
 
-void script::interp::pullScope(void)
+void Script::interp::pullScope(void)
 {
     while(frame && stack[frame - 1].scr == stack[frame].scr)
         --frame;
 }
 
-void script::interp::pullLoop(void)
+void Script::interp::pullLoop(void)
 {
     skip();
     if(frame) {
@@ -928,7 +928,7 @@ void script::interp::pullLoop(void)
     }
 }
 
-unsigned script::interp::getResource(void)
+unsigned Script::interp::getResource(void)
 {
     if(!stack || !stack[frame].scr || (frame == 0 && !stack[frame].line))
         return 0;
@@ -939,7 +939,7 @@ unsigned script::interp::getResource(void)
     return stack[frame].resmask;
 }
 
-bool script::interp::pop(void)
+bool Script::interp::pop(void)
 {
     pullScope();
     if(frame)
@@ -950,9 +950,9 @@ bool script::interp::pop(void)
     return true;
 }
 
-void script::interp::push(void)
+void Script::interp::push(void)
 {
-    if(frame >= script::stacking) {
+    if(frame >= Script::stacking) {
         if(!scriptEvent("stack")) {
             frame = 0;
             stack[frame].line = NULL;
@@ -964,12 +964,12 @@ void script::interp::push(void)
     ++frame;
 }
 
-bool script::interp::trylabel(const char *label)
+bool Script::interp::trylabel(const char *label)
 {
     if(*label != '@')
         return false;
 
-    script::header *scr = script::find(*image, label);
+    Script::header *scr = Script::find(*image, label);
     if(!scr || !scr->first || stack[stack[frame].base].scr == scr)
         return false;
 
@@ -978,7 +978,7 @@ bool script::interp::trylabel(const char *label)
     return true;
 }
 
-bool script::interp::tryexit(void)
+bool Script::interp::tryexit(void)
 {
     if(stack[frame].event && eq("exit", stack[frame].event->name))
         return false;
@@ -986,7 +986,7 @@ bool script::interp::tryexit(void)
     if(scriptEvent("exit"))
         return true;
 
-    script::header *ex = script::find(image.get(), "@exit");
+    Script::header *ex = Script::find(image.get(), "@exit");
     frame = 0;
 
     if(!ex || stack[frame].scr == ex)
@@ -996,9 +996,9 @@ bool script::interp::tryexit(void)
     return true;
 }
 
-bool script::interp::step(void)
+bool Script::interp::step(void)
 {
-    unsigned scount = script::stepping;
+    unsigned scount = Script::stepping;
     line_t *line = stack[frame].line;
     bool rtn = true;
 
@@ -1019,10 +1019,10 @@ bool script::interp::step(void)
     return true;
 }
 
-bool script::interp::getCondition(const char *test, const char *v)
+bool Script::interp::getCondition(const char *test, const char *v)
 {
     unsigned points = 0;
-    script::symbol *sym;
+    Script::symbol *sym;
 
     if(eq(test, "defined")) {
         if(!v)
@@ -1131,9 +1131,9 @@ bool script::interp::getCondition(const char *test, const char *v)
     return false;
 }
 
-bool script::interp::isConditional(unsigned index)
+bool Script::interp::isConditional(unsigned index)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *cp;
     bool rtn = false;
 
@@ -1167,9 +1167,9 @@ bool script::interp::isConditional(unsigned index)
     return rtn;
 }
 
-bool script::interp::getExpression(unsigned index)
+bool Script::interp::getExpression(unsigned index)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *v1 = "", *v2 = "", *op;
     const char *d1, *d2;
     unsigned len;
@@ -1318,13 +1318,13 @@ bool script::interp::getExpression(unsigned index)
     }
 
     if(eq(op, "?") || eq(op, "in")) {
-        pcount = script::count(v2);
+        pcount = Script::count(v2);
         if(!pcount)
             return false;
 
         len = strlen(v1);
         while(pos < pcount) {
-            op = script::get(v2, pos++);
+            op = Script::get(v2, pos++);
             if(op && eq(v1, op, len) && (op[len] == ',' || op[len] == 0 || op[len] == '='))
                 return true;
         }
@@ -1332,13 +1332,13 @@ bool script::interp::getExpression(unsigned index)
     }
 
     if(eq(op, "!?") || eq(op, "notin")) {
-        pcount = script::count(v2);
+        pcount = Script::count(v2);
         if(!pcount)
             return true;
 
         len = strlen(v1);
         while(pos < pcount) {
-            op = script::get(v2, pos++);
+            op = Script::get(v2, pos++);
             if(op && eq(v1, op, len) && (op[len] == ',' || op[len] == 0 || op[len] == '='))
                 return false;
         }

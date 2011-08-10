@@ -138,7 +138,7 @@ AC_ARG_WITH(pkg-config,
 if test "$UCOMMON_MODEL" = "CC" ; then
     LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
-AC_CHECK_HEADERS(sys/resource.h pwd.h)
+AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
 AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])

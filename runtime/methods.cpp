@@ -1,19 +1,19 @@
-// Copyright (C) 2008-2010 David Sugar, Tycho Softworks.
+// Copyright (C) 2008-2011 David Sugar, Tycho Softworks.
 //
-// This file is part of GNU uCommon C++.
+// This file is part of GNU Bayonne.
 //
-// GNU uCommon C++ is free software; you can redistribute it and/or modify
+// GNU Bayonne is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
-// GNU uCommon C++ is distributed in the hope that it will be useful,
+// GNU Bayonne is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
+// along with GNU Bayonne.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
 #include <ucommon/ucommon.h>
@@ -23,14 +23,14 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-bool script::methods::scrDo(void)
+bool Script::methods::scrDo(void)
 {
     push();
     skip();
     return true;
 }
 
-bool script::methods::scrPrevious(void)
+bool Script::methods::scrPrevious(void)
 {
     --frame;
     if(stack[frame].index < 2) {
@@ -42,13 +42,13 @@ bool script::methods::scrPrevious(void)
     return true;
 }
 
-bool script::methods::scrExpand(void)
+bool Script::methods::scrExpand(void)
 {
     unsigned index = 1;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *tuples = getContent(line->argv[0]);
-    unsigned tcount = script::count(tuples);
-    script::symbol *sym;
+    unsigned tcount = Script::count(tuples);
+    Script::symbol *sym;
     const char *cp;
 
     while(line->argv[index]) {
@@ -66,8 +66,8 @@ bool script::methods::scrExpand(void)
         if(index > tcount)
             String::set(sym->data, sym->size + 1, "");
         else {
-            cp = script::get(tuples, index - 1);
-            script::copy(cp, sym->data, sym->size + 1);
+            cp = Script::get(tuples, index - 1);
+            Script::copy(cp, sym->data, sym->size + 1);
         }
         ++index;
     }
@@ -75,10 +75,10 @@ bool script::methods::scrExpand(void)
     return true;
 }
 
-bool script::methods::scrForeach(void)
+bool Script::methods::scrForeach(void)
 {
-    script::line_t *line = stack[frame].line;
-    script::symbol *sym = find(line->argv[0]);
+    Script::line_t *line = stack[frame].line;
+    Script::symbol *sym = find(line->argv[0]);
     const char *cp;
     unsigned index = stack[frame].index;
 
@@ -94,7 +94,7 @@ bool script::methods::scrForeach(void)
     if(!index) {
         cp = line->argv[2];
         if(cp && (*cp == '%' || *cp == '&')) {
-            script::symbol *skip = find(cp);
+            Script::symbol *skip = find(cp);
             if(!skip)
                 skip = getVar(cp);
             if(skip) {
@@ -110,21 +110,21 @@ bool script::methods::scrForeach(void)
         }
     }
 
-    cp = script::get(getContent(line->argv[1]), index);
+    cp = Script::get(getContent(line->argv[1]), index);
     if(cp == NULL) {
         stack[frame].index = 0;
         skip();
         return scrBreak();
     }
 
-    script::copy(cp, sym->data, sym->size + 1);
+    Script::copy(cp, sym->data, sym->size + 1);
     stack[frame].index = ++index;
     push();
     skip();
     return true;
 }
 
-bool script::methods::scrWhile(void)
+bool Script::methods::scrWhile(void)
 {
     if(isConditional(0)) {
         push();
@@ -135,18 +135,18 @@ bool script::methods::scrWhile(void)
     return scrBreak();
 }
 
-bool script::methods::scrEndcase(void)
+bool Script::methods::scrEndcase(void)
 {
     pullLoop();
     return true;
 }
 
-bool script::methods::scrCase(void)
+bool Script::methods::scrCase(void)
 {
-    script::method_t method = getLooping();
-    script::line_t *line = stack[frame].line;
+    Script::method_t method = getLooping();
+    Script::line_t *line = stack[frame].line;
 
-    if(method == (method_t)&script::methods::scrCase) {
+    if(method == (method_t)&Script::methods::scrCase) {
         skip();
         while(stack[frame].line && stack[frame].line->loop > line->loop)
             skip();
@@ -161,7 +161,7 @@ bool script::methods::scrCase(void)
 
     return scrOtherwise();
 
-    if(stack[frame].line->method == (method_t)&script::methods::scrOtherwise) {
+    if(stack[frame].line->method == (method_t)&Script::methods::scrOtherwise) {
         push();
         skip();
         return false;
@@ -169,9 +169,9 @@ bool script::methods::scrCase(void)
     return false;
 }
 
-bool script::methods::scrOtherwise(void)
+bool Script::methods::scrOtherwise(void)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
 
     skip();
     while(stack[frame].line && stack[frame].line->loop > line->loop)
@@ -180,7 +180,7 @@ bool script::methods::scrOtherwise(void)
     return true;
 }
 
-bool script::methods::scrUntil(void)
+bool Script::methods::scrUntil(void)
 {
     if(isConditional(0))
         pullLoop();
@@ -189,30 +189,30 @@ bool script::methods::scrUntil(void)
     return true;
 }
 
-bool script::methods::scrLoop(void)
+bool Script::methods::scrLoop(void)
 {
     --frame;
     return true;
 }
 
-bool script::methods::scrElif(void)
+bool Script::methods::scrElif(void)
 {
     return scrElse();
 }
 
-bool script::methods::scrEndif(void)
+bool Script::methods::scrEndif(void)
 {
     return scrNop();
 }
 
-bool script::methods::scrDefine(void)
+bool Script::methods::scrDefine(void)
 {
     return scrNop();
 }
 
-bool script::methods::scrInvoke(void)
+bool Script::methods::scrInvoke(void)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     unsigned mask;
 
     getParams(line->sub, line->sub->first);
@@ -232,16 +232,16 @@ bool script::methods::scrInvoke(void)
     return true;
 }
 
-bool script::methods::scrElse(void)
+bool Script::methods::scrElse(void)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     unsigned loop = 0;
 
     skip();
     while(NULL != (line = stack[frame].line)) {
-        if(line->method == (method_t)&script::methods::scrIf)
+        if(line->method == (method_t)&Script::methods::scrIf)
             ++loop;
-        else if(line->method == (method_t)&script::methods::scrEndif) {
+        else if(line->method == (method_t)&Script::methods::scrEndif) {
             if(!loop) {
                 skip();
                 return true;
@@ -253,9 +253,9 @@ bool script::methods::scrElse(void)
     return true;
 }
 
-bool script::methods::scrIf(void)
+bool Script::methods::scrIf(void)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     unsigned loop = 0;
 
     if(isConditional(0)) {
@@ -265,20 +265,20 @@ bool script::methods::scrIf(void)
 
     skip();
     while(NULL != (line = stack[frame].line)) {
-        if(line->method == (method_t)&script::methods::scrIf)
+        if(line->method == (method_t)&Script::methods::scrIf)
             ++loop;
-        else if(line->method == (method_t)&script::methods::scrEndif) {
+        else if(line->method == (method_t)&Script::methods::scrEndif) {
             if(!loop) {
                 skip();
                 return true;
             }
             --loop;
         }
-        else if(!loop && line->method == (method_t)&script::methods::scrElse) {
+        else if(!loop && line->method == (method_t)&Script::methods::scrElse) {
             skip();
             return true;
         }
-        else if(!loop && line->method == (method_t)&script::methods::scrElif) {
+        else if(!loop && line->method == (method_t)&Script::methods::scrElif) {
             if(isConditional(0)) {
                 skip();
                 return true;
@@ -289,17 +289,17 @@ bool script::methods::scrIf(void)
     return false;
 }
 
-bool script::methods::scrPause(void)
+bool Script::methods::scrPause(void)
 {
     return false;
 }
 
-bool script::methods::scrBreak(void)
+bool Script::methods::scrBreak(void)
 {
-    script::line_t *line = stack[frame].line;
-    script::method_t method = getLooping();
+    Script::line_t *line = stack[frame].line;
+    Script::method_t method = getLooping();
 
-    if(method == (method_t)&script::methods::scrCase || method == (method_t)&script::methods::scrOtherwise) {
+    if(method == (method_t)&Script::methods::scrCase || method == (method_t)&Script::methods::scrOtherwise) {
         skip();
         while(stack[frame].line && stack[frame].line->loop >= line->loop)
             skip();
@@ -312,26 +312,26 @@ bool script::methods::scrBreak(void)
     return true;
 }
 
-bool script::methods::scrRepeat(void)
+bool Script::methods::scrRepeat(void)
 {
     --frame;
     --stack[frame].index;
     return true;
 }
 
-bool script::methods::scrContinue(void)
+bool Script::methods::scrContinue(void)
 {
     --frame;
     return true;
 }
 
-bool script::methods::scrNop(void)
+bool Script::methods::scrNop(void)
 {
     skip();
     return true;
 }
 
-bool script::methods::scrWhen(void)
+bool Script::methods::scrWhen(void)
 {
     if(!isConditional(0))
         skip();
@@ -340,14 +340,14 @@ bool script::methods::scrWhen(void)
     return true;
 }
 
-bool script::methods::scrExit(void)
+bool Script::methods::scrExit(void)
 {
     frame = 0;
     stack[frame].line = NULL;
     return false;
 }
 
-bool script::methods::scrRestart(void)
+bool Script::methods::scrRestart(void)
 {
     unsigned mask = stack[frame].resmask;
     pullBase();
@@ -357,11 +357,11 @@ bool script::methods::scrRestart(void)
     return false;
 }
 
-bool script::methods::scrGoto(void)
+bool Script::methods::scrGoto(void)
 {
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *cp;
-    script::header *scr = NULL;
+    Script::header *scr = NULL;
     unsigned index = 0;
     unsigned mask = stack[frame].resmask;
 
@@ -372,7 +372,7 @@ bool script::methods::scrGoto(void)
                 return true;
         }
         else
-            scr = script::find(*image, line->argv[0]);
+            scr = Script::find(*image, line->argv[0]);
     }
     if(!scr)
         return error("label not found");
@@ -385,21 +385,21 @@ bool script::methods::scrGoto(void)
     return false;
 }
 
-bool script::methods::scrGosub(void)
+bool Script::methods::scrGosub(void)
 {
     unsigned index = stack[frame].index;
-    script::line_t *line = stack[frame].line;
-    script::header *scr = NULL;
+    Script::line_t *line = stack[frame].line;
+    Script::header *scr = NULL;
     const char *cp;
     unsigned mask = stack[frame].resmask;
-    script::event *ev = NULL;
+    Script::event *ev = NULL;
 
     while(ev == NULL && scr == NULL && index < line->argc) {
         cp = line->argv[index++];
         if(*cp == '@') {
-            scr = script::find(*image, cp);
+            scr = Script::find(*image, cp);
             if(!scr && image->shared.get())
-                scr = script::find(image->shared.get(), cp);
+                scr = Script::find(image->shared.get(), cp);
         }
         else
             ev = scriptMethod(cp);
@@ -431,7 +431,7 @@ bool script::methods::scrGosub(void)
     return false;
 }
 
-bool script::methods::scrReturn(void)
+bool Script::methods::scrReturn(void)
 {
     unsigned mask = stack[frame].resmask;
     if(!pop())
@@ -442,7 +442,7 @@ bool script::methods::scrReturn(void)
     return false;
 }
 
-bool script::methods::scrIndex(void)
+bool Script::methods::scrIndex(void)
 {
     const char *op;
     int result = 0, value;
@@ -487,7 +487,7 @@ bool script::methods::scrIndex(void)
     return true;
 }
 
-bool script::methods::scrRef(void)
+bool Script::methods::scrRef(void)
 {
     const char *cp = stack[frame].line->argv[0];
     cp = getContent(cp);
@@ -495,9 +495,9 @@ bool script::methods::scrRef(void)
     return true;
 }
 
-bool script::methods::scrExpr(void)
+bool Script::methods::scrExpr(void)
 {
-    unsigned exdecimals = script::decimals;
+    unsigned exdecimals = Script::decimals;
     const char *id, *cp, *op, *aop;
     double result, value;
     long lvalue;
@@ -572,10 +572,10 @@ bool script::methods::scrExpr(void)
     return true;
 }
 
-bool script::methods::scrVar(void)
+bool Script::methods::scrVar(void)
 {
     unsigned index = 0;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *id;
 
     while(index < line->argc) {
@@ -593,10 +593,10 @@ bool script::methods::scrVar(void)
     return true;
 }
 
-bool script::methods::scrConst(void)
+bool Script::methods::scrConst(void)
 {
     unsigned index = 0;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *id;
 
     while(index < line->argc) {
@@ -610,11 +610,11 @@ bool script::methods::scrConst(void)
     return true;
 }
 
-bool script::methods::scrError(void)
+bool Script::methods::scrError(void)
 {
     char msg[65];
     unsigned index = 0;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     bool space = false;
     const char *cp;
 
@@ -632,12 +632,12 @@ bool script::methods::scrError(void)
     return error(msg);
 }
 
-bool script::methods::scrClear(void)
+bool Script::methods::scrClear(void)
 {
     unsigned index = 0;
-    script::line_t *line = stack[frame].line;
+    Script::line_t *line = stack[frame].line;
     const char *id;
-    script::symbol *sym;
+    Script::symbol *sym;
 
     while(index < line->argc) {
         id = line->argv[index++];
@@ -652,11 +652,11 @@ bool script::methods::scrClear(void)
     return true;
 }
 
-bool script::methods::scrAdd(void)
+bool Script::methods::scrAdd(void)
 {
     unsigned index = 1;
-    script::line_t *line = stack[frame].line;
-    script::symbol *sym = find(line->argv[0]);
+    Script::line_t *line = stack[frame].line;
+    Script::symbol *sym = find(line->argv[0]);
     const char *cp;
 
     if(!sym)
@@ -676,11 +676,11 @@ bool script::methods::scrAdd(void)
     return true;
 }
 
-bool script::methods::scrPack(void)
+bool Script::methods::scrPack(void)
 {
     unsigned index = 1;
-    script::line_t *line = stack[frame].line;
-    script::symbol *sym = find(line->argv[0]);
+    Script::line_t *line = stack[frame].line;
+    Script::symbol *sym = find(line->argv[0]);
     const char *cp;
     char quote[2] = {0,0};
 
@@ -732,10 +732,10 @@ add:
     return true;
 }
 
-bool script::methods::scrPush(void)
+bool Script::methods::scrPush(void)
 {
-    script::line_t *line = stack[frame].line;
-    script::symbol *sym = createSymbol(line->argv[0]);
+    Script::line_t *line = stack[frame].line;
+    Script::symbol *sym = createSymbol(line->argv[0]);
     unsigned size = 0;
     bool qflag = false;
     const char *key = NULL, *value;
@@ -785,11 +785,11 @@ bool script::methods::scrPush(void)
     return true;
 }
 
-bool script::methods::scrSet(void)
+bool Script::methods::scrSet(void)
 {
     unsigned index = 1;
-    script::line_t *line = stack[frame].line;
-    script::symbol *sym = createSymbol(line->argv[0]);
+    Script::line_t *line = stack[frame].line;
+    Script::symbol *sym = createSymbol(line->argv[0]);
     const char *cp;
 
     if(!sym)

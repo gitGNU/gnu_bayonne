@@ -1,21 +1,21 @@
 // Copyright (C) 1995-1999 David Sugar, Tycho Softworks.
 // Copyright (C) 1999-2005 Open Source Telecom Corp.
-// Copyright (C) 2005-2010 David Sugar, Tycho Softworks.
+// Copyright (C) 2005-2011 David Sugar, Tycho Softworks.
 //
-// This file is part of GNU uCommon C++.
+// This file is part of GNU Bayonne.
 //
-// GNU uCommon C++ is free software; you can redistribute it and/or modify
+// GNU Bayonne is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
-// GNU uCommon C++ is distributed in the hope that it will be useful,
+// GNU Bayonne is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GNU uCommon C++.  If not, see <http://www.gnu.org/licenses/>.
+// along with GNU Bayonne.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <config.h>
 #include <ucommon/ucommon.h>
@@ -26,14 +26,14 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-static script::keyword_t *keywords = NULL;
+static Script::keyword_t *keywords = NULL;
 
-size_t script::paging = 0;  // default page size used...
-unsigned script::sizing = 64;   // default symbol size is 64...
-unsigned script::indexing = 77; // hash size of symbol index
-unsigned script::stacking = 20; // max stack depth 20...
-unsigned script::stepping = 7;  // automatic stepping...
-unsigned script::decimals = 2;  // two decimal places...us default
+size_t Script::paging = 0;  // default page size used...
+unsigned Script::sizing = 64;   // default symbol size is 64...
+unsigned Script::indexing = 77; // hash size of symbol index
+unsigned Script::stacking = 20; // max stack depth 20...
+unsigned Script::stepping = 7;  // automatic stepping...
+unsigned Script::decimals = 2;  // two decimal places...us default
 
 static bool ideq(const char *id1, const char *id2)
 {
@@ -279,14 +279,14 @@ static bool preparse(char **tokens)
     return true;
 }
 
-script::error::error(script *img, unsigned line, const char *msg) :
+Script::error::error(Script *img, unsigned line, const char *msg) :
 OrderedObject(&img->errlist)
 {
     errmsg = img->dup(msg);
     errline = line;
 }
 
-script::script() :
+Script::Script() :
 CountedObject(), memalloc()
 {
     errors = 0;
@@ -296,18 +296,18 @@ CountedObject(), memalloc()
     global = NULL;
     headers = NULL;
     stack = NULL;
-    scripts = (LinkedObject **)alloc(sizeof(LinkedObject **) * script::indexing);
-    memset(scripts, 0, sizeof(LinkedObject **) * script::indexing);
+    scripts = (LinkedObject **)alloc(sizeof(LinkedObject **) * Script::indexing);
+    memset(scripts, 0, sizeof(LinkedObject **) * Script::indexing);
 }
 
-script::~script()
+Script::~Script()
 {
     if(stack)
         delete[] stack;
     shared = NULL;
 }
 
-void script::errlog(unsigned line, const char *fmt, ...)
+void Script::errlog(unsigned line, const char *fmt, ...)
 {
     char text[65];
     va_list args;
@@ -316,12 +316,12 @@ void script::errlog(unsigned line, const char *fmt, ...)
     vsnprintf(text, sizeof(text), fmt, args);
 
     ++errors;
-    caddr_t mp = (caddr_t)alloc(sizeof(script::error));
-    new(mp) error(this, line, text);
+    caddr_t mp = (caddr_t)alloc(sizeof(Script::error));
+    new(mp) Script::error(this, line, text);
     va_end(args);
 }
 
-void script::assign(script::keyword_t *keyword)
+void Script::assign(Script::keyword_t *keyword)
 {
     while(keyword && keyword->name) {
         keyword->next = keywords;
@@ -330,7 +330,7 @@ void script::assign(script::keyword_t *keyword)
     }
 }
 
-script::keyword_t *script::find(const char *cmd)
+Script::keyword_t *Script::find(const char *cmd)
 {
     keyword_t *keyword = keywords;
 
@@ -342,7 +342,7 @@ script::keyword_t *script::find(const char *cmd)
     return keyword;
 }
 
-void script::init(void)
+void Script::init(void)
 {
     static keyword_t keywords[] = {
         {"pause", (method_t)&methods::scrPause, (check_t)&checks::chkNop},
@@ -397,9 +397,9 @@ void script::init(void)
     }
 }
 
-script::header *script::find(script *img, const char *id)
+Script::header *Script::find(Script *img, const char *id)
 {
-    unsigned path = NamedObject::keyindex(id, script::indexing);
+    unsigned path = NamedObject::keyindex(id, Script::indexing);
     linked_pointer<header> hp = img->scripts[path];
 
     while(is(hp)) {
@@ -411,20 +411,20 @@ script::header *script::find(script *img, const char *id)
     return *hp;
 }
 
-script *script::merge(const char *fn, script *root)
+Script *Script::merge(const char *fn, Script *root)
 {
-    script *img = compile(fn, root);
+    Script *img = compile(fn, root);
     if(!root || !img)
         return img;
 
     return merge(img, root);
 }
 
-script *script::merge(script *img, script *root)
+Script *Script::merge(Script *img, Script *root)
 {
     assert(img != NULL && root != NULL);
 
-    for(unsigned index = 0; index < script::indexing; ++index) {
+    for(unsigned index = 0; index < Script::indexing; ++index) {
         header *prior = NULL;
         linked_pointer<header> hp = img->scripts[index];
         while(is(hp)) {
@@ -440,23 +440,23 @@ script *script::merge(script *img, script *root)
     return img;
 }
 
-script *script::compile(const char *fn, script *cfg)
+Script *Script::compile(const char *fn, Script *cfg)
 {
-    return script::append(NULL, fn, cfg);
+    return Script::append(NULL, fn, cfg);
 }
 
-script *script::append(script *merge, const char *fn, script *cfg)
+Script *Script::append(Script *merge, const char *fn, Script *cfg)
 {
 //  linked_pointer<script::strict> sp;
 
     char **argv = new char *[256];
     stringbuf<512> buffer;
-    script *img;
+    Script *img;
     charfile cf(fn, "r");
     header *scr = NULL;
     const char *name = "_init_";
-    script::event *current;
-    script::event *prior;
+    Script::event *current;
+    Script::event *prior;
     char *tokens;
     const char *token = NULL;
     char *arg;
@@ -468,7 +468,7 @@ script *script::append(script *merge, const char *fn, script *cfg)
     char *assigned;
     unsigned path;
     bool indented, formed;
-    script::header *invoke;
+    Script::header *invoke;
     bool define = false;
     bool when = false;
     bool label = false;
@@ -487,10 +487,10 @@ script *script::append(script *merge, const char *fn, script *cfg)
     if(merge)
         img = merge;
     else
-        img = new script();
+        img = new Script();
 
     if(!img->stack)
-        img->stack = new line_t*[script::stacking];
+        img->stack = new line_t*[Script::stacking];
 
     img->shared = cfg;
     img->filename = strrchr(fn, '/');
@@ -521,7 +521,7 @@ initial:
 
     // we drop additional initializers during append
     if(!eq(name, "_init_") || !merge) {
-        path = NamedObject::keyindex(name, script::indexing);
+        path = NamedObject::keyindex(name, Script::indexing);
         scr->enlist(&img->scripts[path]);
     }
 
@@ -613,7 +613,7 @@ initial:
             continue;
 
         if(*token == '^' || *token == '-') {
-            current = (event *)img->alloc(sizeof(script::event));
+            current = (event *)img->alloc(sizeof(Script::event));
             if(!prior)
                 prior = current;
 
@@ -857,7 +857,7 @@ parse:
         pos = 0;
         while(img->isStrict() && pos < line->argc) {
             cp = line->argv[pos++];
-            if(!script::strict::find(img, scr, cp))
+            if(!Script::strict::find(img, scr, cp))
                 img->errlog(lnum, "undefined symbol reference %s\n", cp);
         }
 
@@ -919,7 +919,7 @@ closure:
     return img;
 }
 
-bool script::isEvent(header *scr, const char *id)
+bool Script::isEvent(header *scr, const char *id)
 {
     linked_pointer<event> ep = scr->events;
 
@@ -931,7 +931,7 @@ bool script::isEvent(header *scr, const char *id)
     return false;
 }
 
-bool script::push(line_t *line)
+bool Script::push(line_t *line)
 {
     if(loop < stacking) {
         stack[loop++] = line;
@@ -940,7 +940,7 @@ bool script::push(line_t *line)
     return false;
 }
 
-script::method_t script::pull(void)
+Script::method_t Script::pull(void)
 {
     if(!loop)
         return NULL;
@@ -948,7 +948,7 @@ script::method_t script::pull(void)
     return stack[--loop]->method;
 }
 
-script::method_t script::looping(void)
+Script::method_t Script::looping(void)
 {
     if(!loop)
         return NULL;
@@ -956,14 +956,14 @@ script::method_t script::looping(void)
     return stack[loop - 1]->method;
 }
 
-void script::strict::createVar(script* image, script::header *scr, const char *id)
+void Script::strict::createVar(Script* image, Script::header *scr, const char *id)
 {
     assert(id && *id);
     assert(scr != NULL);
     assert(image != NULL);
 
-    linked_pointer<script::strict> sp;
-    script::strict *sym;
+    linked_pointer<Script::strict> sp;
+    Script::strict *sym;
 
     if(*id == '%' || *id == '=' || *id == '$')
         ++id;
@@ -978,7 +978,7 @@ void script::strict::createVar(script* image, script::header *scr, const char *i
                 return;
             sp.next();
         }
-        sym = (script::strict *)image->zalloc(sizeof(script::strict));
+        sym = (Script::strict *)image->zalloc(sizeof(Script::strict));
         sym->enlist(&scr->scoped);
         sym->id = id;
         return;
@@ -989,19 +989,19 @@ void script::strict::createVar(script* image, script::header *scr, const char *i
             return;
         sp.next();
     }
-    sym = (script::strict *)image->zalloc(sizeof(script::strict));
+    sym = (Script::strict *)image->zalloc(sizeof(Script::strict));
     sym->enlist(&image->global);
     sym->id = id;
 }
 
-void script::strict::createSym(script* image, script::header *scr, const char *id)
+void Script::strict::createSym(Script* image, Script::header *scr, const char *id)
 {
     assert(id && *id);
     assert(scr != NULL);
     assert(image != NULL);
 
-    linked_pointer<script::strict> sp;
-    script::strict *sym;
+    linked_pointer<Script::strict> sp;
+    Script::strict *sym;
 
     if(*id == '%' || *id == '=' || *id == '$')
         ++id;
@@ -1023,19 +1023,19 @@ void script::strict::createSym(script* image, script::header *scr, const char *i
             return;
         sp.next();
     }
-    sym = (script::strict *)image->zalloc(sizeof(script::strict));
+    sym = (Script::strict *)image->zalloc(sizeof(Script::strict));
     sym->enlist(&image->global);
     sym->id = id;
 }
 
-void script::strict::createAny(script* image, script::header *scr, const char *id)
+void Script::strict::createAny(Script* image, Script::header *scr, const char *id)
 {
     assert(id && *id);
     assert(scr != NULL);
     assert(image != NULL);
 
-    linked_pointer<script::strict> sp;
-    script::strict *sym;
+    linked_pointer<Script::strict> sp;
+    Script::strict *sym;
 
     if(*id == '%' || *id == '=' || *id == '$')
         ++id;
@@ -1057,7 +1057,7 @@ void script::strict::createAny(script* image, script::header *scr, const char *i
             return;
         sp.next();
     }
-    sym = (script::strict *)image->zalloc(sizeof(script::strict));
+    sym = (Script::strict *)image->zalloc(sizeof(Script::strict));
     if(*(scr->name) != '@')
         sym->enlist(&scr->scoped);
     else
@@ -1065,13 +1065,13 @@ void script::strict::createAny(script* image, script::header *scr, const char *i
     sym->id = id;
 }
 
-void script::strict::createGlobal(script *image, const char *id)
+void Script::strict::createGlobal(Script *image, const char *id)
 {
     assert(id && *id);
     assert(image != NULL);
 
-    linked_pointer<script::strict> sp;
-    script::strict *sym;
+    linked_pointer<Script::strict> sp;
+    Script::strict *sym;
 
     if(*id == '%' || *id == '=' || *id == '$')
         ++id;
@@ -1082,12 +1082,12 @@ void script::strict::createGlobal(script *image, const char *id)
             return;
         sp.next();
     }
-    sym = (script::strict *)image->zalloc(sizeof(script::strict));
+    sym = (Script::strict *)image->zalloc(sizeof(Script::strict));
     sym->enlist(&image->global);
     sym->id = id;
 }
 
-bool script::strict::find(script* image, script::header *scr, const char *id)
+bool Script::strict::find(Script* image, Script::header *scr, const char *id)
 {
     assert(id && *id);
     assert(scr != NULL);
@@ -1096,7 +1096,7 @@ bool script::strict::find(script* image, script::header *scr, const char *id)
     char buf[64];
     const char *cp;
     char *ep;
-    linked_pointer<script::strict> sp;
+    linked_pointer<Script::strict> sp;
 
     if(!image->global)
         return true;
@@ -1143,7 +1143,7 @@ bool script::strict::find(script* image, script::header *scr, const char *id)
     return false;
 }
 
-void script::strict::put(FILE *fp, const char *header)
+void Script::strict::put(FILE *fp, const char *header)
 {
     assert(fp != NULL);
     assert(id != NULL);
@@ -1158,7 +1158,7 @@ void script::strict::put(FILE *fp, const char *header)
     fputc('\n', fp);
 }
 
-unsigned script::count(const char *data)
+unsigned Script::count(const char *data)
 {
     unsigned count = 0;
     char quote = 0;
@@ -1184,7 +1184,7 @@ unsigned script::count(const char *data)
     return count;
 }
 
-void script::copy(const char *list, char *item, unsigned size)
+void Script::copy(const char *list, char *item, unsigned size)
 {
     assert(size > 0);
     assert(item != NULL);
@@ -1238,13 +1238,13 @@ void script::copy(const char *list, char *item, unsigned size)
     *item = 0;
 }
 
-unsigned script::offset(const char *list, unsigned index)
+unsigned Script::offset(const char *list, unsigned index)
 {
     const char *cp = get(list, index);
     return cp - list;
 }
 
-const char *script::get(const char *list, unsigned index)
+const char *Script::get(const char *list, unsigned index)
 {
     char quote = 0;
     unsigned paren = 0;
@@ -1273,7 +1273,7 @@ const char *script::get(const char *list, unsigned index)
     return NULL;
 }
 
-char *script::get(char *list, unsigned index)
+char *Script::get(char *list, unsigned index)
 {
     char quote = 0;
     unsigned paren = 0;

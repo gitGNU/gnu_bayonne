@@ -9,13 +9,9 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-RELEASE = -version-info $(LT_VERSION)
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-EXTRA_DIST =
+EXTRA_DIST = *.conf
 
-lib_LTLIBRARIES = libbayonne.la 
+pkgconfdir=$(sysconfdir)/bayonne
 
-libbayonne_la_LDFLAGS = @BAYONNE_LIBS@ $(RELEASE) 
-libbayonne_la_SOURCES = script.cpp methods.cpp interp.cpp checks.cpp \
-	modules.cpp audio.cpp resample.cpp phrasebook.cpp tonegen.cpp
+pkgconf_DATA = tones.conf
 

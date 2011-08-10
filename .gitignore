@@ -11,13 +11,15 @@ config.log
 config.status
 configure.lineno
 libtool
+test/bayonneScript
 stamp*
 *.m4
 *.a
 *.o
 *.lo
 *.la
-*.so*
+*.so.*
+*.so
 *.authors
 *.kdev4
 *.deps

@@ -21,6 +21,8 @@
 
 #cmakedefine HAVE_SYS_RESOURCE_H 1
 #cmakedefine HAVE_PWD_H 1
+#cmakedefine HAVE_ENDIAN_H 1
+#cmakedefine HAVE_MATH_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_GETUID 1
