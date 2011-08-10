@@ -10,8 +10,8 @@
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex
-SUBDIRS = inc runtime test
-DIST_SUBDIRS = inc runtime test
+SUBDIRS = inc runtime utils test
+DIST_SUBDIRS = inc runtime utils test
 
 doc:
 	cd docs ; pdflatex script.tex

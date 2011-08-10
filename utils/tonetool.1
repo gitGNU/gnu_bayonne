@@ -1,0 +1,54 @@
+.TH tonetool "1" "Febuary 2005" "GNU ccAudio Tone Tool" OST
+.SH NAME
+tonetool \- create and manipulate telephony tones.
+.SH SYNOPSIS
+.B tonetool
+[\fIoptions...\fR] \fBcommand\fR [\fIarguments...\fR]
+.SH DESCRIPTION
+Teltones is used to generate or play audio telephony tones based on a
+"spec".  The spec can be "dtmf digitstring" to create or play dtmf digits,
+"mf digitstring" to create or play mf digits, "single ...", to create or
+play a single tone, or "dual ..." to create or play a dual tone.
+Teltones can also be used to detect dtmf digits contained in audio files.
+.PP
+.SH OPTIONS
+.TP
+\fI\-encoding=pcmu\fR
+Specify audio encoding format.
+.TP
+\fI\-framing=20ms\fR
+Specify audio framing size.
+.TP
+\fI\-interdigit=60ms\fR
+Specify dtmf interdigit time.
+.TP
+\fI\-level=30000\fR
+Specify base audio level to use.
+.SH COMMANDS
+.TP
+\fBappend\fR
+Appends the generated tone to the end of an existing audio file.
+.TP
+\fBcreate\fR
+Create a new audio file from scratch and fill with the tone specified.
+.TP
+\fBdetect\fR
+Process an existing audio file and report on dtmf digits found.
+.TP
+\fBlist\fR
+List a tone entry definition by sequencing.
+\fBplay\fR
+Generate a tone or dialing string and play it to the local soundcard.
+.SH BUGS
+At this time tonetool always assumes all data is sourced at 8khz and
+does not support sample rate conversion.
+.SH AUTHOR
+Written by David Sugar.
+.SH "REPORTING BUGS"
+Report bugs to <dyfet@gnu.org>.
+.SH COPYRIGHT
+Copyright \(co 2005 David Sugar, Tycho Softworks.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.

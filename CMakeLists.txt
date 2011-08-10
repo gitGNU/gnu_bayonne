@@ -206,7 +206,11 @@ set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ucommon)
 target_link_libraries(bayonne-runtime ${MATH_LIB} ${USES_UCOMMON_LIBRARIES})
 
-install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
+add_executable(phrasebook utils/phrasebook.cpp)
+add_dependencies(phrasebook bayonne-runtime ucommon)
+target_link_libraries(phrasebook bayonne-runtime ${USES_UCOMMON_LIBRARIES})
 
+install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
+install(TARGETS phrasebook DESTINATION ${INSTALL_BINDIR})
 
 

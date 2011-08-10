@@ -285,5 +285,5 @@ AC_SUBST(LT_VERSION)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
-AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile)
+AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile)
 
