@@ -210,7 +210,11 @@ add_executable(phrasebook utils/phrasebook.cpp)
 add_dependencies(phrasebook bayonne-runtime ucommon)
 target_link_libraries(phrasebook bayonne-runtime ${USES_UCOMMON_LIBRARIES})
 
+add_executable(tonetool utils/tonetool.cpp)
+add_dependencies(tonetool bayonne-runtime ucommon)
+target_link_libraries(tonetool bayonne-runtime ${USES_UCOMMON_LIBRARIES})
+
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
-install(TARGETS phrasebook DESTINATION ${INSTALL_BINDIR})
+install(TARGETS phrasebook tonetool DESTINATION ${INSTALL_BINDIR})
 
 

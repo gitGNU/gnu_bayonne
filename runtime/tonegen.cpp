@@ -327,7 +327,7 @@ bool Tonegen::load(const char *l)
     bool loaded = false;
 
     fp = fopen(DEFAULT_CFGPATH "/bayonne/tones.conf", "r");
-    if(!fp)
+    if(fp == NULL)
         return false;
 
     memset(&hash, 0, sizeof(hash));
@@ -480,6 +480,7 @@ skip:
     }
 
     fclose(fp);
+
     if(page)
         return true;
     return false;

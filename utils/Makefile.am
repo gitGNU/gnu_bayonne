@@ -15,7 +15,8 @@ LDADD = ../runtime/libbayonne.la @BAYONNE_LIBS@
 EXTRA_DIST = audiotool.1 tonetool.1
 
 man_MANS = audiotool.1 tonetool.1
-bin_PROGRAMS = phrasebook
+bin_PROGRAMS = phrasebook tonetool
 
 phrasebook_SOURCES = phrasebook.cpp
 
+tonetool_SOURCES = tonetool.cpp
