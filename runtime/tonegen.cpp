@@ -327,7 +327,10 @@ bool Tonegen::load(const char *l)
     bool loaded = false;
 
     fp = fopen(DEFAULT_CFGPATH "/bayonne/tones.conf", "r");
-    if(fp == NULL)
+    if(!fp)
+        fp = fopen("../config/tones.conf", "r");
+
+    if(!fp)
         return false;
 
     memset(&hash, 0, sizeof(hash));
