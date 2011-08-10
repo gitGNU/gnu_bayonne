@@ -12,7 +12,7 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ $(CHECKFLAGS)
 INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../runtime/libbayonne.la @BAYONNE_LIBS@
-EXTRA_DIST = audiotool.1 tonetool.1
+EXTRA_DIST = audiotool.1 tonetool.1 CMakeLists.txt
 
 man_MANS = audiotool.1 tonetool.1
 bin_PROGRAMS = phrasebook tonetool
