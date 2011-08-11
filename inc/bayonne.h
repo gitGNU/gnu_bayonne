@@ -1263,7 +1263,7 @@ public:
 
     static const char *config(const char *name);
 
-    static const char *pathname(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size);
+    static const char *path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size);
 };
 
 /**

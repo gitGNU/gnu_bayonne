@@ -27,7 +27,7 @@ static shell::flagopt althelp('?', NULL, NULL);
 static shell::stringopt lang('l', "--lang", _TEXT("specify language"), "language", "C");
 static shell::stringopt prefix('P', "--prefix", _TEXT("specify prefix path"), "path", "/var/lib/ccaudio");
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
-static shell::stringopt voices('V', "--voice", _TEXT("specify voice library"), "path", "/usr/share/ccaudio");
+static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static Phrasebook *ruleset;
 static bool showpath = false;
 
@@ -108,7 +108,7 @@ static void display(char **args)
         else while(*out) {
             if(showpath) {
                 char buffer[512];
-                Env::pathname(ruleset, NULL, *(out++), buffer, sizeof(buffer));
+                Env::path(ruleset, *voice, *(out++), buffer, sizeof(buffer));
                 printf("%s\n", buffer);
             }
             else

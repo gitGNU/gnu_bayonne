@@ -148,7 +148,7 @@ const char *Env::config(const char *name)
     return env(name);
 }
 
-const char *Env::pathname(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size)
+const char *Env::path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size)
 {
     const char *ext;
 
