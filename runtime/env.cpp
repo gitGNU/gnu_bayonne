@@ -52,6 +52,7 @@ void Env::init(shell_t *args)
     set("calls", _STR(str(prefix) + "/logs/bayonne.calls"));
     set("stats", _STR(str(prefix) + "/logs/bayonne.stats"));
     set("scripts", _STR(str(prefix) + "/scripts"));
+    set("definitions", _STR(str(prefix) + "/scripts"));
     set("shell", "cmd.exe");
     set("voices", _STR(str(prefix) + "\\voices"));
 
@@ -76,6 +77,7 @@ void Env::init(shell_t *args)
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
     set("scripts", DEFAULT_CFGPATH "/bayonne.d");
+    set("definitions", DEFAULT_DATADIR "/bayonne");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/phrasebook");
 #endif
@@ -99,6 +101,7 @@ void Env::init(shell_t *args)
         set("config", _STR(str(pwd->pw_dir) + "/.bayonnerc"));
         set("configs", _STR(str(pwd->pw_dir) + "/.bayonne"));
         set("sysconfigs", _STR(str(DEFAULT_CFGPATH) + "/bayonne"));
+        set("scripts", _STR(str(pwd->pw_dir) + "/bayonne"));
         set("services", prefix);
         set("controls", rundir);
         set("control", _STR(str(rundir) + "/control"));

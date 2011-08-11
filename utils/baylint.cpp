@@ -36,7 +36,6 @@ static shell::flagopt helpflag('h',"--help", _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::stringopt driver('d', "--driver", _TEXT("driver lint definitions to use"), "name", NULL);
 static shell::stringopt modules('m', "--modules", _TEXT("names of optional modules we added"), "list", NULL);
-static shell::stringopt lintfiles('l', "--lint", _TEXT("optional lint data directory"), "list", DEFAULT_DATADIR "/bayonne");
 static shell::flagopt ver('v', "--version", _TEXT("version of application"));
 
 static void version(void)
@@ -74,6 +73,8 @@ PROGRAM_MAIN(argc, argv)
 
     Env::init(&args);
 
+    const char *lintfiles = Env::env("definitions");
+
     if(is(helpflag) || is(althelp))
         usage();
 
@@ -95,8 +96,8 @@ PROGRAM_MAIN(argc, argv)
         exit(-1);
     }
 
-    if((is(driver) || is(modules)) && !fsys::isdir(*lintfiles)) {
-        fprintf(stderr, "*** baylint: %s: invalid data directory\n", *lintfiles);
+    if((is(driver) || is(modules)) && !fsys::isdir(lintfiles)) {
+        fprintf(stderr, "*** baylint: %s: invalid data directory\n", lintfiles);
         exit(-1);
     }
 
@@ -117,7 +118,7 @@ PROGRAM_MAIN(argc, argv)
     while(def < defcount) {
         dn = defs[def++];
         if(!strchr(dn, '/') && !strchr(dn, '.')) {
-            snprintf(buffer, sizeof(buffer), "%s/%s.lint", *lintfiles, dn);
+            snprintf(buffer, sizeof(buffer), "%s/%s.lint", lintfiles, dn);
             dn = buffer;
         }
         if(!fsys::isfile(dn))
