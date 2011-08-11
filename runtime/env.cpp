@@ -53,6 +53,7 @@ void Env::init(shell_t *args)
     set("stats", _STR(str(prefix) + "/logs/bayonne.stats"));
     set("scripts", _STR(str(prefix) + "/scripts"));
     set("shell", "cmd.exe");
+    set("voices", _STR(str(prefix) + "\\voices"));
 
     prefix = "C:\\Program Files\\bayonne\\media";
 
@@ -76,6 +77,7 @@ void Env::init(shell_t *args)
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
     set("scripts", DEFAULT_CFGPATH "/bayonne.d");
     set("shell", "/bin/sh");
+    set("voices", DEFAULT_DATADIR "/phrasebook");
 #endif
 
 #ifdef  HAVE_PWD_H
@@ -116,6 +118,8 @@ void Env::init(shell_t *args)
         daemon_flag = false;
 #endif
 
+    set("voice", "default");
+    set("extension", ".au");
     set("prefix", prefix);
     set("rundir", rundir);
     set("plugins", plugins);
@@ -142,6 +146,44 @@ const char *Env::config(const char *name)
     // cache and use requested config path...
     set(name, *filename);
     return env(name);
+}
+
+const char *Env::pathname(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size)
+{
+    const char *ext;
+
+    if(strchr(path, '/')) {
+        String::set(buffer, size, path);
+        ext = strrchr(buffer, '/');
+        if(!strchr(ext, '.'))
+            String::add(buffer, size, env("extension"));
+        return buffer;
+    }
+
+    if(!voice)
+        voice = env("voice");
+
+    const char *altvoices = env("altvoices");
+    if(strchr(path, '.'))
+        ext = "";
+    else
+        ext = env("extension");
+
+    if(book) {
+        snprintf(buffer, size, "%s%s%s/%s%s",
+            env("voices"), book->path(), voice, path, ext);
+
+        if(!altvoices || fsys::isfile(buffer))
+            return buffer;
+    }
+
+    if(!altvoices)
+        return NULL;
+
+    snprintf(buffer, size, "%s/%s/%s%s",
+        altvoices, voice, path, ext);
+
+    return buffer;
 }
 
 

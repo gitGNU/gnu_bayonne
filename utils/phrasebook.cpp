@@ -106,12 +106,16 @@ static void display(char **args)
         if(*out == NULL)
             printf("*** %s: failed", arg);
         else while(*out) {
-//          if(showpath)
-//              printf("%s ", Audio::path(*(out++)).c_str());
-//          else
+            if(showpath) {
+                char buffer[512];
+                Env::pathname(ruleset, NULL, *(out++), buffer, sizeof(buffer));
+                printf("%s\n", buffer);
+            }
+            else
                 printf("%s ", *(out++));
         }
-        printf("\n");
+        if(!showpath)
+            printf("\n");
     }
 }
 

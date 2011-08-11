@@ -1262,6 +1262,8 @@ public:
         {return sys->getsym(id);};
 
     static const char *config(const char *name);
+
+    static const char *pathname(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size);
 };
 
 /**
