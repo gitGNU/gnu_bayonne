@@ -582,27 +582,6 @@ private:
 };
 
 /**
-* Interface for managing server specific plugins.  This includes activation
-* of startup and shutdown methods for modules that need to manage additional
-* threads, notification of server specific events, and methods to invoke
-* server actions.
-* @author David Sugar <dyfet@gnutelephony.org>
-*/
-class __EXPORT Module : public LinkedObject
-{
-protected:
-    virtual void start(void);
-
-    virtual void stop(void);
-
-public:
-    Module();
-
-    static void startup(void);
-    static void shutdown(void);
-};
-
-/**
  * Generic audio class to hold master data types and various useful
  * class encapsulated friend functions as per GNU Common C++ 2 coding
  * standard.
@@ -1259,14 +1238,41 @@ public:
 };
 
 /**
+ * Core bayonne environment.
+ * @author David Sugar <dyfet@gnutelephony.org>
+ */
+class __EXPORT Env
+{
+private:
+    static shell_t *sys;
+    static const char *prefix;
+    static const char *rundir;
+    static bool daemon_flag;
+
+public:
+    static void init(shell_t *args);
+
+    static inline void set(const char *id, const char *value)
+        {sys->setsym(id, value);};
+
+    static inline const char *get(const char *id)
+        {return sys->getsym(id);};
+
+    static inline const char *env(const char *id)
+        {return sys->getsym(id);};
+
+    static const char *config(const char *name);
+};
+
+/**
  * The Tonegen class is used to create a frame of audio encoded single or
  * dualtones.  The frame will be iterated for each request, so a
  * continual tone can be extracted by frame.
  *
- * @author David Sugar <dyfet@ostel.com>
+ * @author David Sugar <dyfet@gnutelephony.org>
  * @short audio tone generator class.
  */
-class __EXPORT Tonegen : public Audio
+class __EXPORT Tonegen : public Audio, protected Env
 {
 public:
     typedef struct _tonedef {
@@ -1428,6 +1434,27 @@ public:
     static bool load(const char *locale = NULL);
 
     static key_t *find(const char *id, const char *locale = NULL);
+};
+
+/**
+* Interface for managing server specific plugins.  This includes activation
+* of startup and shutdown methods for modules that need to manage additional
+* threads, notification of server specific events, and methods to invoke
+* server actions.
+* @author David Sugar <dyfet@gnutelephony.org>
+*/
+class __EXPORT Module : public LinkedObject, protected Env
+{
+protected:
+    virtual void start(void);
+
+    virtual void stop(void);
+
+public:
+    Module();
+
+    static void startup(void);
+    static void shutdown(void);
 };
 
 END_NAMESPACE

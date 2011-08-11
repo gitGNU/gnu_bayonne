@@ -294,6 +294,10 @@ PROGRAM_MAIN(argc, argv)
     shell::bind("tonetool");
     shell args(argc, argv);
 
+    Env::init(&args);
+
+    Env::set("altconfig", "../config/");
+
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: tonetool [options] command [arguments...]"));
         printf("%s\n\n", _TEXT("Tone tool operations"));

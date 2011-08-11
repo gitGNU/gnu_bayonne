@@ -326,10 +326,7 @@ bool Tonegen::load(const char *l)
     char namebuf[65];
     bool loaded = false;
 
-    fp = fopen(DEFAULT_CFGPATH "/bayonne/tones.conf", "r");
-    if(!fp)
-        fp = fopen("../config/tones.conf", "r");
-
+    fp = fopen(config("tones.conf"), "r");
     if(!fp)
         return false;
 

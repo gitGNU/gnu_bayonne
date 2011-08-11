@@ -120,6 +120,8 @@ PROGRAM_MAIN(argc, argv)
     shell::bind("phrasebook");
     shell args(argc, argv);
 
+    Env::init(&args);
+
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: phrasebook [options] command arguments..."));
         printf("%s\n\n", _TEXT("Phrasebook operations"));
