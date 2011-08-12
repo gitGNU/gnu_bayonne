@@ -154,16 +154,12 @@ const char *Env::config(const char *name)
     if(result)
         return result;
 
-    const char *altconfig = env("altconfig");
     const char *sysconfig = env("sysconfig");
 
     string_t filename = str(env("configs")) + str(name);
 
     if(sysconfig && !fsys::isfile(*filename))
         filename = str(sysconfig) + str(name);
-
-    if(altconfig && !fsys::isfile(*filename))
-        filename = str(altconfig) + str(name);
 
     // cache and use requested config path...
     set(name, *filename);
@@ -247,23 +243,12 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
     if(writeflag)
         return NULL;
 
-    const char *altvoices = env("altvoices");
-
     if(book) {
         snprintf(buffer, size, "%s%s%s/%s%s",
             env("voices"), book->path(), voice, path, ext);
 
-        if(!altvoices || fsys::isfile(buffer))
-            return buffer;
+        return buffer;
     }
-
-    if(!altvoices)
-        return NULL;
-
-    snprintf(buffer, size, "%s/%s/%s%s",
-        altvoices, voice, path, ext);
-
-    return buffer;
 }
 
 

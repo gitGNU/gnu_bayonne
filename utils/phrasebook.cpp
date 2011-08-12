@@ -28,6 +28,7 @@ static shell::stringopt lang('l', "--lang", _TEXT("specify language"), "language
 static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
+static shell::stringopt phrasebook('v', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
 static Phrasebook *ruleset;
 static bool showpath = false;
 
@@ -135,6 +136,9 @@ PROGRAM_MAIN(argc, argv)
 
     if(is(prefix))
         Env::set("prefix", *prefix);
+
+    if(is(phrasebook))
+        Env::set("voices", *phrasebook);
 
     if(is(suffix))
         Env::set("extension", *suffix);

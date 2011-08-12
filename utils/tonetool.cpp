@@ -24,6 +24,7 @@ using namespace UCOMMON_NAMESPACE;
 static const char *delfile = NULL;
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
+static shell::stringopt configdir('c', "--config", _TEXT("config directory"), "path", NULL);
 static shell::stringopt encoding('e', "--encoding", _TEXT("audio format"), "type", "pcmu");
 static shell::numericopt framing('f', "--framing", _TEXT("audio framing"), "msec", 20);
 static shell::numericopt interdigit('i', "--interdigit", _TEXT("interdigit timing"), "msec", 60);
@@ -296,7 +297,8 @@ PROGRAM_MAIN(argc, argv)
 
     Env::tool(&args);
 
-    Env::set("altconfig", "../config/");
+    if(is(configdir))
+        Env::set("config", *configdir);
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: tonetool [options] command [arguments...]"));
