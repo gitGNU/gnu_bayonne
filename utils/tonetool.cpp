@@ -294,7 +294,7 @@ PROGRAM_MAIN(argc, argv)
     shell::bind("tonetool");
     shell args(argc, argv);
 
-    Env::init(&args);
+    Env::tool(&args);
 
     Env::set("altconfig", "../config/");
 

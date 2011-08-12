@@ -71,7 +71,7 @@ PROGRAM_MAIN(argc, argv)
     shell::bind("baylint");
     shell args(argc, argv);
 
-    Env::init(&args);
+    Env::tool(&args);
 
     const char *lintfiles = Env::env("definitions");
 

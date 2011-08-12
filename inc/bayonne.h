@@ -1245,12 +1245,13 @@ class __EXPORT Env
 {
 private:
     static shell_t *sys;
-    static const char *prefix;
-    static const char *rundir;
     static bool daemon_flag;
+    static bool tool_flag;
 
 public:
     static void init(shell_t *args);
+
+    static void tool(shell_t *args);
 
     static inline void set(const char *id, const char *value)
         {sys->setsym(id, value);};
@@ -1263,7 +1264,7 @@ public:
 
     static const char *config(const char *name);
 
-    static const char *path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size);
+    static const char *path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size, bool write = false);
 };
 
 /**

@@ -25,7 +25,7 @@ using namespace UCOMMON_NAMESPACE;
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::stringopt lang('l', "--lang", _TEXT("specify language"), "language", "C");
-static shell::stringopt prefix('P', "--prefix", _TEXT("specify prefix path"), "path", "/var/lib/ccaudio");
+static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static Phrasebook *ruleset;
@@ -103,13 +103,20 @@ static void display(char **args)
         else
             ruleset->literal(arg, &state.rule);
 
-        if(*out == NULL)
+        if(*out == NULL) {
             printf("*** %s: failed", arg);
+            if(showpath)
+                printf("\n");
+        }
         else while(*out) {
             if(showpath) {
                 char buffer[512];
-                Env::path(ruleset, *voice, *(out++), buffer, sizeof(buffer));
-                printf("%s\n", buffer);
+                const char *file = Env::path(ruleset, *voice, *out, buffer, sizeof(buffer), true);
+                if(!file)
+                    printf("*** %s: invalid\n", *out);
+                else
+                    printf("%s\n", file);
+                ++out;
             }
             else
                 printf("%s ", *(out++));
@@ -124,7 +131,13 @@ PROGRAM_MAIN(argc, argv)
     shell::bind("phrasebook");
     shell args(argc, argv);
 
-    Env::init(&args);
+    Env::tool(&args);
+
+    if(is(prefix))
+        Env::set("prefix", *prefix);
+
+    if(is(suffix))
+        Env::set("extension", *suffix);
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: phrasebook [options] command arguments..."));

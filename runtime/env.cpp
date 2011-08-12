@@ -29,6 +29,7 @@ using namespace UCOMMON_NAMESPACE;
 
 shell_t *Env::sys;
 bool Env::daemon_flag = true;
+bool Env::tool_flag = false;
 
 void Env::init(shell_t *args)
 {
@@ -55,8 +56,9 @@ void Env::init(shell_t *args)
     set("definitions", _STR(str(prefix) + "/scripts"));
     set("shell", "cmd.exe");
     set("voices", _STR(str(prefix) + "\\voices"));
+    set("temp", "C:\\Program Files\\bayonne\\temp");
 
-    prefix = "C:\\Program Files\\bayonne\\media";
+    prefix = "C:\\Program Files\\bayonne\\datafiles";
 
 #else
     const char *prefix = DEFAULT_VARPATH "/lib/bayonne";
@@ -80,28 +82,39 @@ void Env::init(shell_t *args)
     set("definitions", DEFAULT_DATADIR "/bayonne");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/phrasebook");
+    set("temp", DEFAULT_VARPATH "/tmp/bayonne");
 #endif
 
 #ifdef  HAVE_PWD_H
+    const char *home_prefix = NULL;
     struct passwd *pwd = getpwuid(getuid());
     umask(007);
 
     if(getuid() && pwd && pwd->pw_dir && *pwd->pw_dir == '/') {
-        prefix = strdup(pwd->pw_dir);
         if(!eq(pwd->pw_shell, "/bin/false") && !eq(pwd->pw_dir, "/var/", 5) && !eq(pwd->pw_dir, "/srv/", 5)) {
             umask(077);
             daemon_flag = false;
-        };
+        }
+        else    // alternate media prefix possible if not root startup...
+            prefix = strdup(pwd->pw_dir);
     }
 
-    if(!daemon_flag && pwd) {
+    // if user mode (testing)...
+    if(!daemon_flag && pwd)
+        home_prefix = strdup(str(pwd->pw_dir) + "/.bayonne");
+
+    // tool mode only uses ~/.bayonne if also actually exists...
+    if(home_prefix && tool_flag && !fsys::isdir(home_prefix))
+        home_prefix = NULL;
+
+    if(home_prefix) {
         rundir = strdup(str("/tmp/bayonne-") + str(pwd->pw_name));
-        prefix = strdup(str(pwd->pw_dir) + "/.bayonne");
+        prefix = home_prefix;
 
         set("config", _STR(str(pwd->pw_dir) + "/.bayonnerc"));
-        set("configs", _STR(str(pwd->pw_dir) + "/.bayonne"));
+        set("configs", home_prefix);
+        set("scripts", home_prefix);
         set("sysconfigs", _STR(str(DEFAULT_CFGPATH) + "/bayonne"));
-        set("scripts", _STR(str(pwd->pw_dir) + "/bayonne"));
         set("services", prefix);
         set("controls", rundir);
         set("control", _STR(str(rundir) + "/control"));
@@ -128,6 +141,12 @@ void Env::init(shell_t *args)
     set("plugins", plugins);
 }
 
+void Env::tool(shell_t *args)
+{
+    tool_flag = true;
+    init(args);
+}
+
 const char *Env::config(const char *name)
 {
     // if we have cached copy of config path, use it...
@@ -151,26 +170,84 @@ const char *Env::config(const char *name)
     return env(name);
 }
 
-const char *Env::path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size)
+const char *Env::path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size, bool writeflag)
 {
-    const char *ext;
+    const char *ext = strrchr(path, '/');
 
-    if(strchr(path, '/')) {
-        String::set(buffer, size, path);
-        ext = strrchr(buffer, '/');
-        if(!strchr(ext, '.'))
-            String::add(buffer, size, env("extension"));
+    // file: and tool: can be used anywhere, but for toolmode only...
+    if(case_eq(path, "file:", 5) || case_eq(path, "tool:")) {
+        if(!tool_flag)
+            return NULL;
+
+        String::set(buffer, size, path + 5);
+        return buffer;
+    }
+
+    // out: can be used to override for writing absolute path in tool mode...
+    if(case_eq(path, "out:", 4)) {
+        if(!tool_flag || !writeflag)
+            return NULL;
+
+        String::set(buffer, size, path + 4);
+        return buffer;
+    }
+
+    // writeflag used to restrict what bayonne can modify.  We disable this
+    // for various bayonne tools.
+    if(tool_flag)
+        writeflag = false;
+
+    // all other xxx: paths cannot include subdirectories...
+    if(ext && strchr(path + 2, ':'))
+        return NULL;
+
+    // xxx.ext is a local file, not phrase library, in tool mode...
+    if(!ext && strchr(path, '.') && tool_flag && !strchr(path + 2, ':'))
+        ext = path;
+
+    if(ext) {
+        ext = strchr(ext, '.');
+        if(ext)
+            ext = "";
+        else
+            ext = env("extension");
+
+        if(*path != '/' && tool_flag)
+            snprintf(buffer, size, "%s/%s%s",
+                env("prefix"), path, ext);
+        else
+            snprintf(buffer, size, "%s%s", path, ext);
+
         return buffer;
     }
 
     if(!voice)
         voice = env("voice");
 
-    const char *altvoices = env("altvoices");
-    if(strchr(path, '.'))
+    ext = strchr(path, '.');
+
+    if(ext)
         ext = "";
     else
         ext = env("extension");
+
+    // tmp: to access bayonne temporary files...
+    if(case_eq(path, "tmp:", 4)) {
+        snprintf(buffer, size, "%s/%s%s",
+            env("temp"), path + 4, ext);
+        return buffer;
+    }
+    // lib: optional way to always specify use library
+    else if(case_eq(path, "lib:", 4))
+        path += 4;
+    else if(strchr(path, ':'))
+        return NULL;
+
+    // normally cannot write to phrasebook library unless toolmode
+    if(writeflag)
+        return NULL;
+
+    const char *altvoices = env("altvoices");
 
     if(book) {
         snprintf(buffer, size, "%s%s%s/%s%s",
