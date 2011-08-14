@@ -1546,6 +1546,197 @@ private:
 };
 
 /**
+ * The codec class is a virtual used for transcoding audio samples between
+ * linear frames (or other known format) and an encoded "sample" buffer.
+ * This class is only abstract and describes the core interface for
+ * loadable codec modules.  This class is normally merged with AudioSample.
+ * A derived AudioCodecXXX will typically include a AudioRegisterXXX static
+ * class to automatically initialize and register the codec with the codec
+ * registry.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short process codec interface.
+ */
+class __EXPORT AudioCodec : public Audio, public LinkedObject
+{
+protected:
+    encoding_t encoding;
+    const char *name;
+    info_t info;
+
+    AudioCodec();
+
+    /**
+     * often used to create a "new" codec of a subtype based on
+     * encoding format, default returns the current codec entity.
+     *
+     * @return pointer to an active codec or NULL if not found.
+     * @param format name from spd.
+     */
+    virtual AudioCodec *getByFormat(const char *format)
+        {return this;};
+
+    /**
+     * get a codec by audio source info descriptor.
+     *
+     * @return pointer to an active codec or NULL if not found.
+     * @param info audio source descriptor.
+     */
+    virtual AudioCodec *getByInfo(info_t& info)
+        {return this;};
+
+public:
+    /**
+     * Base for codecs, create a named coded of a specific encoding.
+     *
+     * @param name of codec.
+     * @param encoding type of codec.
+     */
+    AudioCodec(const char *name, encoding_t encoding);
+
+    inline const char *getName(void) const
+        {return name;};
+
+    inline const char *getDescription(void) const
+        {return info.annotation;};
+
+    virtual ~AudioCodec() {};
+
+    /**
+     * End use of a requested codec.  If constructed then will be
+     * deleted.
+     *
+     * @param codec pointer to getCodec returned coded pointer.
+     */
+    static void release(AudioCodec *codec);
+
+    static AudioCodec *begin(void);
+    /**
+     * Get the codec base class for accessing a specific derived
+     * codec identified by encoding type and optional spd info.
+     *
+     * @return pointer to codec for processing.
+     * @param encoding format requested.
+     * @param format spd options to pass to codec being created.
+     */
+    static AudioCodec *get(encoding_t encoding, const char *format = NULL);
+
+    /**
+     * Get the codec base class for accessing a specific derived
+     * codec identified by audio source descriptor.
+     *
+     * @return pointer to codec for processing.
+     * @param info source descriptor for codec being requested.
+     */
+    static AudioCodec *get(info_t& info);
+
+    /**
+     * Get the impulse energy level of a frame of X samples in
+     * the specified codec format.
+     *
+     * @return average impulse energy of frame (sumnation).
+     * @param buffer of encoded samples.
+     * @param number of encoded samples.
+     */
+    virtual level_t impulse(void *buffer, unsigned number = 0);
+
+    /**
+     * Get the peak energy level within the frame of X samples.
+     *
+     * @return peak energy impulse in frame (largest).
+     * @param buffer of encoded samples.
+     * @param number of encoded samples.
+     */
+    virtual level_t peak(void *buffer, unsigned number = 0);
+
+    /**
+     * Signal if the current audio frame is silent.  This can be
+     * deterimed either by an impulse computation, or, in some
+     * cases, some codecs may signal and flag silent packets.
+     *
+     * @return true if silent
+     * @param threashold to use if not signaled.
+     * @param buffer of encoded samples.
+     * @param number of encoded samples.
+     */
+    virtual bool is_silent(level_t threashold, void *buffer, unsigned number = 0);
+
+    /**
+     * Encode a linear sample frame into the codec sample buffer.
+     *
+     * @return number of bytes written.
+     * @param buffer linear sample buffer to use.
+     * @param dest buffer to store encoded results.
+     * @param number of samples.
+     */
+    virtual unsigned encode(linear_t buffer, void *dest, unsigned number = 0) = 0;
+
+    /**
+     * Encode linear samples buffered into the coded.
+     *
+     * @return number of bytes written or 0 if incomplete.
+     * @param buffer linear samples to post.
+     * @param destination of encoded audio.
+     * @param number of samples being buffered.
+     */
+    virtual unsigned encodeBuffered(linear_t Buffer, encoded_t dest, unsigned number);
+
+    /**
+     * Decode the sample frame into linear samples.
+     *
+     * @return number of bytes scanned or returned
+     * @param buffer sample buffer to save linear samples into.
+     * @param source for encoded data.
+     * @param number of samples to extract.
+     */
+    virtual unsigned decode(linear_t buffer, void *source, unsigned number = 0) = 0;
+
+    /**
+     * Buffer and decode data into linear samples.  This is needed
+     * for audio formats that have irregular packet sizes.
+     *
+     * @return number of samples actually decoded.
+     * @param destination for decoded data.
+     * @param source for encoded data.
+     * @param number of bytes being sent.
+     */
+    virtual unsigned decodeBuffered(linear_t buffer, encoded_t source, unsigned len);
+
+    /**
+     * Get estimated data required for buffered operations.
+     *
+     * @return estimated number of bytes required for decode.
+     */
+    virtual unsigned getEstimated(void);
+
+    /**
+     * get required samples for encoding.
+     *
+     * @return required number of samples for encoder buffer.
+     */
+    virtual unsigned getRequired(void);
+
+    /**
+     * Get a packet of data rather than decode.  This is tied with
+     * getEstimated.
+     *
+     * @return size of data packet or 0 if not complete.
+     * @param destination to save.
+     * @param data to push into buffer.
+     * @param number of bytes to push.
+     */
+    virtual unsigned getPacket(encoded_t destination, encoded_t data, unsigned size);
+
+    /**
+     * Get an info description for this codec.
+     *
+     * @return info.
+     */
+    inline info_t getInfo(void) const
+        {return info;};
+};
+
+/**
 * Interface for managing server specific plugins.  This includes activation
 * of startup and shutdown methods for modules that need to manage additional
 * threads, notification of server specific events, and methods to invoke
