@@ -37,12 +37,10 @@ static Tonegen *getTone(char **argv, Audio::level_t l, timeout_t framing, timeou
     Tonegen::key_t *key;
     char *name, *locale;
 
-/*
     if(!stricmp(*argv, "dtmf"))
-        return new DTMFTones(*(++argv), l, framing, interdigit);
+        return new DTMFDialer(*(++argv), l, framing, interdigit);
     else if(!stricmp(*argv, "mf"))
-        return new MFTones(*(++argv), l, framing, interdigit);
-*/
+        return new MFDialer(*(++argv), l, framing, interdigit);
 
     name = *(argv++);
     locale = *(argv);
@@ -241,7 +239,7 @@ void toneDetect(char **argv)
     AudioStream input;
     Audio::Info info, make;
     const char *target;
-    Audio::Linear buffer;
+    Audio::linear_t buffer;
     char result[128];
 
     while(*argv) {

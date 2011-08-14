@@ -249,6 +249,7 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
 
         return buffer;
     }
+    return NULL;
 }
 
 

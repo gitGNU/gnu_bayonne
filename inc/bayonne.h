@@ -1440,6 +1440,112 @@ public:
 };
 
 /**
+ * DTMFDialer is used to generate a series of dtmf audio data from a
+ * "telephone" number passed as an ASCII string.  Each time getFrame()
+ * is called, the next audio frame of dtmf audio will be created
+ * and pulled.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short Generate DTMF audio
+ */
+class __EXPORT DTMFDialer : public Tonegen
+{
+protected:
+    unsigned dtmfframes;
+    const char *digits;
+
+public:
+    /**
+     * Generate a dtmf dialer for a specified dialing string.
+     *
+     * @param digits to generate tone dialing for.
+     * @param level for dtmf.
+     * @param duration timing for generated audio.
+     * @param interdigit timing, should be multiple of frame.
+     */
+    DTMFDialer(const char *digits, level_t level, timeout_t duration = 20, timeout_t interdigit = 60);
+
+    ~DTMFDialer();
+
+    linear_t getFrame(void);
+};
+
+/**
+ * MFDialer is used to generate a series of mf audio data from a
+ * "telephone" number passed as an ASCII string.  Each time getFrame()
+ * is called, the next audio frame of dtmf audio will be created
+ * and pulled.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short Generate MF audio
+ */
+class __EXPORT MFDialer : public Tonegen
+{
+protected:
+    unsigned mfframes;
+    const char *digits;
+    bool kflag;
+
+public:
+    /**
+     * Generate a mf dialer for a specified dialing string.
+     *
+     * @param digits to generate tone dialing for.
+     * @param level for mf.
+     * @param duration timing for generated audio.
+     * @param interdigit timing, should be multiple of frame.
+     */
+    MFDialer(const char *digits, level_t level, timeout_t duration = 20, timeout_t interdigit = 60);
+
+    ~MFDialer();
+
+    linear_t getFrame(void);
+};
+
+/**
+ * DTMFDetect is used for detecting DTMF tones in a stream of audio.
+ * It currently only supports 8000Hz input.
+ */
+class __EXPORT DTMFDetect : public Audio
+{
+public:
+    DTMFDetect();
+    ~DTMFDetect();
+
+    /**
+     * This routine is used to push linear audio data into the
+     * dtmf tone detection analysizer.  It may be called multiple
+     * times and results fetched later.
+     *
+     * @param buffer of audio data in native machine endian to analysize.
+     * @param count of samples to analysize from buffer.
+     */
+    int putSamples(linear_t buffer, int count);
+
+    /**
+     * Copy detected dtmf results into a data buffer.
+     *
+     * @param data buffer to copy into.
+     * @param size of data buffer to copy into.
+     */
+    int getResult(char *data, int size);
+
+protected:
+    void goertzelInit(goertzel_state_t *s, tone_detection_descriptor_t *t);
+    void goertzelUpdate(goertzel_state_t *s, sample_t x[], int samples);
+    float goertzelResult(goertzel_state_t *s);
+
+private:
+    dtmf_detect_state_t *state;
+    tone_detection_descriptor_t dtmf_detect_row[4];
+    tone_detection_descriptor_t dtmf_detect_col[4];
+    tone_detection_descriptor_t dtmf_detect_row_2nd[4];
+    tone_detection_descriptor_t dtmf_detect_col_2nd[4];
+    tone_detection_descriptor_t fax_detect;
+    tone_detection_descriptor_t fax_detect_2nd;
+};
+
+/**
 * Interface for managing server specific plugins.  This includes activation
 * of startup and shutdown methods for modules that need to manage additional
 * threads, notification of server specific events, and methods to invoke
