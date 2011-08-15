@@ -644,7 +644,7 @@ public:
      * Audio encoding rate, samples per second.
      */
     enum    Rate {
-        rateUnknown,
+        rateUnknown = 0,
         rate6khz = 6000,
         rate8khz = 8000,
         rate11khz = 11025,

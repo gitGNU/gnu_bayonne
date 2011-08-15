@@ -33,6 +33,11 @@ using namespace UCOMMON_NAMESPACE;
 #endif
 
 static const char *delfile = NULL;
+static shell::stringopt encopt('e', "--encoding", _TEXT("audio encoding"), "name", NULL);
+static shell::numericopt framing('f', "--framing", _TEXT("audio framing"), "msec", 20);
+static shell::numericopt pad('p', "--padding", _TEXT("padding frames"), "count", 0);
+static shell::numericopt rateopt('r', "--rate", _TEXT("audio rate"), "samples per second", 0);
+static shell::numericopt silent('s', "--silence", _TEXT("silence level"), "level", 0);
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
 static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language", "C");
@@ -293,67 +298,17 @@ static void chart(char **argv)
     AudioFile file;
     Audio::info_t info;
     AudioCodec *codec = NULL;
-    char *fn;
-    timeout_t framing = 20;
-    Audio::level_t silence = 0;
+    Audio::level_t silence = (Audio::level_t)*silent;
     unsigned char *buffer;
     short max, current;
     unsigned long sum;
     unsigned long count;
     char pathbuf[256];
 
-retry:
     if(!*argv) {
         shell::errexit(2, "*** audiotool: -chart: %s\n",
             _TEXT("missing arguments"));
     }
-
-    fn = *argv;
-
-    if(eq(fn, "--")) {
-        ++argv;
-        goto skip;
-    }
-
-    if(eq(fn, "--", 2))
-        ++fn;
-
-    if(eq(fn, "-framing=", 9)) {
-        framing = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-framing"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -chart: -framing: %s\n",
-                _TEXT("missing argument"));
-        }
-        framing = atoi(*(argv++));
-        goto retry;
-    }
-
-    if(eq(fn, "-silence=", 9)) {
-        silence = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-silence"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -chart: -silence: %s\n",
-                _TEXT("missing argument"));
-        }
-        silence = atoi(*(argv++));
-        goto retry;
-    }
-
-skip:
-
-    if(!framing)
-        framing = 20;
 
     while(*argv) {
         const char *out = Env::path(book, *voice, *argv, pathbuf, sizeof(pathbuf));
@@ -367,7 +322,7 @@ skip:
                 fname(*(argv++)), _TEXT("inaccessable"));
             continue;
         }
-        file.open(out, Audio::modeRead, framing);
+        file.open(out, Audio::modeRead, *framing);
         file.getInfo(info);
         if(!Audio::is_linear(info.encoding))
             codec = AudioCodec::get(info);
@@ -468,23 +423,9 @@ static void info(char **argv)
     AudioFile au;
     Audio::Info info;
     const char *fn;
-    timeout_t framing = 0;
     unsigned long end;
     unsigned long minutes, seconds, subsec, scale;
     char pathbuf[256];
-
-    fn = *argv;
-    if(eq(fn, "--", 2))
-        ++fn;
-    if(eq(fn, "-framing=", 9)) {
-        framing = atoi(fn + 9);
-        ++argv;
-    }
-    else if(eq(fn, "-framing"))
-    {
-        framing = atoi(*(++argv));
-        ++argv;
-    }
 
     while(*argv) {
         const char *out = Env::path(book, *voice, *argv, pathbuf, sizeof(pathbuf));
@@ -498,7 +439,7 @@ static void info(char **argv)
                 fname(*(argv++)), _TEXT("inaccessable"));
             continue;
         }
-        au.open(out, Audio::modeInfo, framing);
+        au.open(out, Audio::modeInfo, *framing);
         au.getInfo(info);
         au.setPosition();
         end = au.getPosition();
@@ -574,9 +515,7 @@ static void strip(char **argv)
     AudioFile file, tmp;
     Audio::info_t info;
     AudioCodec *codec = NULL;
-    char *fn;
-    timeout_t framing = 20;
-    short silence = 0;
+    short silence = *silent;
     int rtn;
     unsigned char *buffer;
     Audio::level_t max, current;
@@ -585,57 +524,10 @@ static void strip(char **argv)
     char target[256];
     char source[256];
 
-retry:
     if(!*argv) {
         shell::errexit(2, "*** audiotool: -strip: %s\n",
             _TEXT("missing arguments"));
     }
-
-    fn = *argv;
-
-    if(eq(fn, "--")) {
-        ++argv;
-        goto skip;
-    }
-
-    if(eq(fn, "--", 2))
-        ++fn;
-    if(eq(fn, "-framing=", 9)) {
-        framing = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-framing"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(2, "*** audiotool: -strip: -framing: %s\n",
-                _TEXT("missing argument"));
-        }
-        framing = atoi(*(argv++));
-        goto retry;
-    }
-
-    if(eq(fn, "-silence=", 9)) {
-        silence = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-silence"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(2, "*** audiotool: -strip: -silence: %s\n",
-                _TEXT("missing argument"));
-        }
-        silence = atoi(*(argv++));
-        goto retry;
-    }
-
-skip:
-
-    if(!framing)
-        framing = 20;
 
     while(*argv) {
         const char *out = Env::path(book, *voice, *argv, source, sizeof(source));
@@ -651,7 +543,7 @@ skip:
         }
         rewrite(out, target, sizeof(target));
         delfile = target;
-        file.open(out, Audio::modeRead, framing);
+        file.open(out, Audio::modeRead, *framing);
         file.getInfo(info);
         if(!Audio::is_linear(info.encoding))
             codec = AudioCodec::get(info);
@@ -753,12 +645,10 @@ skip:
 static void trim(char **argv)
 {
     AudioFile file, tmp;
-    unsigned long first = 0, last = 0, total = 0, padding = 0;
+    unsigned long first = 0, last = 0, total = 0, padding = *pad;
     Audio::info_t info;
     AudioCodec *codec = NULL;
-    char *fn;
-    timeout_t framing = 20;
-    Audio::level_t silence = 0;
+    Audio::level_t silence = *silent;
     int rtn;
     unsigned char *buffer;
     Audio::linear_t samples = NULL;
@@ -768,74 +658,11 @@ static void trim(char **argv)
     char source[256];
     bool use = false;
 
-retry:
     if(!*argv) {
         shell::errexit(2, "*** audiotool: -trim: %s\n",
             _TEXT("missing arguments"));
         exit(-1);
     }
-
-    fn = *argv;
-
-    if(eq(fn, "--")) {
-        ++argv;
-        goto skip;
-    }
-
-    if(eq(fn, "--", 2))
-        ++fn;
-    if(eq(fn, "-framing=", 9)) {
-        framing = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-framing"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -trim: -framing: %s\n",
-                _TEXT("missing argument"));
-        }
-        framing = atoi(*(argv++));
-        goto retry;
-    }
-
-    if(eq(fn, "-padding=", 9)) {
-        padding = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-padding"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -trim: -padding: %s\n",
-                _TEXT("missing argument"));
-        }
-        padding = atol(*(argv++));
-        goto retry;
-    }
-
-    if(eq(fn, "-silence=", 9)) {
-        silence = atoi(fn + 9);
-        ++argv;
-        goto retry;
-    }
-    else if(eq(fn, "-silence"))
-    {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -trim: -silence: %s\n",
-                _TEXT("missing argument"));
-        }
-        silence = atoi(*(argv++));
-        goto retry;
-    }
-
-skip:
-
-    if(!framing)
-        framing = 20;
 
     while(*argv) {
         const char *out = Env::path(book, *voice, *argv, source, sizeof(source));
@@ -851,7 +678,7 @@ skip:
         }
         rewrite(out, target, sizeof(target));
         delfile = target;
-        file.open(out, Audio::modeRead, framing);
+        file.open(out, Audio::modeRead, *framing);
         file.getInfo(info);
         if(!Audio::is_linear(info.encoding))
             codec = AudioCodec::get(info);
@@ -1115,59 +942,15 @@ static void build(char **argv)
     AudioStream output;
     Audio::info_t info, make;
     const char *target;
-    char *option;
-    char *encoding = NULL;
-    Audio::rate_t rate = Audio::rateUnknown;
+    const char *encoding = *encopt;
+    Audio::rate_t rate = (Audio::rate_t)(*rateopt);
     char pathbuf[256];
 
-retry:
     if(!*argv) {
         shell::errexit(2, "*** audiotool: -build: %s\n",
             _TEXT("missing arguments"));
     }
 
-    option = *argv;
-    if(eq("--", option)) {
-        ++argv;
-        goto skip;
-    }
-
-    if(eq("--", option, 2))
-        ++option;
-
-    if(eq(option, "-encoding=", 10)) {
-        encoding = option + 10;
-        ++argv;
-        goto retry;
-    }
-
-    if(eq(option, "-rate=", 6)) {
-        rate = (Audio::rate_t)atol(option + 6);
-        ++argv;
-        goto retry;
-    }
-
-    if(eq(option, "-encoding")) {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -build: -encoding: %s\n",
-                _TEXT("missing argument"));
-        }
-        encoding = *(argv++);
-        goto retry;
-    }
-
-    if(eq(option, "-rate")) {
-        ++argv;
-        if(!*argv) {
-            shell::errexit(3, "*** audiotool: -build: -rate: %s\n",
-                _TEXT("missing argument"));
-        }
-        rate = (Audio::rate_t)atol(*(argv++));
-        goto retry;
-    }
-
-skip:
     if(*argv && **argv == '-') {
         shell::errexit(2, "*** auditool: -build: %s: %s\n",
             *argv, _TEXT("unknown option"));

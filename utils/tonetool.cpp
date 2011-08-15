@@ -24,7 +24,7 @@ using namespace UCOMMON_NAMESPACE;
 static const char *delfile = NULL;
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
-static shell::stringopt configdir('c', "--config", _TEXT("config directory"), "path", NULL);
+static shell::stringopt configdir('C', "--config", _TEXT("config directory"), "path", NULL);
 static shell::stringopt encoding('e', "--encoding", _TEXT("audio format"), "type", "pcmu");
 static shell::numericopt framing('f', "--framing", _TEXT("audio framing"), "msec", 20);
 static shell::numericopt interdigit('i', "--interdigit", _TEXT("interdigit timing"), "msec", 60);
