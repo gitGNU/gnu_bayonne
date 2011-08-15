@@ -16,10 +16,14 @@ add_executable(tonetool tonetool.cpp)
 add_dependencies(tonetool bayonne-runtime ucommon)
 target_link_libraries(tonetool bayonne-runtime ${USES_UCOMMON_LIBRARIES})
 
+add_executable(audiotool audiotool.cpp)
+add_dependencies(audiotool bayonne-runtime ucommon)
+target_link_libraries(audiotool bayonne-runtime ${USES_UCOMMON_LIBRARIES})
+
 add_executable(baylint baylint.cpp)
 add_dependencies(baylint bayonne-runtime ucommon)
 target_link_libraries(baylint bayonne-runtime ${USES_UCOMMON_LIBRARIES})
 
-install(TARGETS phrasebook tonetool baylint DESTINATION ${INSTALL_BINDIR})
+install(TARGETS phrasebook tonetool baylint audiotool DESTINATION ${INSTALL_BINDIR})
 
 
