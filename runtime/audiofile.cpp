@@ -43,7 +43,7 @@ AudioFile::AudioFile(const char *name, unsigned long sample)
     AudioFile::open(name);
     if(!is_open())
         return;
-    position(sample);
+    setPosition(sample);
 }
 
 AudioFile::AudioFile(const char *name, info_t& inf, unsigned long samples)
@@ -879,4 +879,324 @@ done:
         fsys::fileinfo(name, &ino);
         iolimit = ino.st_size;
     }
+}
+
+void AudioFile::close(void)
+{
+    fsys::fileinfo_t ino;
+    unsigned char buf[58];
+
+    if(!is(fs))
+        return;
+
+    if(mode != modeWrite) {
+        fs.close();
+        clear();
+        return;
+    }
+
+    if(!seek(0)) {
+        fs.close();
+        clear();
+        return;
+    }
+
+    if(-1 == peek(buf, 58)) {
+        fs.close();
+        clear();
+        return;
+    }
+
+    switch(info.format) {
+    case riff:
+    case wave:
+        fs.fileinfo(&ino);
+        length = ino.st_size;
+
+        // RIFF header
+        setLong(buf + 4, length - 8);
+
+        // If it's a non-PCM datatype, the offsets are a bit
+        // different for subchunk 2.
+        switch(info.encoding) {
+        case cdaStereo:
+        case cdaMono:
+        case pcm8Stereo:
+        case pcm8Mono:
+        case pcm16Stereo:
+        case pcm16Mono:
+        case pcm32Stereo:
+        case pcm32Mono:
+            setLong(buf + 40, length - header);
+            break;
+        default:
+            setLong(buf + 54, length - header);
+        }
+
+        write(buf, 58);
+        break;
+    case snd:
+        fs.fileinfo(&ino);
+        length = ino.st_size;
+
+        setLong(buf + 8, length - header);
+        write(buf, 12);
+        break;
+    default:
+        break;
+    }
+    fs.close();
+    clear();
+}
+
+void AudioFile::clear(void)
+{
+    if(pathname) {
+        if(pathname)
+            delete[] pathname;
+        pathname = NULL;
+    }
+    if(info.annotation) {
+        if(info.annotation)
+            delete[] info.annotation;
+        info.annotation = NULL;
+    }
+    minimum = 0l;
+    iolimit = 0l;
+}
+
+void AudioFile::initialize(void)
+{
+    pos = 0l;
+    minimum = 0l;
+    pathname = NULL;
+    info.annotation = NULL;
+    header = 0l;
+    iolimit = 0l;
+    mode = modeInfo;
+    fs.close();
+}
+
+int AudioFile::getSamples(void *addr, unsigned request)
+{
+    const char *fname;
+    unsigned char *caddr = (unsigned char *)addr;
+    ssize_t count, bytes;
+
+    if(!request)
+        request = info.framecount;
+
+    for(;;)
+    {
+        bytes = (int)toBytes(info, request);
+        if(bytes < 1)
+            return EINVAL;
+        count = read(caddr, bytes);
+        if(count == bytes)
+            return 0;
+
+        if(count < 0)
+            return fs.err();
+
+        if(count > 0) {
+            caddr += count;
+            count = request - toSamples(info.encoding, count);
+        }
+        else
+            count = request;
+
+        if(mode == modeFeed) {
+            setPosition(0);
+            request = count;
+            continue;
+        }
+
+retry:
+        if(mode == modeReadOne)
+            fname = NULL;
+        else
+            fname = getContinuation();
+
+        if(!fname)
+            break;
+
+        AudioFile::close();
+        AudioFile::open(fname, modeRead);
+        if(!is(fs)) {
+            if(mode == modeReadAny)
+                goto retry;
+            break;
+        }
+
+        request = count;
+    }
+    if(count)
+        Audio::fill(caddr, count, info.encoding);
+    return EPIPE;
+}
+
+int AudioFile::putSamples(void *addr, unsigned samples)
+{
+    int count;
+    int bytes;
+
+    if(!samples)
+        samples = info.framecount;
+
+    bytes = (int)toBytes(info, samples);
+    if(bytes < 1)
+        return EINVAL;
+
+    count = write((unsigned char *)addr, bytes);
+    if(count == bytes) {
+        length += count;
+        return 0;
+    }
+    if(count < 1)
+        return fs.err();
+    else {
+        length += count;
+        return EPIPE;
+    }
+}
+
+ssize_t AudioFile::putBuffer(encoded_t addr, size_t len)
+{
+    ssize_t count;
+    unsigned long curpos;
+
+    if(!len)
+        len = info.framesize;
+
+    curpos = (unsigned long)toBytes(info, getPosition());
+    if(curpos >= iolimit && mode == modeFeed) {
+        curpos = 0;
+        setPosition(0);
+    }
+
+    if (iolimit && ((curpos + len) > iolimit))
+        len = iolimit - curpos;
+
+    if (len <= 0)
+        return 0;
+
+    count = write((unsigned char *)addr, (unsigned)len);
+    if(count == (ssize_t)len) {
+        length += count;
+        return count;
+    }
+    if(count < 1)
+        return count;
+    else {
+        length += count;
+        return count;
+    }
+}
+
+ssize_t AudioFile::getBuffer(encoded_t addr, size_t bytes)
+{
+    info_t prior;
+    const char *fname;
+    ssize_t count;
+    unsigned long curpos, xfer = 0;
+
+    if(!bytes)
+        bytes = info.framesize;
+
+    curpos = (unsigned long)toBytes(info, getPosition());
+    if(curpos >= iolimit && mode == modeFeed) {
+        curpos = 0;
+        setPosition(0);
+    }
+    if (iolimit && ((curpos + bytes) > iolimit))
+        bytes = iolimit - curpos;
+    if (bytes < 0)
+        bytes = 0;
+
+    getInfo(prior);
+
+    for(;;)
+    {
+        count = read(addr, (unsigned)bytes);
+        if(count < 0) {
+            if(!xfer)
+                return count;
+            return xfer;
+        }
+        xfer += count;
+        if(count == (ssize_t)bytes)
+            return xfer;
+        if(mode == modeFeed) {
+            setPosition(0l);
+            goto cont;
+        }
+
+retry:
+        if(mode == modeReadOne)
+            fname = NULL;
+        else
+            fname = getContinuation();
+
+        if(!fname)
+            return xfer;
+        AudioFile::close();
+        AudioFile::open(fname, modeRead, info.framing);
+        if(!is(fs)) {
+            if(mode == modeReadAny)
+                goto retry;
+            return xfer;
+        }
+
+        if(prior.encoding != info.encoding) {
+            AudioFile::close();
+            return xfer;
+        }
+cont:
+        bytes -= count;
+        addr += count;
+    }
+}
+
+
+int AudioFile::setPosition(unsigned long samples)
+{
+    size_t offset;
+    fsys::fileinfo_t ino;
+
+    if(!is(fs))
+        return EBADF;
+
+    fs.fileinfo(&ino);
+
+    if(samples == (unsigned long)~0l)
+        return seek(ino.st_size);
+
+    offset = header + toBytes(info, samples);
+    if(offset > (size_t)ino.st_size)
+        offset = ino.st_size;
+
+    return seek(offset);
+}
+
+unsigned long AudioFile::getPosition(void)
+{
+    if(!is(fs) || !pos)
+        return 0;
+
+    return toSamples(info, (pos - header));
+}
+
+int AudioFile::setMinimum(unsigned long samples)
+{
+    if(!is(fs))
+        return EBADF;
+    minimum = samples;
+    return 0;
+}
+
+
+
+const char *AudioFile::getContinuation(void)
+{
+    return NULL;
 }

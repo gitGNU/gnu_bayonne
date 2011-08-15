@@ -1765,7 +1765,7 @@ protected:
     ssize_t peek(void *buf, size_t len);
     bool seek(size_t pos);
 
-    virtual char *getContinuation();
+    virtual const char *getContinuation();
 
     /**
      * Convert binary 2 byte data stored in the order specified
@@ -2000,7 +2000,7 @@ public:
      * @return 0 if successful, else error number.
      * @param samples position to seek in file.
      */
-    int position(unsigned long samples = ~0l);
+    int setPosition(unsigned long samples = ~0l);
 
     /**
      * Seek a file position by timestamp.  The actual position
@@ -2009,7 +2009,7 @@ public:
      * @return 0 if successful, else errno.
      * @param timestamp position to seek.
      */
-    int setPosition(const char *timestamp);
+    int position(const char *timestamp);
 
     /**
      * Return the timestamp of the current absolute file position.
@@ -2031,9 +2031,10 @@ public:
      * Copy the source description of the audio file into the
      * specified object.  Can set error state of object if fails.
      *
-     * @param info pointer to object to copy source description into.
+     * @param output object to copy source description into.
      */
-    void getInfo(info_t& info);
+    inline void getInfo(info_t& output) const
+        {output = info;};
 
     /**
      * Set minimum file size for a created file.  If the file
@@ -2068,7 +2069,7 @@ public:
      * start of the sample buffer.  Returns 0 if the file is not
      * open, is empty, or an error has occured.
      */
-    inline size_t getPosition(void);
+    unsigned long getPosition(void);
 
     inline bool operator!() const
         {return !fs;};

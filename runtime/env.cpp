@@ -243,6 +243,12 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
     if(writeflag)
         return NULL;
 
+    // can optionally force path through voice library setting
+    if(strchr(voice, '/')) {
+        snprintf(buffer, size, "%s/%s%s", voice, path, ext);
+        return buffer;
+    }
+
     if(book) {
         snprintf(buffer, size, "%s%s%s/%s%s",
             env("voices"), book->path(), voice, path, ext);
