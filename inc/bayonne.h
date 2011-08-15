@@ -731,7 +731,6 @@ public:
         raw,
         snd,
         riff,
-        mpeg,
         wave
     };
     typedef enum Format format_t;
@@ -1736,6 +1735,390 @@ public:
         {return info;};
 };
 
+/**
+ * A class used to manipulate audio data.  This class provides file
+ * level access to audio data stored in different formats.  This class
+ * also provides the ability to write audio data into a disk file.
+ *
+ * @author David Sugar <dyfet@ostel.com>
+ * @short audio file access.
+ */
+class __EXPORT AudioFile: public Audio
+{
+protected:
+    char *pathname;
+    size_t header;              // offset to start of audio
+    size_t minimum;             // minimum sample size required
+    size_t length;              // current size of file, including header
+    size_t iolimit;
+    size_t pos;                 // saved position mark...
+    info_t info;
+    mode_t mode;
+    fsys_t fs;
+
+    void initialize(void);
+    void getWaveFormat(int size);
+    AudioCodec *getCodec(void);
+
+    ssize_t read(void *buf, size_t len);
+    ssize_t write(void *buf, size_t len);
+    ssize_t peek(void *buf, size_t len);
+    bool seek(size_t pos);
+
+    virtual char *getContinuation();
+
+    /**
+     * Convert binary 2 byte data stored in the order specified
+     * in the source description into a short variable.  This is
+     * often used to manipulate header data.  The info type of the
+     * object is used to determine the endian format.
+     *
+     * @return short value.
+     * @param data binary 2 byte data pointer.
+     */
+    unsigned short getShort(unsigned char *data) const;
+
+    /**
+     * Save a short as two byte binary data stored in the endian
+     * order specified in the source description.  This is often
+     * used to manipulate header data.
+     *
+     * @param data binary 2 byte data pointer.
+     * @param value to convert.
+     */
+    void setShort(unsigned char *data, unsigned short value);
+
+    /**
+     * Convert binary 4 byte data stored in the order specified
+     * in the source description into a long variable.  This is
+     * often used to manipulate header data.  The object's info
+     * order is used to determine the endian.
+     *
+     * @return long value.
+     * @param data binary 4 byte data pointer.
+     */
+    unsigned long getLong(unsigned char *data) const;
+
+    /**
+     * Save a long as four byte binary data stored in the endian
+     * order specified in the source description.  This is often
+     * used to manipulate header data.
+     *
+     * @param data binary 4 byte data pointer.
+     * @param value to convert.
+     */
+    void setLong(unsigned char *data, unsigned long value);
+
+public:
+    /**
+     * Construct and open an existing audio file for read/write.
+     *
+     * @param name of file to open.
+     * @param offset to start access.
+     */
+    AudioFile(const char *name, unsigned long offset = 0);
+
+    /**
+     * Create and open a new audio file for writing.
+     *
+     * @param name of file to create.
+     * @param info source description for new file.
+     * @param minimum file size to accept at close.
+     */
+    AudioFile(const char *name, info_t& info, unsigned long minimum = 0);
+
+    /**
+     * Construct an audio file without attaching to the filesystem.
+     */
+    AudioFile();
+
+    virtual ~AudioFile();
+
+    /**
+     * Open an audio file and associate it with this object.
+     * Called implicitly by the two-argument version of the
+     * constructor.
+     *
+     * @param name of the file to open.  Don't forget to
+     * double your backslashes for DOS-style pathnames.
+     * @param mode to open file under.
+     * @param framing time in milliseconds.
+     */
+    void open(const char *name, mode_t mode = modeWrite, timeout_t framing = 0);
+
+    /**
+     * Create a new audio file and associate it with this object.
+     * Called implicitly by the three-argument version of the
+     * constructor.
+     *
+     * @param name The name of the file to open.
+     * @param info The type of the audio file to be created.
+     * @param framing time in milliseconds.
+     */
+    void create(const char *name, info_t& info, timeout_t framing = 0);
+
+    /**
+     * Returns age since last prior access.  Used for cache
+     * computations.
+     *
+     * @return age in seconds.
+     */
+    time_t age(void);
+
+    /**
+     * Get maximum size of frame buffer for data use.
+     *
+     * @return max frame size in bytes.
+     */
+    inline size_t getSize(void)
+        {return maxFramesize(info);};
+
+    /**
+     * Close an object associated with an open file.  This
+     * updates the header metadata with the file length if the
+     * file length has changed.
+     */
+    void close(void);
+
+    /**
+     * Clear the AudioFile structure.  Called by
+     * AudioFile::close().  Sets all fields to zero and deletes
+     * the dynamically allocated memory pointed to by the pathname
+     * and info.annotation members.  See AudioFile::initialize()
+     * for the dynamic allocation code.
+     */
+    void clear(void);
+
+    inline int err(void)
+        {return fs.err();};
+
+    /**
+     * Retrieve bytes from the file into a memory buffer.  This
+     * increments the file pointer so subsequent calls read further
+     * bytes.  If you want to read a number of samples rather than
+     * bytes, use getSamples().
+     *
+     * @param buffer area to copy the samples to.
+     * @param len The number of bytes (not samples) to copy or 0 for frame.
+     * @return The number of bytes (not samples) read.  Returns -1
+     * if no bytes are read and an error occurs.
+     */
+    ssize_t getBuffer(encoded_t buffer, size_t len = 0);
+
+    /**
+     * Retrieve and convert content to linear encoded audio data
+     * from it's original form.
+     *
+     * @param buffer to copy linear data into.
+     * @param request number of linear samples to extract or 0 for frame.
+     * @return number of samples retrieved, 0 if no codec or eof.
+     */
+    unsigned getLinear(linear_t buffer, unsigned request = 0);
+
+    /**
+     * Get raw data and assure is in native machine endian.
+     *
+     * @return data received in buffer.
+     * @param data to get.
+     * @param size of data to get.
+     */
+    ssize_t getNative(encoded_t data, size_t size);
+
+    /**
+     * Insert bytes into the file from a memory buffer.  This
+     * increments the file pointer so subsequent calls append
+     * further samples.  If you want to write a number of samples
+     * rather than bytes, use putSamples().
+     *
+     * @param buffer area to append the samples from.
+     * @param len The number of bytes (not samples) to append.
+     * @return The number of bytes (not samples) read.  Returns -1
+     * if an error occurs and no bytes are written.
+     */
+    ssize_t putBuffer(encoded_t buffer, size_t len = 0);
+
+    /**
+     * Puts raw data and does native to refined endian swapping
+     * if needed based on encoding type and local machine endian.
+     *
+     * @param data to put.
+     * @param size of data to put.
+     * @return number of bytes actually put.
+     */
+    ssize_t putNative(encoded_t data, size_t size);
+
+    /**
+     * Convert and store content from linear encoded audio data
+     * to the format of the audio file.
+     *
+     * @param buffer to copy linear data from.
+     * @param request Number of linear samples to save or 0 for frame.
+     * @return number of samples saved, 0 if no codec or eof.
+     */
+    unsigned putLinear(linear_t buffer, unsigned request = 0);
+
+    /**
+     * Retrieve samples from the file into a memory buffer.  This
+     * increments the file pointer so subsequent calls read
+     * further samples.  If a limit has been set using setLimit(),
+     * the number of samples read will be truncated to the limit
+     * position.  If you want to read a certain number of bytes
+     * rather than a certain number of samples, use getBuffer().
+     *
+     * @param buffer pointer to copy the samples to.
+     * @param samples The number of samples to read or 0 for frame.
+     * @return 0 if successful, or errno if not.
+     */
+    int getSamples(void *buffer, unsigned samples = 0);
+
+    /**
+     * Insert samples into the file from a memory buffer.  This
+     * increments the file pointer so subsequent calls append
+     * further samples.  If you want to write a certain number of
+     * bytes rather than a certain number of samples, use
+     * putBuffer().
+     *
+     * @param buffer pointer to append the samples from.
+     * @param samples The number of samples (not bytes) to append.
+     * @return 0 if successful, or errno if not.
+     */
+    int putSamples(void *buffer, unsigned samples = 0);
+
+    /**
+     * Change the file position by skipping a specified number
+     * of audio samples of audio data.
+     *
+     * @return 0 if successful, else errno.
+     * @param number of samples to skip.
+     */
+    int skip(long number);
+
+    /**
+     * Seek a file position by sample count.  If no position
+     * specified, then seeks to end of file.
+     *
+     * @return 0 if successful, else error number.
+     * @param samples position to seek in file.
+     */
+    int position(unsigned long samples = ~0l);
+
+    /**
+     * Seek a file position by timestamp.  The actual position
+     * will be rounded by framing.
+     *
+     * @return 0 if successful, else errno.
+     * @param timestamp position to seek.
+     */
+    int setPosition(const char *timestamp);
+
+    /**
+     * Return the timestamp of the current absolute file position.
+     *
+     * @param timestamp to save ascii position into.
+     * @param size of timestamp buffer.
+     */
+    void getPosition(char *timestamp, size_t size);
+
+    /**
+     * Set the maximum file position for reading and writing of
+     * audio data by samples.  If 0, then no limit is set.
+     *
+     * @param maximum file i/o access size sample position.
+     */
+    void setLimit(unsigned long maximum = 0l);
+
+    /**
+     * Copy the source description of the audio file into the
+     * specified object.  Can set error state of object if fails.
+     *
+     * @param info pointer to object to copy source description into.
+     */
+    void getInfo(info_t& info);
+
+    /**
+     * Set minimum file size for a created file.  If the file
+     * is closed with fewer samples than this, it will also be
+     * deleted.
+     *
+     * @param minimum number of samples for new file.
+     * @return 0 if successful, else errno.
+     */
+    int setMinimum(unsigned long minimum);
+
+    /**
+     * Get the current file pointer in bytes relative to the start
+     * of the file.  See getPosition() to determine the position
+     * relative to the start of the sample buffer.
+     *
+     * @return The current file pointer in bytes relative to the
+     * start of the file.  Returns 0 if the file is not open, is
+     * empty, or an error has occured.
+     */
+    inline size_t getAbsolutePosition(void)
+        {return pos;}
+
+    /**
+     * Get the current file pointer in samples relative to the
+     * start of the sample buffer.  Note that you must multiply
+     * this result by the result of a call to
+     * toBytes(info.encoding, 1) in order to determine the offset
+     * in bytes.
+     *
+     * @return the current file pointer in samples relative to the
+     * start of the sample buffer.  Returns 0 if the file is not
+     * open, is empty, or an error has occured.
+     */
+    inline size_t getPosition(void);
+
+    inline bool operator!() const
+        {return !fs;};
+
+    inline operator bool() const
+        {return is(fs);};
+
+    inline bool is_open(void) const
+        {return is(fs);};
+
+    /**
+     * Return audio encoding format for this audio file.
+     *
+     * @return audio encoding format.
+     */
+    inline encoding_t getEncoding(void) const
+        {return info.encoding;};
+
+    /**
+     * Return base file format of containing audio file.
+     *
+     * @return audio file container format.
+     */
+    inline format_t getFormat(void) const
+        {return info.format;};
+
+    /**
+     * Get audio encoding sample rate, in samples per second, for
+     * this audio file.
+     *
+     * @return sample rate.
+     */
+    inline unsigned getSampleRate(void) const
+        {return info.rate;};
+
+    /**
+     * Get annotation extracted from header of containing file.
+     *
+     * @return annotation text if any, else NULL.
+     */
+    inline char *getAnnotation(void) const
+        {return info.annotation;};
+
+    /**
+     * Return if the current content is signed or unsigned samples.
+     *
+     * @return true if signed.
+     */
+    bool is_signed(void) const;
+};
 /**
 * Interface for managing server specific plugins.  This includes activation
 * of startup and shutdown methods for modules that need to manage additional
