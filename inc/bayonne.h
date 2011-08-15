@@ -1749,9 +1749,8 @@ protected:
     char *pathname;
     size_t header;              // offset to start of audio
     size_t minimum;             // minimum sample size required
-    size_t length;              // current size of file, including header
     size_t iolimit;
-    size_t pos;                 // saved position mark...
+    size_t pos, eof;            // saved position mark...
     info_t info;
     mode_t mode;
     fsys_t fs;

@@ -60,7 +60,6 @@ AudioFile::AudioFile(const char *name, info_t& inf, unsigned long samples)
 AudioFile::AudioFile()
 {
     pathname = NULL;
-    pos = 0l;
     initialize();
 }
 
@@ -75,6 +74,8 @@ ssize_t AudioFile::read(void *buffer, size_t request)
     ssize_t result = fs.read(buffer, request);
     if(result > 0)
         pos += result;
+    if(pos > eof)
+        eof = pos;
     return result;
 }
 
@@ -83,6 +84,8 @@ ssize_t AudioFile::write(void *buffer, size_t request)
     ssize_t result = fs.write(buffer, request);
     if(result > 0)
         pos += result;
+    if(pos > eof)
+        eof = pos;
     return result;
 }
 
@@ -535,7 +538,6 @@ void AudioFile::create(const char *name, info_t& myinfo, timeout_t framing)
         }
 
         header = getAbsolutePosition();
-        length = getAbsolutePosition();
         break;
 
     case snd:
@@ -604,7 +606,6 @@ void AudioFile::create(const char *name, info_t& myinfo, timeout_t framing)
         if(info.annotation)
             write((unsigned char *)info.annotation, (unsigned long)strlen(info.annotation) + 1);
         header = getAbsolutePosition();
-        length = getAbsolutePosition();
         break;
     case raw:
         break;
@@ -706,6 +707,7 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
     mode = m;
     pos = 0;
     fsys::access_t fm;
+    fsys::fileinfo_t ino;
 
     switch(mode) {
     case modeWrite:
@@ -722,6 +724,9 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
         fs.open(name, fm);
         if(is(fs))
             break;
+
+        fsys::fileinfo(name, &ino);
+        eof = ino.st_size;
 
         if(mode == modeReadAny || mode == modeReadOne)
             name = getContinuation();
@@ -773,8 +778,6 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
         info.format = riff;
     }
 
-
-
     if(!strncmp((char *)filehdr + 8, "WAVE", 4) && info.format == riff) {
         header = 12;
         for(;;)
@@ -800,6 +803,7 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
         seek(header);
         goto done;
     }
+
     if(!strncmp((char *)filehdr, ".snd", 4)) {
         info.format = snd;
         info.order = __BIG_ENDIAN;
@@ -883,7 +887,6 @@ done:
 
 void AudioFile::close(void)
 {
-    fsys::fileinfo_t ino;
     unsigned char buf[58];
 
     if(!is(fs))
@@ -910,11 +913,8 @@ void AudioFile::close(void)
     switch(info.format) {
     case riff:
     case wave:
-        fs.fileinfo(&ino);
-        length = ino.st_size;
-
         // RIFF header
-        setLong(buf + 4, length - 8);
+        setLong(buf + 4, eof - 8);
 
         // If it's a non-PCM datatype, the offsets are a bit
         // different for subchunk 2.
@@ -927,19 +927,16 @@ void AudioFile::close(void)
         case pcm16Mono:
         case pcm32Stereo:
         case pcm32Mono:
-            setLong(buf + 40, length - header);
+            setLong(buf + 40, eof - header);
             break;
         default:
-            setLong(buf + 54, length - header);
+            setLong(buf + 54, eof - header);
         }
 
         write(buf, 58);
         break;
     case snd:
-        fs.fileinfo(&ino);
-        length = ino.st_size;
-
-        setLong(buf + 8, length - header);
+        setLong(buf + 8, eof - header);
         write(buf, 12);
         break;
     default:
@@ -963,11 +960,12 @@ void AudioFile::clear(void)
     }
     minimum = 0l;
     iolimit = 0l;
+    pos = eof = 0l;
 }
 
 void AudioFile::initialize(void)
 {
-    pos = 0l;
+    pos = eof = 0l;
     minimum = 0l;
     pathname = NULL;
     info.annotation = NULL;
@@ -1048,16 +1046,12 @@ int AudioFile::putSamples(void *addr, unsigned samples)
         return EINVAL;
 
     count = write((unsigned char *)addr, bytes);
-    if(count == bytes) {
-        length += count;
+    if(count == bytes)
         return 0;
-    }
-    if(count < 1)
+    else if(count < 1)
         return fs.err();
-    else {
-        length += count;
+    else
         return EPIPE;
-    }
 }
 
 ssize_t AudioFile::putBuffer(encoded_t addr, size_t len)
@@ -1081,16 +1075,12 @@ ssize_t AudioFile::putBuffer(encoded_t addr, size_t len)
         return 0;
 
     count = write((unsigned char *)addr, (unsigned)len);
-    if(count == (ssize_t)len) {
-        length += count;
+    if(count == (ssize_t)len)
         return count;
-    }
     if(count < 1)
         return count;
-    else {
-        length += count;
+    else
         return count;
-    }
 }
 
 ssize_t AudioFile::getBuffer(encoded_t addr, size_t bytes)
