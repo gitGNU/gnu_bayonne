@@ -31,6 +31,12 @@ static shell::numericopt interdigit('i', "--interdigit", _TEXT("interdigit timin
 static shell::numericopt level('l', "--level", _TEXT("audio level"), "level", 30000);
 static shell::numericopt maxtime('m', "--max", _TEXT("max time"), "msec", 60000);
 static shell::numericopt offset('s', "--offset", _TEXT("offset into stream"), "msec", 0);
+static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language", "C");
+static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
+static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
+static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
+static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
+static Phrasebook *ruleset;
 
 static Tonegen *getTone(char **argv, Audio::level_t l, timeout_t framing, timeout_t interdigit)
 {
@@ -61,18 +67,18 @@ static const char *fname(const char *cp)
     return cp;
 }
 
-/*
 void writeTones(char **argv, bool append)
 {
     Tonegen *tone;
     AudioStream output;
-    Audio::Info info, make;
+    Audio::info_t info, make;
     const char *target;
     unsigned maxframes;
-    Audio::Linear buffer;
+    Audio::linear_t buffer;
     char *filename = (char *)"tones.conf";
+    char pathbuf[256];
 
-    TelTone::load(filename);
+    Tonegen::load(filename);
 
     if(*argv)
         target = *(argv++);
@@ -85,11 +91,17 @@ void writeTones(char **argv, bool append)
     if(!append)
         make.encoding = Audio::getEncoding(*encoding);
 
+    if(!Env::path(ruleset, *voice, target, pathbuf, sizeof(pathbuf), true))
+        shell::errexit(3, "*** tonetool: %s: %s\n",
+            target, _TEXT("invalid destination"));
+    else
+        target = pathbuf;
+
     make.rate = Audio::rate8khz;
 
     if(!append) {
         remove(target);
-        output.create(target, &make, false, *framing);
+        output.create(target, make, *framing);
     }
     else {
         output.open(target, Audio::modeWrite, *framing);
@@ -109,9 +121,9 @@ void writeTones(char **argv, bool append)
             fname(target), _TEXT("unable to load codec"));
     }
 
-    output.getInfo(&info);
+    output.getInfo(info);
 
-    tone = getTone(argv, ((Audio::Level)*level), info.framing, *interdigit);
+    tone = getTone(argv, ((Audio::level_t)*level), info.framing, *interdigit);
 
     if(!tone) {
         shell::errexit(5, "*** tonetool: %s\n",
@@ -139,7 +151,6 @@ void writeTones(char **argv, bool append)
     output.close();
     exit(0);
 }
-*/
 
 void listTones(char **argv)
 {
@@ -232,7 +243,6 @@ skip:
     exit(0);
 }
 
-/*
 void toneDetect(char **argv)
 {
     DTMFDetect *dtmf;
@@ -241,9 +251,16 @@ void toneDetect(char **argv)
     const char *target;
     Audio::linear_t buffer;
     char result[128];
+    char pathbuf[256];
 
     while(*argv) {
         target = *(argv++);
+
+        if(!Env::path(ruleset, *voice, target, pathbuf, sizeof(pathbuf)))
+            shell::errexit(3, "*** tonetool: %s: %s\n",
+                target, _TEXT("invalid destination"));
+        else
+            target = pathbuf;
 
         input.open(target, Audio::modeRead, *framing);
 
@@ -257,10 +274,10 @@ void toneDetect(char **argv)
                 fname(target), _TEXT("unable to load codec"));
         }
 
-        input.getInfo(&info);
+        input.getInfo(info);
         dtmf = new DTMFDetect;
 
-        buffer = new Audio::Sample[input.getCount()];
+        buffer = new Audio::sample_t[input.getCount()];
         for(;;)
         {
             if(!input.getMono(buffer, 1))
@@ -278,7 +295,6 @@ void toneDetect(char **argv)
     }
     exit(0);
 }
-*/
 
 static void stop(void)
 {
@@ -295,8 +311,22 @@ PROGRAM_MAIN(argc, argv)
 
     Env::tool(&args);
 
+    if(is(prefix))
+        Env::set("prefix", *prefix);
+
+    if(is(phrasebook))
+        Env::set("voices", *phrasebook);
+
+    if(is(suffix))
+        Env::set("extension", *suffix);
+
     if(is(configdir))
         Env::set("config", *configdir);
+
+    if(is(lang))
+        ruleset = Phrasebook::find(*lang);
+    else
+        ruleset = Phrasebook::find(NULL);
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: tonetool [options] command [arguments...]"));
@@ -320,12 +350,12 @@ PROGRAM_MAIN(argc, argv)
 
     if(eq(cp, "list"))
         listTones(argv);
-//  else if(eq(cp, "detect"))
-//      toneDetect(argv);
-//  else if(eq(cp, "create"))
-//      writeTones(argv, false);
-//  else if(eq(cp, "append"))
-//      writeTones(argv, true);
+    else if(eq(cp, "detect"))
+        toneDetect(argv);
+    else if(eq(cp, "create"))
+        writeTones(argv, false);
+    else if(eq(cp, "append"))
+        writeTones(argv, true);
 
     shell::errexit(1, "*** tonetool: %s: %s\n",
         cp, _TEXT("unknown option"));

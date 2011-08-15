@@ -1740,7 +1740,7 @@ public:
  * level access to audio data stored in different formats.  This class
  * also provides the ability to write audio data into a disk file.
  *
- * @author David Sugar <dyfet@ostel.com>
+ * @author David Sugar <dyfet@gnutelephony.org>
  * @short audio file access.
  */
 class __EXPORT AudioFile: public Audio
@@ -2119,6 +2119,230 @@ public:
      */
     bool is_signed(void) const;
 };
+
+/**
+ * AudioStream accesses AudioFile base class content as fixed frames
+ * of streaming linear samples.  If a codec must be assigned to perform
+ * conversion to/from linear data, AudioStream will handle conversion
+ * automatically.  AudioStream will also convert between mono and stereo
+ * audio content.  AudioStream uses linear samples in the native
+ * machine endian format and perform endian byte swapping as needed.
+ *
+ * @author David Sugar <dyfet@gnutelephony.org>
+ * @short Audio Streaming with Linear Conversion
+ */
+class __EXPORT AudioStream : public AudioFile
+{
+protected:
+    AudioCodec *codec;  // if needed
+    encoded_t framebuf;
+    bool streamable;
+    linear_t bufferFrame;
+    unsigned bufferPosition;
+    unsigned bufferChannels;
+    linear_t encBuffer, decBuffer;
+    unsigned encSize, decSize;
+
+    unsigned bufAudio(linear_t samples, unsigned count, unsigned size);
+
+public:
+    /**
+     * Create a new audiostream object.
+     */
+    AudioStream();
+
+    /**
+     * Create an audio stream object and open an existing audio file.
+     *
+     * @param name of file to open.
+     * @param mode of file access.
+     * @param framing time in milliseconds.
+     */
+    AudioStream(const char *name, mode_t mode = modeRead, timeout_t framing = 0);
+
+    /**
+     * Create an audio stream object and a new audio file.
+     *
+     * @param name of file to open.
+     * @param info source description for properties of new file.
+     * @param exclusive access if true.
+     * @param framing time in milliseconds.
+     */
+    AudioStream(const char *name, info_t& info, timeout_t framing = 0);
+
+    virtual ~AudioStream();
+
+    /**
+     * Virtual for packet i/o intercept.
+     *
+     * @return bytes read.
+     * @param data encoding buffer.
+     * @param count requested.
+     */
+    ssize_t getBuffer(encoded_t data, size_t count);
+
+    /**
+     * Open existing audio file for streaming.
+     *
+     * @param name of file to open.
+     * @param mode to use file.
+     * @param framing timer in milliseconds.
+     */
+    void open(const char *name, mode_t mode = modeRead, timeout_t framing = 0);
+
+    /**
+     * Create a new audio file for streaming.
+     *
+     * @param name of file to create.
+     * @param info source description for file properties.
+     * @param exclusive true for exclusive access.
+     * @param framing timing in milliseconds.
+     */
+    void create(const char *name, info_t& info, timeout_t framing = 0);
+
+    /**
+     * Close the currently open audio file for streaming.
+     */
+    void close(void);
+
+    /**
+     * flush any unsaved buffered data to disk.
+     */
+    void flush(void);
+
+    /**
+     * Check if the audio file may be streamed.  Files can be
+     * streamed if a codec is available or if they are linear.
+     *
+     * @return true if streamable.
+     */
+    bool is_streamable(void);
+
+    /**
+     * Get the number of samples expected in a frame.
+     */
+    unsigned getCount(void);    // frame count
+
+    /**
+     * Stream audio data from the file and convert into an alternate
+     * encoding based on the codec supplied.
+     *
+     * @param codec to apply before saving.
+     * @param address of data to save.
+     * @param frames to stream by the codec.
+     * @return number of frames processed.
+     */
+    unsigned getEncoded(AudioCodec *codec, encoded_t address, unsigned frames = 1);
+
+    /**
+     * Stream audio data in an alternate codec into the currently
+     * opened file.
+     *
+     * @param codec to convert incoming data from.
+     * @param address of data to convert and stream.
+     * @param frames of audio to stream.
+     * @return number of frames processed.
+     */
+    unsigned putEncoded(AudioCodec *codec, encoded_t address, unsigned frames = 1);
+
+    /**
+     * Get data from the streamed file in it's native encoding.
+     *
+     * @param address to save encoded audio.
+     * @param frames of audio to load.
+     * @return number of frames read.
+     */
+    unsigned getEncoded(encoded_t address, unsigned frames = 1);
+
+    /**
+     * Put data encoded in the native format of the stream file.
+     *
+     * @param address to load encoded audio.
+     * @param frames of audio to save.
+     * @return number of frames written.
+     */
+    unsigned putEncoded(encoded_t address, unsigned frames = 1);
+
+    /**
+     * Get a packet of data from the file.  This uses the codec
+     * to determine what a true packet boundry is.
+     *
+     * @param buffer to save encoded data.
+     * @return number of bytes read as packet.
+     */
+    ssize_t getPacket(encoded_t data);
+
+    /**
+     * Get and automatically convert audio file data into
+     * mono linear audio samples.
+     *
+     * @param buffer to save linear audio into.
+     * @param frames of audio to read.
+     * @return number of frames read from file.
+     */
+    unsigned getMono(linear_t buffer, unsigned frames = 1);
+
+    /**
+     * Get and automatically convert audio file data into
+     * stereo (two channel) linear audio samples.
+     *
+     * @param buffer to save linear audio into.
+     * @param frames of audio to read.
+     * @return number of frames read from file.
+     */
+    unsigned getStereo(linear_t buffer, unsigned frames = 1);
+
+    /**
+     * Automatically convert and put mono linear audio data into
+     * the audio file.  Convert to stereo as needed by file format.
+     *
+     * @param buffer to save linear audio from.
+     * @param frames of audio to write.
+     * @return number of frames written to file.
+     */
+    unsigned putMono(linear_t buffer, unsigned frames = 1);
+
+    /**
+     * Automatically convert and put stereo linear audio data into
+     * the audio file.  Convert to mono as needed by file format.
+     *
+     * @param buffer to save linear audio from.
+     * @param frames of audio to write.
+     * @return number of frames written to file.
+     */
+    unsigned putStereo(linear_t buffer, unsigned frames = 1);
+
+    /**
+     * Automatically convert and put arbitrary linear mono data
+     * into the audio file.  Convert to stereo and buffer incomplete
+     * frames as needed by the streaming file.
+     *
+     * @param buffer to save linear audio from.
+     * @param count of linear audio to write.
+     * @return number of linear audio samples written to file.
+     */
+    unsigned bufMono(linear_t buffer, unsigned count);
+
+    /**
+     * Automatically convert and put arbitrary linear stereo data
+     * into the audio file.  Convert to mono and buffer incomplete
+     * frames as needed by the streaming file.
+     *
+     * @param buffer to save linear audio from.
+     * @param count of linear audio to write.
+     * @return number of linear audio samples written to file.
+     */
+    unsigned bufStereo(linear_t buffer, unsigned count);
+
+    /**
+     * Return the codec being used if there is one.
+     *
+     * @return codec used.
+     */
+    inline AudioCodec *getCodec(void)
+        {return codec;};
+};
+
 /**
 * Interface for managing server specific plugins.  This includes activation
 * of startup and shutdown methods for modules that need to manage additional

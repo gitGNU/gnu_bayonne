@@ -24,11 +24,11 @@ using namespace UCOMMON_NAMESPACE;
 
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
-static shell::stringopt lang('l', "--lang", _TEXT("specify language"), "language", "C");
+static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language", "C");
 static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
-static shell::stringopt phrasebook('v', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
+static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
 static Phrasebook *ruleset;
 static bool showpath = false;
 
