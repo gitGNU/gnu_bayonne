@@ -128,10 +128,6 @@ void Env::init(shell_t *args)
         set("prefix", prefix);
         set("shell", pwd->pw_shell);
     }
-
-#else
-    if(argv[1])
-        daemon_flag = false;
 #endif
 
     set("voice", "default");
