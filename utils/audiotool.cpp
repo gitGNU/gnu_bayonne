@@ -515,7 +515,7 @@ static void strip(char **argv)
     AudioFile file, tmp;
     Audio::info_t info;
     AudioCodec *codec = NULL;
-    short silence = *silent;
+    short silence = (short)(*silent);
     int rtn;
     unsigned char *buffer;
     Audio::level_t max, current;
@@ -648,7 +648,7 @@ static void trim(char **argv)
     unsigned long first = 0, last = 0, total = 0, padding = *pad;
     Audio::info_t info;
     AudioCodec *codec = NULL;
-    Audio::level_t silence = *silent;
+    Audio::level_t silence = (Audio::level_t)(*silent);
     int rtn;
     unsigned char *buffer;
     Audio::linear_t samples = NULL;
