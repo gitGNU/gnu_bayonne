@@ -22,6 +22,9 @@
 #cmakedefine HAVE_SYS_RESOURCE_H 1
 #cmakedefine HAVE_PWD_H 1
 #cmakedefine HAVE_ENDIAN_H 1
+#cmakedefine HAVE_SPEEX_SPEEX_H 1
+#cmakedefine HAVE_GSM_H 1
+#cmakedefine HAVE_GSM_GSM_H 1
 #cmakedefine HAVE_MATH_H 1
 #cmakedefine HAVE_STDINT_H 1
 #cmakedefine HAVE_SETRLIMIT 1

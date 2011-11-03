@@ -141,6 +141,27 @@ if test "$UCOMMON_MODEL" = "CC" ; then
 AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
+AC_CHECK_HEADER(gsm/gsm.h, [
+    ac_gsm_codec=true
+    AC_DEFINE(HAVE_GSM_GSM_H, [1], [gsm header found])
+    EXPORT_LIBS="$EXPORT_LIBS -lgsm"
+],[
+    AC_CHECK_HEADER(gsm.h, [
+        EXPORT_LIBS="$EXPORT_LIBS -lgsm"
+        AC_DEFINE(HAVE_GSM_H, [1], [gsm default header])
+    ])
+])
+
+AC_ARG_ENABLE(speex, [ --disable-speex          disable speex support])
+if test "$enable_speex" != "no" ; then
+    AC_CHECK_HEADER(speex/speex.h, [
+        AC_CHECK_LIB(speex, speex_encode_int, [
+            AC_DEFINE(HAVE_SPEEX_SPEEX_H, [1], [speex codec support])
+            EXPORT_LIBS="$EXPORT_LIBS -lspeex"
+        ])
+    ])
+fi
+
 AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
 
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
