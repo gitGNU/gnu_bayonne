@@ -14,7 +14,7 @@ PROJECT(bayonne)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckFunctionExists)
 
-set (VERSION 2.99+api1)
+set (VERSION 2.99+apionly1)
 
 # when we override default install prefix, assume full path is used...
 
