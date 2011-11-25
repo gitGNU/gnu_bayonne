@@ -172,7 +172,7 @@ if(MATH_LIB)
     set(EXPORT_LIBS ${EXPORT_LIBS} m)
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT MINGW AND NOT MSYS AND NOT CYGWIN)
     if(HAVE_SPEEX_SPEEX_H)
         set(EXPORT_LIBS ${EXPORT_LIBS} libspeex)
     endif()
