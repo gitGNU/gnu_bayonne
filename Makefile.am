@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex
+EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex *.pc *.pc.in
 SUBDIRS = inc runtime utils test
 DIST_SUBDIRS = inc runtime utils test
 
