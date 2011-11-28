@@ -1,9 +1,11 @@
-.TH tonetool "1" "Febuary 2005" "GNU ccAudio Tone Tool" OST
+.TH tonetool "1" "Febuary 2005" "GNU Bayonne Tone Tool" "GNU Telephony"
 .SH NAME
 tonetool \- create and manipulate telephony tones.
 .SH SYNOPSIS
 .B tonetool
-[\fIoptions...\fR] \fBcommand\fR [\fIarguments...\fR]
+.I [options...]
+.B command
+.IR [arguments...]
 .SH DESCRIPTION
 Teltones is used to generate or play audio telephony tones based on a
 "spec".  The spec can be "dtmf digitstring" to create or play dtmf digits,
@@ -13,31 +15,31 @@ Teltones can also be used to detect dtmf digits contained in audio files.
 .PP
 .SH OPTIONS
 .TP
-\fI\-encoding=pcmu\fR
+.BI -encoding= pcmu
 Specify audio encoding format.
 .TP
-\fI\-framing=20ms\fR
+.BI -framing= 20ms
 Specify audio framing size.
 .TP
-\fI\-interdigit=60ms\fR
+.BI -interdigit= 60ms
 Specify dtmf interdigit time.
 .TP
-\fI\-level=30000\fR
+.BI -level= 30000
 Specify base audio level to use.
 .SH COMMANDS
 .TP
-\fBappend\fR
+.B append
 Appends the generated tone to the end of an existing audio file.
 .TP
-\fBcreate\fR
+.B create
 Create a new audio file from scratch and fill with the tone specified.
 .TP
-\fBdetect\fR
+.B detect
 Process an existing audio file and report on dtmf digits found.
 .TP
-\fBlist\fR
+.B list
 List a tone entry definition by sequencing.
-\fBplay\fR
+.B play
 Generate a tone or dialing string and play it to the local soundcard.
 .SH BUGS
 At this time tonetool always assumes all data is sourced at 8khz and
