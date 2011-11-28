@@ -9,9 +9,18 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex *.pc *.pc.in
+EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex \
+	*.pc.in *-config.in *-config.1
 SUBDIRS = inc runtime utils test
 DIST_SUBDIRS = inc runtime utils test
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = bayonne.pc
+
+scriptdir = $(bindir)
+script_SCRIPTS = bayonne-config
+
+man_MANS = bayonne-config.1
 
 doc:
 	cd docs ; pdflatex script.tex
