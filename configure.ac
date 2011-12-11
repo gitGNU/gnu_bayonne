@@ -210,10 +210,10 @@ fi
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
 
-if test -z "$BUILD_SUBDIRS" ; then
-    AC_ERROR([no buildable targets.  Stopped])
-    exit 1
-fi
+#if test -z "$BUILD_SUBDIRS" ; then
+#   AC_ERROR([no buildable targets.  Stopped])
+#   exit 1
+#fi
 
 AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
