@@ -1255,6 +1255,12 @@ public:
         const char *voices;
         const char *appname;
 
+        inline pathinfo_t()
+            {book = NULL; voices = appname = NULL;};
+
+        inline void reset(void)
+            {book = NULL; voices = appname = NULL;};
+
         inline Phrasebook *operator->()
             {return book;};
     };
