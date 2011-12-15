@@ -28,6 +28,8 @@
 #include <math.h>
 #endif
 
+#include <ctype.h>
+
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 

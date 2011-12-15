@@ -19,6 +19,7 @@
 #include <ucommon/ucommon.h>
 #include <ucommon/export.h>
 #include <bayonne.h>
+#include <ctype.h>
 
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;

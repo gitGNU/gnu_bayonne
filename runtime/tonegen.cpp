@@ -19,6 +19,7 @@
 #include <ucommon/ucommon.h>
 #include <ucommon/export.h>
 #include <bayonne.h>
+#include <ctype.h>
 
 #ifdef  HAVE_MATH_H
 #include <math.h>
