@@ -36,7 +36,7 @@ static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix 
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
-static Phrasebook *ruleset;
+static Env::pathinfo_t ruleset;
 
 static Tonegen *getTone(char **argv, Audio::level_t l, timeout_t framing, timeout_t interdigit)
 {
@@ -91,7 +91,9 @@ void writeTones(char **argv, bool append)
     if(!append)
         make.encoding = Audio::getEncoding(*encoding);
 
-    if(!Env::path(ruleset, *voice, target, pathbuf, sizeof(pathbuf), true))
+    ruleset.voices = *voice;
+
+    if(!Env::path(ruleset, target, pathbuf, sizeof(pathbuf), true))
         shell::errexit(3, "*** tonetool: %s: %s\n",
             target, _TEXT("invalid destination"));
     else
@@ -253,10 +255,12 @@ void toneDetect(char **argv)
     char result[128];
     char pathbuf[256];
 
+    ruleset.voices = *voice;
+
     while(*argv) {
         target = *(argv++);
 
-        if(!Env::path(ruleset, *voice, target, pathbuf, sizeof(pathbuf)))
+        if(!Env::path(ruleset, target, pathbuf, sizeof(pathbuf)))
             shell::errexit(3, "*** tonetool: %s: %s\n",
                 target, _TEXT("invalid destination"));
         else
@@ -324,9 +328,9 @@ PROGRAM_MAIN(argc, argv)
         Env::set("config", *configdir);
 
     if(is(lang))
-        ruleset = Phrasebook::find(*lang);
+        ruleset.book = Phrasebook::find(*lang);
     else
-        ruleset = Phrasebook::find(NULL);
+        ruleset.book = Phrasebook::find(NULL);
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: tonetool [options] command [arguments...]"));

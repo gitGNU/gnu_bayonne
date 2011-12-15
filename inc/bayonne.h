@@ -1248,6 +1248,17 @@ private:
     static bool tool_flag;
 
 public:
+    class __LOCAL pathinfo_t
+    {
+    public:
+        Phrasebook *book;
+        const char *voices;
+        const char *appname;
+
+        inline Phrasebook *operator->()
+            {return book;};
+    };
+
     static void init(shell_t *args);
 
     static void tool(shell_t *args);
@@ -1263,7 +1274,7 @@ public:
 
     static const char *config(const char *name);
 
-    static const char *path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size, bool write = false);
+    static const char *path(pathinfo_t& pathinfo, const char *path, char *buffer, size_t size, bool write = false);
 };
 
 /**

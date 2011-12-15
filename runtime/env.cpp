@@ -53,6 +53,8 @@ void Env::init(shell_t *args)
     set("calls", _STR(str(prefix) + "/logs/bayonne.calls"));
     set("stats", _STR(str(prefix) + "/logs/bayonne.stats"));
     set("scripts", _STR(str(prefix) + "/scripts"));
+    set("appaudio", _STR(str(prefix) + "/audio"));
+    set("sounds", _STR(str(prefix) + "/sounds"));
     set("definitions", _STR(str(prefix) + "/scripts"));
     set("shell", "cmd.exe");
     set("voices", _STR(str(prefix) + "\\voices"));
@@ -78,7 +80,10 @@ void Env::init(shell_t *args)
     set("logfile", DEFAULT_VARPATH "/log/bayonne.log");
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
-    set("scripts", DEFAULT_CFGPATH "/bayonne.d");
+    set("scripts", DEFAULT_VARPATH "/lib/bayonne/scripts");
+    set("audio", DEFAULT_DATADIR "/bayonne");
+    set("sounds", DEFAULT_DATADIR "/sounds");
+    set("applications", DEFAULT_DATADIR "/bayonne");
     set("definitions", DEFAULT_DATADIR "/bayonne");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/phrasebook");
@@ -162,7 +167,7 @@ const char *Env::config(const char *name)
     return env(name);
 }
 
-const char *Env::path(Phrasebook *book, const char *voice, const char *path, char *buffer, size_t size, bool writeflag)
+const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t size, bool writeflag)
 {
     const char *ext = strrchr(path, '/');
 
@@ -213,6 +218,7 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
         return buffer;
     }
 
+    const char *voice = pi.voices;
     if(!voice)
         voice = env("voice");
 
@@ -224,11 +230,22 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
         ext = env("extension");
 
     // tmp: to access bayonne temporary files...
-    if(case_eq(path, "tmp:", 4)) {
+    if(case_eq(path, "tmp:", 4) || case_eq(path, "temp:", 5)) {
         snprintf(buffer, size, "%s/%s%s",
-            env("temp"), path + 4, ext);
+            env("temp"), strchr(path, ':') + 1, ext);
         return buffer;
     }
+
+    // we cannot write to system sounds directory...
+    if(case_eq(path, "sound:", 6) || case_eq(path, "sounds:", 7)) {
+        if(writeflag)
+            return NULL;
+
+        snprintf(buffer, size, "%s/%s%s",
+            env("sounds"), strchr(path, ':') + 1, ext);
+    }
+
+
     // lib: optional way to always specify use library
     else if(case_eq(path, "lib:", 4))
         path += 4;
@@ -245,9 +262,9 @@ const char *Env::path(Phrasebook *book, const char *voice, const char *path, cha
         return buffer;
     }
 
-    if(book) {
+    if(pi.book) {
         snprintf(buffer, size, "%s%s%s/%s%s",
-            env("voices"), book->path(), voice, path, ext);
+            env("voices"), pi->path(), voice, path, ext);
 
         return buffer;
     }

@@ -29,7 +29,7 @@ static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix 
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
-static Phrasebook *ruleset;
+static Env::pathinfo_t ruleset;
 static bool showpath = false;
 
 static void display(char **args)
@@ -104,6 +104,8 @@ static void display(char **args)
         else
             ruleset->literal(arg, &state.rule);
 
+        ruleset.voices = *voice;
+
         if(*out == NULL) {
             printf("*** %s: failed", arg);
             if(showpath)
@@ -112,7 +114,7 @@ static void display(char **args)
         else while(*out) {
             if(showpath) {
                 char buffer[512];
-                const char *file = Env::path(ruleset, *voice, *out, buffer, sizeof(buffer), true);
+                const char *file = Env::path(ruleset, *out, buffer, sizeof(buffer), true);
                 if(!file)
                     printf("*** %s: invalid\n", *out);
                 else
@@ -162,11 +164,11 @@ PROGRAM_MAIN(argc, argv)
     ++argv;
 
     if(is(lang))
-        ruleset = Phrasebook::find(*lang);
+        ruleset.book = Phrasebook::find(*lang);
     else
-        ruleset = Phrasebook::find(NULL);
+        ruleset.book = Phrasebook::find(NULL);
 
-    if(!ruleset)
+    if(!ruleset.book)
         shell::errexit(3, "*** phrasebook: %s: %s\n",
             *lang, _TEXT("language not found"));
 

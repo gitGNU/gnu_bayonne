@@ -45,7 +45,7 @@ static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix 
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
-static Phrasebook *book;
+static Env::pathinfo_t rules;
 
 class AudioBuild : public AudioStream
 {
@@ -81,7 +81,7 @@ PacketStream::PacketStream() : AudioStream()
 
 void PacketStream::open(char **argv)
 {
-    const char *out = Env::path(book, *voice, *(argv++), pathbuf, sizeof(pathbuf));
+    const char *out = Env::path(rules, *(argv++), pathbuf, sizeof(pathbuf));
     if(out)
         AudioStream::open(out, modeRead, 10);
     if(is_open())
@@ -93,7 +93,7 @@ const char *PacketStream::getContinuation(void)
     if(!list)
         return NULL;
 
-    return Env::path(book, *voice, *(list++), pathbuf, sizeof(pathbuf));
+    return Env::path(rules, *(list++), pathbuf, sizeof(pathbuf));
 }
 
 
@@ -104,7 +104,7 @@ AudioBuild::AudioBuild() : AudioStream()
 
 void AudioBuild::open(char **argv)
 {
-    const char *out = Env::path(book, *voice, *(argv++), pathbuf, sizeof(pathbuf));
+    const char *out = Env::path(rules, *(argv++), pathbuf, sizeof(pathbuf));
     if(out)
         AudioStream::open(out, modeRead, 10);
     if(is_open())
@@ -116,7 +116,7 @@ const char *AudioBuild::getContinuation(void)
     if(!list)
         return NULL;
 
-    return Env::path(book, *voice, *(list++), pathbuf, sizeof(pathbuf));
+    return Env::path(rules, *(list++), pathbuf, sizeof(pathbuf));
 }
 
 void AudioBuild::copyConvert(AudioStream &input, AudioStream &output)
@@ -311,7 +311,7 @@ static void chart(char **argv)
     }
 
     while(*argv) {
-        const char *out = Env::path(book, *voice, *argv, pathbuf, sizeof(pathbuf));
+        const char *out = Env::path(rules, *argv, pathbuf, sizeof(pathbuf));
         if(!out || !fsys::isfile(out)) {
             printf("%s: %s\n",
                 fname(*(argv++)), _TEXT("invalid"));
@@ -428,7 +428,7 @@ static void info(char **argv)
     char pathbuf[256];
 
     while(*argv) {
-        const char *out = Env::path(book, *voice, *argv, pathbuf, sizeof(pathbuf));
+        const char *out = Env::path(rules, *argv, pathbuf, sizeof(pathbuf));
         if(!out || !fsys::isfile(out)) {
             printf("audiotool: %s: %s\n",
                 fname(*(argv++)), _TEXT("invalid"));
@@ -530,7 +530,7 @@ static void strip(char **argv)
     }
 
     while(*argv) {
-        const char *out = Env::path(book, *voice, *argv, source, sizeof(source));
+        const char *out = Env::path(rules, *argv, source, sizeof(source));
         if(!out || !fsys::isfile(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("invalid"));
@@ -665,7 +665,7 @@ static void trim(char **argv)
     }
 
     while(*argv) {
-        const char *out = Env::path(book, *voice, *argv, source, sizeof(source));
+        const char *out = Env::path(rules, *argv, source, sizeof(source));
         if(!out || !fsys::isfile(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("invalid"));
@@ -821,7 +821,7 @@ static void size(char **argv)
             _TEXT("no file specified"));
     }
 
-    const char *out = Env::path(book, *voice, fn, pathbuf, sizeof(pathbuf));
+    const char *out = Env::path(rules, fn, pathbuf, sizeof(pathbuf));
     if(out)
         file.open(out, Audio::modeRead);
     if(!file.is_open()) {
@@ -886,7 +886,7 @@ static void note(char **argv)
 
     ann = *argv;
 
-    const char *out = Env::path(book, *voice, fn, source, sizeof(source));
+    const char *out = Env::path(rules, fn, source, sizeof(source));
     if(out)
         file.open(out, Audio::modeRead);
     if(!file.is_open()) {
@@ -957,7 +957,7 @@ static void build(char **argv)
     }
 
     if(*argv) {
-        target = Env::path(book, *voice, *(argv++), pathbuf, sizeof(pathbuf));
+        target = Env::path(rules, *(argv++), pathbuf, sizeof(pathbuf));
 
         if(!target) {
         shell::errexit(4, "*** audiotool: -build: %s\n",
@@ -1056,7 +1056,7 @@ skip:
     }
 
     if(*argv) {
-        target = Env::path(book, *voice, *(argv++), pathbuf, sizeof(pathbuf));
+        target = Env::path(rules, *(argv++), pathbuf, sizeof(pathbuf));
 
         if(!target) {
         shell::errexit(4, "*** audiotool: -build: %s\n",
@@ -1112,6 +1112,8 @@ PROGRAM_MAIN(argc, argv)
 
     Env::tool(&args);
 
+    rules.voices = *voice;
+
     if(is(prefix))
         Env::set("prefix", *prefix);
 
@@ -1122,9 +1124,9 @@ PROGRAM_MAIN(argc, argv)
         Env::set("extension", *suffix);
 
     if(is(lang))
-        book = Phrasebook::find(*lang);
+        rules.book = Phrasebook::find(*lang);
     else
-        book = Phrasebook::find(NULL);
+        rules.book = Phrasebook::find(NULL);
 
     if(is(helpflag) || is(althelp)) {
         printf("%s\n", _TEXT("Usage: audiotool [options] command arguments..."));
