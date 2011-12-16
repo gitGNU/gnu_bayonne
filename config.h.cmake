@@ -27,6 +27,9 @@
 #cmakedefine HAVE_GSM_GSM_H 1
 #cmakedefine HAVE_MATH_H 1
 #cmakedefine HAVE_STDINT_H 1
+#cmakedefine HAVE_TERMIOS_H 1
+#cmakedefine HAVE_SYS_IOCTL_H 1
+#cmakedefine HAVE_IOCTL_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_GETUID 1
