@@ -19,5 +19,5 @@ libbayonne_la_LDFLAGS = @BAYONNE_LIBS@ $(RELEASE)
 libbayonne_la_SOURCES = script.cpp methods.cpp interp.cpp checks.cpp \
 	modules.cpp audio.cpp resample.cpp phrasebook.cpp env.cpp \
 	tonegen.cpp dialers.cpp detect.cpp info.cpp audiocodecs.cpp \
-	audiofile.cpp audiostream.cpp devices.cpp termios.cpp wserial.cpp
+	audiofile.cpp audiostream.cpp serial.cpp termios.cpp wserial.cpp
 

@@ -29,7 +29,7 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-class __LOCAL serial : public Device::Serial
+class __LOCAL serial : public Serial
 {
 private:
     HANDLE fd;
@@ -55,7 +55,7 @@ public:
     ~serial();
 };
 
-serial::serial(const char *name) : Device::Serial()
+serial::serial(const char *name) : Serial()
 {
     fd = CreateFile(name,
         GENERIC_READ | GENERIC_WRITE,
@@ -410,7 +410,7 @@ void serial::dtr(timeout_t timeout)
     }
 }
 
-Device::Serial *Device::open(const char *name)
+Serial *Serial::create(const char *name)
 {
     char buf[65];
 
@@ -420,7 +420,7 @@ Device::Serial *Device::open(const char *name)
     if(cp)
         *cp = 0;
 
-    devserial_t dev = new serial(buf);
+    serial_t dev = new serial(buf);
     name = strchr(name, ':');
     if(dev && name)
         dev->set(++name);
@@ -428,7 +428,7 @@ Device::Serial *Device::open(const char *name)
     return dev;
 }
 
-stringpager *Device::serial_list(void)
+stringpager *Serial::list(void)
 {
     DWORD index = 0;
     TCHAR keyname[4096];

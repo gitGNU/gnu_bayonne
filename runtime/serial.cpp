@@ -23,23 +23,23 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-Device::Serial::Serial()
+Serial::Serial()
 {
     errno = 0;
 }
 
-Device::Serial::~Serial()
+Serial::~Serial()
 {
 }
 
 #if !defined(_MSWINDOWS_) && !defined(HAVE_TERMIOS_H)
 
-Device::Serial *Device::open(const char *name)
+Serial *Serial::create(const char *name)
 {
     return NULL;
 }
 
-stringpager *Device::serial_list(void)
+stringpager *Serial::list(void)
 {
     return new stringpager();
 }
