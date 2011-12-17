@@ -2403,6 +2403,8 @@ public:
 
     inline static void close(Serial *device)
         {delete device;};
+
+    stringpager *serial_list(void);
 };
 
 /**

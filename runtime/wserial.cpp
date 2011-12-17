@@ -414,13 +414,11 @@ Device::Serial *Device::open(const char *name)
 {
     char buf[65];
 
-    String::set(buf, sizeof(buf) - 1, name);
+    String::set(buf, sizeof(buf), name);
+
     char *cp = strchr(buf, ':');
-    if(!cp) {
-        cp = buf + strlen(buf);
-        *(cp++) = ':';
+    if(cp)
         *cp = 0;
-    }
 
     devserial_t dev = new serial(buf);
     name = strchr(name, ':');
@@ -429,5 +427,23 @@ Device::Serial *Device::open(const char *name)
 
     return dev;
 }
+
+stringpager *Device::serial_list(void)
+{
+    DWORD index = 0;
+    TCHAR keyname[4096];
+    DWORD size = sizeof(keyname);
+    stringpager *list = new stringpager;
+    HKEY reg;
+
+    if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ, &reg) == ERROR_SUCCESS) {
+        while(RegEnumKeyEx(reg, index++, keyname, &size, NULL, NULL, NULL, &ftime) == ERROR_SUCCESS) {
+            list->add(keyname);
+        }
+        RegCloseKey(reg);
+    }
+    return list;
+}
+
 #endif
 

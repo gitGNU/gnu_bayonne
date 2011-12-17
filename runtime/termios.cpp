@@ -504,6 +504,20 @@ check:
     return dev;
 }
 
+stringpager *Device::serial_list(void)
+{
+    stringpager *list = new stringpager;
+    char filename[64];
+    fsys_t dir;
+
+    fsys::open(dir, "/dev", fsys::ACCESS_DIRECTORY);
+    while(is(dir) && fsys::read(dir, filename, sizeof(filename)) > 0) {
+        if(eq(filename, "tty", 3))
+            list->add(filename + 3);
+    }
+    fsys::close(dir);
+}
+
 #endif
 
 

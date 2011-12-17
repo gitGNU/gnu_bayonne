@@ -39,4 +39,9 @@ Device::Serial *Device::open(const char *name)
     return NULL;
 }
 
+stringpager *Device::serial_list(void)
+{
+    return new stringpager();
+}
+
 #endif
