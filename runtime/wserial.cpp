@@ -435,9 +435,10 @@ stringpager *Serial::list(void)
     DWORD size = sizeof(keyname);
     stringpager *list = new stringpager;
     HKEY reg;
+    FILETIME fTime;
 
     if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ, &reg) == ERROR_SUCCESS) {
-        while(RegEnumKeyEx(reg, index++, keyname, &size, NULL, NULL, NULL, &ftime) == ERROR_SUCCESS) {
+        while(RegEnumKeyEx(reg, index++, keyname, &size, NULL, NULL, NULL, &fTime) == ERROR_SUCCESS) {
             list->add(keyname);
         }
         RegCloseKey(reg);
