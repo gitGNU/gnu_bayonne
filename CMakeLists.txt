@@ -231,6 +231,7 @@ set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ucommon)
 target_link_libraries(bayonne-runtime ${EXPORT_LIBS} ${USES_UCOMMON_LIBRARIES})
 
+add_subdirectory(server)
 add_subdirectory(utils)
 
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
