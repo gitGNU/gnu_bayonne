@@ -29,7 +29,7 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-class __LOCAL serial : public Device::Serial
+class __LOCAL serial : public Serial
 {
 private:
     HANDLE fd;
@@ -39,6 +39,7 @@ private:
     bool set(const char *format);
     size_t get(void *addr, size_t len);
     size_t put(void *addr, size_t len);
+    void dtr(timeout_t toggle_time);
     void bin(size_t size, timeout_t timeout);
     void text(char nl1, char nl2);
     void clear(void);
@@ -54,9 +55,9 @@ public:
     ~serial();
 };
 
-serial::serial(const char *name) : Device::Serial()
+serial::serial(const char *name) : Serial()
 {
-    fd = CreateFile(fname,
+    fd = CreateFile(name,
         GENERIC_READ | GENERIC_WRITE,
         0,                    // exclusive access
         NULL,                 // no security attrs
@@ -87,7 +88,7 @@ serial::serial(const char *name) : Device::Serial()
     current.fDtrControl = DTR_CONTROL_ENABLE;
     current.fOutxCtsFlow = 1;
     current.fRtsControl = RTS_CONTROL_ENABLE;
-    current.fInX = attr->fOutX = 0;
+    current.fInX = current.fOutX = 0;
 
     current.fBinary = true;
     current.fParity = true;
@@ -154,7 +155,7 @@ bool serial::set(const char *format)
             break;
         case 'o':
         case 'O':
-            current.c_cflag = ODDPARITY;
+            current.Parity = ODDPARITY;
             break;
         case 's':
         case 'S':
@@ -196,11 +197,12 @@ bool serial::set(const char *format)
             case 6:
             case 7:
             case 8:
-                current.ByteSize = opt;
+                current.ByteSize = (unsigned char)opt;
                 break;
             default:
                 current.BaudRate = opt;
                 break;
+            }
             break;
         default:
             error = EINVAL;
@@ -208,12 +210,12 @@ bool serial::set(const char *format)
         }
         cp = strtok(NULL, ",");
     }
-    current.DCBLength = sizeof(DCB);
+    current.DCBlength = sizeof(DCB);
     SetCommState(fd, &current);
     return true;
 }
 
-size_t Serial::get(void *data, size_t len)
+size_t serial::get(void *data, size_t len)
 {
     DWORD   dwLength = 0, dwError, dwReadLength;
     COMSTAT cs;
@@ -252,7 +254,7 @@ size_t Serial::get(void *data, size_t len)
     return dwLength;
 }
 
-size_t Serial::put(char *data, size_t len)
+size_t serial::put(void *data, size_t len)
 {
     COMSTAT cs;
     unsigned long dwError = 0;
@@ -304,7 +306,7 @@ bool serial::wait(timeout_t timeout)
     dwMask = EV_RXCHAR;
     SetCommMask(fd, dwMask);
     // let's wait for event or timeout
-    if((suc = WaitCommEvent(dfd, &dwEvents, &ol)) == FALSE) {
+    if((suc = WaitCommEvent(fd, &dwEvents, &ol)) == FALSE) {
         if(GetLastError() == ERROR_IO_PENDING) {
             DWORD transferred;
 
@@ -356,7 +358,7 @@ bool serial::flush(timeout_t timeout)
     dwMask = EV_TXEMPTY;
     SetCommMask(fd, dwMask);
     // let's wait for event or timeout
-    if((suc = WaitCommEvent(dfd, &dwEvents, &ol)) == FALSE) {
+    if((suc = WaitCommEvent(fd, &dwEvents, &ol)) == FALSE) {
         if(GetLastError() == ERROR_IO_PENDING) {
             DWORD transferred;
 
@@ -399,24 +401,50 @@ void serial::text(char nl1, char nl2)
 {
 }
 
-Device::Serial::open(const char *name)
+void serial::dtr(timeout_t timeout)
+{
+    EscapeCommFunction(fd, CLRDTR);
+    if(timeout) {
+        Thread::sleep(timeout);
+        EscapeCommFunction(fd, SETDTR);
+    }
+}
+
+Serial *Serial::create(const char *name)
 {
     char buf[65];
 
-    String::set(buf, sizeof(buf) - 1, name);
-    const char *cp = strchr(buf, ':');
-    if(!cp) {
-        cp = buf + strlen(buf);
-        *(cp++) = ':';
-        *cp = 0;
-    }
+    String::set(buf, sizeof(buf), name);
 
-    devserial_t dev = new serial(buf);
+    char *cp = strchr(buf, ':');
+    if(cp)
+        *cp = 0;
+
+    serial_t dev = new serial(buf);
     name = strchr(name, ':');
     if(dev && name)
         dev->set(++name);
 
     return dev;
 }
+
+stringpager *Serial::list(void)
+{
+    DWORD index = 0;
+    TCHAR keyname[4096];
+    DWORD size = sizeof(keyname);
+    stringpager *list = new stringpager;
+    HKEY reg;
+    FILETIME fTime;
+
+    if(RegOpenKeyEx(HKEY_LOCAL_MACHINE, "HARDWARE\\DEVICEMAP\\SERIALCOMM", 0, KEY_READ, &reg) == ERROR_SUCCESS) {
+        while(RegEnumKeyEx(reg, index++, keyname, &size, NULL, NULL, NULL, &fTime) == ERROR_SUCCESS) {
+            list->add(keyname);
+        }
+        RegCloseKey(reg);
+    }
+    return list;
+}
+
 #endif
 

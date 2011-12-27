@@ -36,7 +36,7 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-class __LOCAL serial : public Device::Serial
+class __LOCAL serial : public Serial
 {
 private:
     fd_t fd;
@@ -62,7 +62,7 @@ public:
     ~serial();
 };
 
-serial::serial(const char *name) : Device::Serial()
+serial::serial(const char *name) : Serial()
 {
     fd = ::open(name, O_RDWR | O_NDELAY);
     if(fd < 0) {
@@ -473,7 +473,7 @@ bool serial::flush(timeout_t timeout)
     return rtn;
 }
 
-Device::Serial *Device::open(const char *name)
+Serial *Serial::create(const char *name)
 {
     assert(name != NULL);
 
@@ -497,11 +497,25 @@ check:
     fsys::fileinfo(buf, &ino);
     if(!fsys::ischar(&ino))
         return NULL;
-    devserial_t dev = new serial(buf);
+    serial_t dev = new serial(buf);
     name = strchr(name, ':');
     if(dev && name)
         dev->set(++name);
     return dev;
+}
+
+stringpager *Serial::list(void)
+{
+    stringpager *list = new stringpager;
+    char filename[64];
+    fsys_t dir;
+
+    fsys::open(dir, "/dev", fsys::ACCESS_DIRECTORY);
+    while(is(dir) && fsys::read(dir, filename, sizeof(filename)) > 0) {
+        if(eq(filename, "tty", 3))
+            list->add(filename + 3);
+    }
+    fsys::close(dir);
 }
 
 #endif

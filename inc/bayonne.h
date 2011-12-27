@@ -2361,48 +2361,43 @@ public:
 };
 
 /**
- * Device manager interface.  This offers abstract base classes which are
- * used to manipulate underlying system devices and hardware.  The actual
+ * Serial debice manager interface.  This offers abstract base classes which
+ * are used to manipulate underlying serial devices and hardware.  The actual
  * objects are created by factory methods in derived classes.  Some of these
  * things are used by clients, various servers and services, and utilities.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Device
+class __EXPORT Serial
 {
+protected:
+    int error;
+
+    Serial();
+    Serial(const Serial&);
+
 public:
-    class __EXPORT Serial
-    {
-    protected:
-        int error;
+    virtual ~Serial();
 
-        Serial();
-        Serial(const Serial&);
+    inline int err(void)
+        {return error;};
 
-    public:
-        virtual ~Serial();
+    virtual operator bool() = 0;
+    virtual bool operator!() = 0;
+    virtual void restore(void) = 0;
+    virtual bool set(const char *format) = 0;
+    virtual void dtr(timeout_t toggle_time) = 0;
+    virtual size_t get(void *addr, size_t len) = 0;
+    virtual size_t put(void *addr, size_t len) = 0;
+    virtual void clear(void) = 0;
+    virtual bool flush(timeout_t timeout) = 0;
+    virtual bool wait(timeout_t timeout) = 0;
+    virtual void text(char nl1 = 0x13, char nl2 = 0x10) = 0;
+    virtual void bin(size_t size, timeout_t timeout = 0) = 0;
+    virtual void sync(void) = 0;
 
-        inline int err(void)
-            {return error;};
+    static Serial *create(const char *name);
 
-        virtual operator bool() = 0;
-        virtual bool operator!() = 0;
-        virtual void restore(void) = 0;
-        virtual bool set(const char *format) = 0;
-        virtual void dtr(timeout_t toggle_time) = 0;
-        virtual size_t get(void *addr, size_t len) = 0;
-        virtual size_t put(void *addr, size_t len) = 0;
-        virtual void clear(void) = 0;
-        virtual bool flush(timeout_t timeout) = 0;
-        virtual bool wait(timeout_t timeout) = 0;
-        virtual void text(char nl1 = 0x13, char nl2 = 0x10) = 0;
-        virtual void bin(size_t size, timeout_t timeout = 0) = 0;
-        virtual void sync(void) = 0;
-    };
-
-    static Serial *open(const char *name);
-
-    inline static void close(Serial *device)
-        {delete device;};
+    static stringpager *list(void);
 };
 
 /**
@@ -2426,7 +2421,7 @@ public:
     static void shutdown(void);
 };
 
-typedef Device::Serial  *devserial_t;
+typedef Serial  *serial_t;
 
 END_NAMESPACE
 
