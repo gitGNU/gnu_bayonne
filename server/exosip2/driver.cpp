@@ -18,35 +18,3 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-static void init(int argc, char **argv, bool detached, shell::mainproc_t svc = NULL)
-{
-//  static script::keyword_t keywords[] = {
-//      {NULL}};
-
-//    server::parse(argc, argv, "sip");
-//    server::startup(svc, detached);
-
-//  script::assign(keywords);   // bind local driver keywords if any...
-
-//    Driver::commit(new driver());
-
-//    driver::start();
-//    server::dispatch();
-//    driver::stop();
-
-//    server::release();
-}
-
-static SERVICE_MAIN(main, argc, argv)
-{
-//    signals::service("bayonne");
-    init(argc, argv, true);
-}
-
-PROGRAM_MAIN(argc, argv)
-{
-    init(argc, argv, false, &service_main);
-    PROGRAM_EXIT(0);
-}
-
-

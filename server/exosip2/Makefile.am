@@ -15,5 +15,5 @@ LDADD = ../common/libserver.a ../../runtime/libbayonne.la @EXOSIP2_LIBS@ @BAYONN
 sbin_PROGRAMS = bayonne-server-exosip2
 noinst_HEADERS = driver.h
 
-bayonne_server_exosip2_SOURCES = server.cpp
+bayonne_server_exosip2_SOURCES = driver.cpp
 
