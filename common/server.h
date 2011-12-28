@@ -397,6 +397,8 @@ public:
 
     inline static const char *getName(void)
         {return instance->name;};
+
+    static keydata *getPaths(void);
 };
 
 END_NAMESPACE

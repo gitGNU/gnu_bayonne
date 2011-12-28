@@ -18,6 +18,9 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
+static keyfile keyserver(DEFAULT_CFGPATH "/bayonne/server.conf");
+static keyfile keydriver(DEFAULT_CFGPATH "/bayonne/driver.conf");
+
 Driver *Driver::instance = NULL;
 
 Driver::Driver()
@@ -26,7 +29,25 @@ Driver::Driver()
 
     instance = this;
     detached = true;
+
+#ifndef _MSWINDOWS_
+    const char *home = NULL;
+
+    if(getuid())
+        home = getenv("HOME");
+
+    if(home)
+        home = strdup(str(home) + str("/.bayonnerc"));
+
+    if(home) {
+        keyserver.load(home);
+        keydriver.load(home);
+    }
+#endif
 }
 
-
+keydata *Driver::getPaths(void)
+{
+    return keyserver.get("paths");
+}
 
