@@ -1265,7 +1265,7 @@ public:
             {return book;};
     };
 
-    static void init(shell_t *args);
+    static bool init(shell_t *args);
 
     static void tool(shell_t *args);
 

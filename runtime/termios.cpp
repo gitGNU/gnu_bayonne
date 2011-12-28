@@ -516,6 +516,7 @@ stringpager *Serial::list(void)
             list->add(filename + 3);
     }
     fsys::close(dir);
+    return list;
 }
 
 #endif

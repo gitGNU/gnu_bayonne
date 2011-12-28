@@ -399,6 +399,8 @@ public:
         {return instance->name;};
 
     static keydata *getPaths(void);
+
+    static void config(void);
 };
 
 END_NAMESPACE

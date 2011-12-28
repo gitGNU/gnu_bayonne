@@ -31,7 +31,7 @@ shell_t *Env::sys;
 bool Env::daemon_flag = true;
 bool Env::tool_flag = false;
 
-void Env::init(shell_t *args)
+bool Env::init(shell_t *args)
 {
     sys = args;
 
@@ -80,7 +80,7 @@ void Env::init(shell_t *args)
     set("logfile", DEFAULT_VARPATH "/log/bayonne.log");
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
-    set("scripts", DEFAULT_VARPATH "/lib/bayonne/scripts");
+    set("scripts", DEFAULT_DATADIR "/bayonne");
     set("audio", DEFAULT_DATADIR "/bayonne");
     set("sounds", DEFAULT_DATADIR "/sounds");
     set("applications", DEFAULT_DATADIR "/bayonne");
@@ -108,8 +108,8 @@ void Env::init(shell_t *args)
     if(!daemon_flag && pwd)
         home_prefix = strdup(str(pwd->pw_dir) + "/.bayonne");
 
-    // tool mode only uses ~/.bayonne if also actually exists...
-    if(home_prefix && tool_flag && !fsys::isdir(home_prefix))
+    // tool only uses ~/.bayonne if also actually exists...
+    if(home_prefix && !fsys::isdir(home_prefix))
         home_prefix = NULL;
 
     if(home_prefix) {
@@ -140,6 +140,8 @@ void Env::init(shell_t *args)
     set("prefix", prefix);
     set("rundir", rundir);
     set("plugins", plugins);
+
+    return daemon_flag;
 }
 
 void Env::tool(shell_t *args)

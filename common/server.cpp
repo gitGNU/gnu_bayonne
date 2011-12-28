@@ -24,11 +24,19 @@ using namespace UCOMMON_NAMESPACE;
 
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
+static shell::flagopt background('b', "--background", _TEXT("run as daemon"));
+static shell::flagopt altback('d', NULL, NULL);
+#ifdef  DEBUG
+static shell::flagopt dump('D', "--dump", _TEXT("dump configuration"));
+#endif
+static shell::flagopt foreground('f', "--foreground", _TEXT("run in foreground"));
 static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language", "C");
+static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
 static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
+static shell::stringopt scripts('A', "--scripts", _TEXT("specify script directory"), "path", NULL);
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
-static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
+static shell::flagopt version(0, "--version", _TEXT("show version information"));
 
 static void corefiles(void)
 {
@@ -53,6 +61,36 @@ static void corefiles(void)
 }
 #endif
 
+#ifdef  DEBUG
+static void dumpconfig(void)
+{
+    printf("definitions = %s\n", Env::config("definitions"));
+    printf("scripts = %s\n", Env::config("scripts"));
+    printf("voices = %s\n", Env::config("voices"));
+    exit(0);
+}
+#endif
+
+static void usage(void)
+{
+    printf("%s\n", _TEXT("Usage: bayonne-server [options]"));
+    printf("%s\n\n", _TEXT("Start bayonne service"));
+    printf("%s\n", _TEXT("Options:"));
+    shell::help();
+    printf("\n%s\n", _TEXT("Report bugs to bayonne-devel@gnu.org"));
+    exit(0);
+}
+
+static void versioninfo(void)
+{
+    printf("Bayonne " VERSION "\n%s", _TEXT(
+        "Copyright (C) 2007,2008,2009 David Sugar, Tycho Softworks\n"
+        "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+        "This is free software: you are free to change and redistribute it.\n"
+        "There is NO WARRANTY, to the extent permitted by law.\n"));
+    exit(0);
+}
+
 static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
 {
     const char *cp;
@@ -61,14 +99,25 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
 
     shell args(argc, argv);
 
-    Env::init(&args);
+    bool detached = Env::init(&args);
 
-    bool detached = false;
-
-    if(svc)
+    if(!svc)
+        detached = false;
+    else if(detached)
         detached = Driver::getDetached();
 
+    if(is(background) && svc)
+        detached = true;
+    else if(is(foreground))
+        detached = false;
+
     corefiles();
+
+    if(is(helpflag) || is(althelp) || args.argc() > 0)
+        usage();
+
+    if(is(version))
+        versioninfo();
 
     // reset paths from config and env ...
 
@@ -80,6 +129,10 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
 
         if(cp && *cp)
             Env::set("voices", cp);
+
+        cp = paths->get("scripts");
+        if(cp && *cp)
+            Env::set("scripts", cp);
     }
 
 #ifndef _MSWINDOWS_
@@ -90,6 +143,10 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
     if(cp && *cp)
         Env::set("voices", cp);
 
+    cp = getenv("SCRIPTS");
+    if(cp && *cp)
+        Env::set("scripts", cp);
+
 #endif
 
     // apply switch options if used...
@@ -97,7 +154,13 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
     if(is(phrasebook))
         Env::set("voices", *phrasebook);
 
+    if(is(scripts))
+        Env::set("scripts", *scripts);
 
+#ifdef  DEBUG
+    if(is(dump))
+        dumpconfig();
+#endif
 }
 
 static SERVICE_MAIN(main, argc, argv)
