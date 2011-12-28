@@ -1,6 +1,6 @@
 if(HAVE_EXOSIP2)
     file(GLOB exosip2_src exosip2/*.cpp)
-    file(GLOBexosip2_inc exosip2/*.h)
+    file(GLOB exosip2_inc exosip2/*.h)
 
     add_executable(bayonne-server-exosip2 ${exosip2_src} ${exosip2_inc})
     add_dependencies(bayonne-server-exosip2 bayonne-server bayonne-runtime usecure ucommon eXosip2)
