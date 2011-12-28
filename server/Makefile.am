@@ -11,6 +11,6 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 EXTRA_DIST = CMakeLists.txt
 
-SUBDIRS = common @BUILD_SUBDIRS@
-DIST_SUBDIRS = common exosip2
+SUBDIRS = @BUILD_SUBDIRS@
+DIST_SUBDIRS = exosip2
 

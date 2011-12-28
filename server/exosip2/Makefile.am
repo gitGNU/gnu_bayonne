@@ -9,8 +9,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server/common @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
-LDADD = ../common/libserver.a ../../runtime/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
+LDADD = ../../common/libserver.a ../../runtime/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 
 sbin_PROGRAMS = bayonne-server-exosip2
 noinst_HEADERS = driver.h

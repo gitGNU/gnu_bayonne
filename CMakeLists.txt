@@ -225,11 +225,16 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 file(GLOB runtime_src runtime/*.cpp)
 file(GLOB runtime_inc inc/bayonne.h)
+file(GLOB common_src common/*.cpp)
+file(GLOB common_inc common/*.h)
 
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ucommon)
 target_link_libraries(bayonne-runtime ${EXPORT_LIBS} ${USES_UCOMMON_LIBRARIES})
+
+add_library(bayonne-server STATIC ${common_src} ${common_inc})
+add_dependencies(bayonne-server bayonne-runtime)
 
 add_subdirectory(server)
 add_subdirectory(utils)
