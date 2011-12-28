@@ -18,15 +18,24 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
+static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
+{
+    bool detached = false;
+
+    if(svc)
+        detached = Driver::getDetached();
+
+}
+
 static SERVICE_MAIN(main, argc, argv)
 {
 //  signals::service("bayonne");
-//  server::init(argc, argv, true);
+    init(argc, argv);
 }
 
 PROGRAM_MAIN(argc, argv)
 {
-//  server::init(argc, argv, false, &service_main);
+    init(argc, argv, &service_main);
     PROGRAM_EXIT(0);
 }
 

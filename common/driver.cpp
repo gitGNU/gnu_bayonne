@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
+// Copyright (C) 2010 David Sugar, Tycho Softworks.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -13,18 +13,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "driver.h"
+#include "server.h"
 
-using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
+using namespace UCOMMON_NAMESPACE;
 
-static class driver : public Driver
-{
-public:
-    driver();
-} _driver_;
+Driver *Driver::instance = NULL;
 
-driver::driver() : Driver()
+Driver::Driver()
 {
-    name = "exosip2";
+    assert(instance == NULL);
+
+    instance = this;
+    detached = true;
 }
+
+
+

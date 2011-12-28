@@ -390,5 +390,27 @@ typedef struct {
     } parm;
 } TSEvent;
 
+class Driver
+{
+private:
+    static Driver *instance;
+
+protected:
+    bool detached;
+    const char *name;
+
+    Driver();
+
+public:
+    inline static Driver *getDriver(void)
+        {return instance;};
+
+    inline static bool getDetached(void)
+        {return instance->detached;};
+
+    inline static const char *getName(void)
+        {return instance->name;};
+};
+
 END_NAMESPACE
 

@@ -15,5 +15,5 @@ EXTRA_DIST =
 noinst_LIBRARIES = libserver.a
 noinst_HEADERS = server.h
 
-libserver_a_SOURCES = server.cpp
+libserver_a_SOURCES = server.cpp driver.cpp
 
