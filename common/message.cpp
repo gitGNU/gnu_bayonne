@@ -21,7 +21,7 @@ using namespace UCOMMON_NAMESPACE;
 static LinkedObject *msgs = NULL;
 static bool cancelled = false;
 
-static class msgthread : public DetachedThread, public Conditional
+static class msgthread : public JoinableThread, public Conditional
 {
 public:
     msgthread();
@@ -31,10 +31,10 @@ public:
 
 private:
     void run(void);
-} *thread = NULL;
+} thread;
 
 msgthread::msgthread() :
-DetachedThread(), Conditional()
+JoinableThread(), Conditional()
 {
 }
 
@@ -72,6 +72,7 @@ void msgthread::stop(void)
     cancelled = true;
     Conditional::signal();
     Conditional::unlock();
+    join();
 }
 
 Message::Message(Timeslot *timeslot, Event *msg) :
@@ -80,7 +81,7 @@ LinkedObject()
     memcpy(&event, msg, sizeof(event));
     ts = timeslot;
 
-    thread->add(this);
+    thread.add(this);
 }
 
 void Message::deliver(void)
@@ -94,13 +95,12 @@ void Message::deliver(void)
     msgs = NULL;
 }
 
-void Message::start(void)
+void Message::start(int priority)
 {
-    thread = new msgthread;
-    thread->start();
+    thread.start();
 }
 
 void Message::stop(void)
 {
-    thread->stop();
+    thread.stop();
 }

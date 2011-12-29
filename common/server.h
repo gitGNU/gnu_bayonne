@@ -406,7 +406,7 @@ public:
     Message(Timeslot *timeslot, Event *msg);
 
     static void deliver(void);
-    static void start(void);
+    static void start(int priority);
     static void stop(void);
 };
 
@@ -429,7 +429,10 @@ public:
         {return span != ((unsigned)(-1));};
 
     inline const char *get(const char *id)
-        {return keys->get(id);};
+        {return (keys == NULL) ? NULL : keys->get(id);};
+
+    inline const char *get(void)
+        {return id;};
 };
 
 class Driver

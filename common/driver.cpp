@@ -123,11 +123,21 @@ void Driver::stop(void)
 
 int Driver::startup(void)
 {
+    keydata *pri = keyserver.get("threads");
+    const char *cp;
+
+    if(pri)
+        cp = pri->get("message");
+    if(!cp)
+        cp = "-1";
+
+    Message::start(atoi(cp));
     return instance->start();
 }
 
 void Driver::shutdown(void)
 {
+    Message::stop();
     instance->stop();
 }
 
