@@ -24,6 +24,6 @@ public:
     driver();
 } _driver_;
 
-driver::driver() : Driver("sip", "registry")
+driver::driver() : Driver("vpb")
 {
 }

@@ -13,17 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "driver.h"
+#include <common/server.h>
+#include <vpbapi.h>
 
+NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
-using namespace BAYONNE_NAMESPACE;
 
-static class driver : public Driver
-{
-public:
-    driver();
-} _driver_;
+END_NAMESPACE
 
-driver::driver() : Driver("sip", "registry")
-{
-}
