@@ -18,9 +18,23 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-Timeslot::Timeslot(unsigned port, unsigned span) :
+Timeslot::Timeslot(unsigned port, Group *group) :
 Script::interp(), Mutex()
 {
+    const char *cp = NULL;
+
+    incoming = span = NULL;
+
+    if(group && group->isSpan()) {
+        span = group;
+        cp = span->get("group");
+    }
+    if(cp)
+        group = Driver::getGroup(cp);
+    if(group)
+        incoming = group;
+    else
+        incoming = span;
 }
 
 unsigned long Timeslot::getIdle(void)

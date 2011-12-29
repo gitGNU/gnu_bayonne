@@ -423,6 +423,13 @@ protected:
 
     Group(const char *name);
     Group(unsigned count);
+
+public:
+    inline bool isSpan(void)
+        {return span != ((unsigned)(-1));};
+
+    inline const char *get(const char *id)
+        {return keys->get(id);};
 };
 
 class Driver
@@ -490,10 +497,13 @@ public:
 class Timeslot : public Script::interp, public Mutex
 {
 protected:
+    Group *incoming;        // incoming group to answer as...
+    Group *span;
+
     virtual bool post(Event *event) = 0;
 
 public:
-    Timeslot(unsigned port, unsigned span = (unsigned) -1);
+    Timeslot(unsigned port, Group *group = NULL);
 
     virtual unsigned long getIdle(void);        // idle time
 
