@@ -121,16 +121,6 @@ void Driver::stop(void)
 {
 }
 
-Timeslot *Driver::index(unsigned timeslot)
-{
-    return NULL;
-}
-
-Timeslot *Driver::request(void)
-{
-    return NULL;
-}
-
 int Driver::startup(void)
 {
     return instance->start();
@@ -139,14 +129,6 @@ int Driver::startup(void)
 void Driver::shutdown(void)
 {
     instance->stop();
-}
-
-Timeslot *Driver::getTimeslot(unsigned timeslot)
-{
-    if(timeslot >= instance->tsUsed)
-        return NULL;
-
-    return instance->index(timeslot);
 }
 
 Group *Driver::getSpan(unsigned sid)
@@ -189,5 +171,80 @@ Group *Driver::getGroup(const char *id)
         gp.next();
     }
     return NULL;
+}
+
+Timeslot *Driver::access(unsigned index)
+{
+    if(index >= instance->tsUsed)
+        return NULL;
+
+    Timeslot *ts = instance->tsIndex[index];
+    ts->lock();
+    return ts;
+}
+
+// we usually select by longest idle, but this can be overriden...
+
+Timeslot *Driver::request(Group *group)
+{
+    enum {
+        FIRST, LAST, IDLE
+    } mode = IDLE;
+
+    const char *cp = NULL;
+    unsigned first = 0;
+    unsigned index = instance->tsUsed;
+    unsigned long idle = 0;
+    Timeslot *ts, *prior = NULL;
+
+    if(group && group->tsCount) {
+        first = group->tsFirst;
+        index = group->tsFirst + group->tsCount;
+        cp = group->keys->get("select");
+    }
+
+    if(!cp)
+        cp = "longest";
+
+    if(case_eq(cp, "first"))
+        mode = FIRST;
+    else if(case_eq(cp, "last"))
+        mode = LAST;
+    else if(case_eq(cp, "idle") || case_eq(cp, "longest"))
+        mode = IDLE;
+
+    switch(mode) {
+    case FIRST:
+        while(first < index) {
+            ts = instance->tsIndex[index++];
+            ts->lock();
+            if(ts->getIdle())
+                return ts;
+            ts->unlock();
+        }
+        return NULL;
+    default:
+        while(index > first) {
+            ts = instance->tsIndex[--index];
+            ts->lock();
+            if(ts->getIdle() > idle) {
+                if(mode == LAST)
+                    return ts;
+                if(prior)
+                    prior->unlock();
+                idle = ts->getIdle();
+                prior = ts;
+            }
+            else
+                ts->unlock();
+        }
+    }
+    return prior;
+}
+
+void Driver::release(Timeslot *timeslot)
+{
+    if(timeslot)
+        timeslot->unlock();
 }
 

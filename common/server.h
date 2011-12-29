@@ -19,6 +19,10 @@
 #define MAX_DIGITS      48
 #define MAX_NAME_LEN    64
 
+#define DEBUG1  shell::DEBUG0
+#define DEBUG2  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 1)))
+#define DEBUG3  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 2)))
+
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
@@ -231,6 +235,15 @@ typedef enum {
 } tsevent_t;
 
 /**
+ * Posting mode for messages.
+ */
+typedef enum {
+    SEND_LOCKED,    // assumed already locked...
+    SEND_NORMAL,    // normal mode, locks and unlocks
+    SEND_QUEUED     // queues message for delivery by dispatch thread
+}   tssend_t;
+
+/**
  * Speed adjustments for audio.  For timeslot drivers which can do this.
  */
 typedef enum {
@@ -381,7 +394,21 @@ typedef struct {
         const char *error;
         dspmode_t dsp;
     } parm;
-} TSEvent;
+} Event;
+
+class Message : public LinkedObject
+{
+protected:
+    Event event;
+    Timeslot *ts;
+
+public:
+    Message(Timeslot *timeslot, Event *msg);
+
+    static void deliver(void);
+    static void start(void);
+    static void stop(void);
+};
 
 class Group : public LinkedObject
 {
@@ -409,7 +436,7 @@ protected:
     bool detached;
     const char *name;
     unsigned tsCount, tsUsed, tsSpan;
-    Timeslot *tsIndex;                  // array...
+    Timeslot **tsIndex;
     char *status;
     keydata *keys;
 
@@ -417,8 +444,6 @@ protected:
 
     Driver(const char *name, const char *registry = "groups");
 
-    virtual Timeslot *index(unsigned timeslot);
-    virtual Timeslot *request(void);
     virtual int start(void);
     virtual void stop(void);
 
@@ -443,22 +468,36 @@ public:
     inline static unsigned getUsed(void)
         {return instance->tsUsed;};
 
-    inline static Timeslot *getAvailable(void)
-        {return instance->request();};
-
     static Group *getGroup(const char *id);
 
     static Group *getSpan(unsigned id);
 
     static Group *getSpan(const char *id);
 
-    static Timeslot *getTimeslot(unsigned index);
+    static Timeslot *access(unsigned index);
+
+    static Timeslot *request(Group *group = NULL);
+
+    static void release(Timeslot *timeslot);
 
     static keydata *getPaths(void);
 
     static int startup(void);
 
     static void shutdown(void);
+};
+
+class Timeslot : public Script::interp, public Mutex
+{
+protected:
+    virtual bool post(Event *event) = 0;
+
+public:
+    Timeslot(unsigned port, unsigned span = (unsigned) -1);
+
+    virtual unsigned long getIdle(void);        // idle time
+
+    bool send(Event *event, tssend_t mode = SEND_NORMAL);
 };
 
 END_NAMESPACE
