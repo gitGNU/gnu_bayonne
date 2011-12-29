@@ -106,7 +106,7 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
     else if(detached)
         detached = Driver::getDetached();
 
-    if(is(background) && svc)
+    if((is(background) || is(altback)) && svc)
         detached = true;
     else if(is(foreground))
         detached = false;

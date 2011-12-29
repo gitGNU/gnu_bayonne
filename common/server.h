@@ -16,10 +16,16 @@
 #include <config.h>
 #include <bayonne.h>
 
+#define MAX_DIGITS      48
+#define MAX_NAME_LEN    64
+
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
 class Timeslot;
+
+typedef uint16_t    keymask_t;
+typedef uint32_t    sigmask_t;
 
 /**
  * Bayonne driver state tables.  When a script command requires the driver to
@@ -287,7 +293,7 @@ typedef union {
         unsigned index;             // index into parsed rule list
         unsigned long offset;
         unsigned long limit;
-        unsigned short terminate;   // termination keys...
+        keymask_t terminate;    // termination keys...
         timeout_t timeout, maxtime;
         unsigned repeat, volume;
         float gain, pitch;
@@ -300,7 +306,7 @@ typedef union {
         const char *annotation, *encoding, *text;
         timeout_t timeout;          // max record time
         unsigned long offset;
-        unsigned short terminate;
+        keymask_t terminate;
         unsigned long silence, trim, minsize;
         unsigned volume;
         float gain;
@@ -312,7 +318,7 @@ typedef union {
     } record;
 
     struct {
-        char digits[65];
+        char digits[MAX_DIGITS + 1];
         char *digit;                // pointer into digits
         const char *callingdigit;
         bool exit;                  // hangup on completion flag
@@ -327,8 +333,8 @@ typedef union {
     struct {
         timeout_t timeout, first;
         unsigned count;
-        unsigned short terminate;
-        unsigned short ignore;
+        keymask_t terminate;
+        keymask_t ignore;
         void *map;
         const char *var;
     } collect;
@@ -377,16 +383,46 @@ typedef struct {
     } parm;
 } TSEvent;
 
+class Group : public LinkedObject
+{
+protected:
+    friend class Driver;
+
+    keydata *keys;
+    const char *id;
+
+    unsigned tsFirst, tsCount;
+    unsigned span;
+
+    Group(const char *name);
+    Group(unsigned count);
+};
+
 class Driver
 {
 private:
+    friend class Group;
+
     static Driver *instance;
 
 protected:
     bool detached;
     const char *name;
+    unsigned tsCount, tsUsed, tsSpan;
+    Timeslot *tsIndex;                  // array...
+    char *status;
+    keydata *keys;
 
-    Driver();
+    volatile unsigned active, down;
+
+    Driver(const char *name, const char *registry = "groups");
+
+    virtual Timeslot *index(unsigned timeslot);
+    virtual Timeslot *request(void);
+    virtual int start(void);
+    virtual void stop(void);
+
+    keydata *getKeys(const char *groupid);
 
 public:
     inline static Driver *getDriver(void)
@@ -398,9 +434,31 @@ public:
     inline static const char *getName(void)
         {return instance->name;};
 
+    inline static const char *getStatus(void)
+        {return instance->status;};
+
+    inline static unsigned getCount(void)
+        {return instance->tsCount;};
+
+    inline static unsigned getUsed(void)
+        {return instance->tsUsed;};
+
+    inline static Timeslot *getAvailable(void)
+        {return instance->request();};
+
+    static Group *getGroup(const char *id);
+
+    static Group *getSpan(unsigned id);
+
+    static Group *getSpan(const char *id);
+
+    static Timeslot *getTimeslot(unsigned index);
+
     static keydata *getPaths(void);
 
-    static void config(void);
+    static int startup(void);
+
+    static void shutdown(void);
 };
 
 END_NAMESPACE

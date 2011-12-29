@@ -24,7 +24,6 @@ public:
     driver();
 } _driver_;
 
-driver::driver() : Driver()
+driver::driver() : Driver("exosip2", "registry")
 {
-    name = "exosip2";
 }
