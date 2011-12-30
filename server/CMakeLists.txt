@@ -19,3 +19,13 @@ if(HAVE_VPBAPI)
 
     install(TARGETS bayonne-server-vpbapi DESTINATION ${INSTALL_SBINDIR})
 endif()
+
+file(GLOB simulator_src simulator/*.cpp)
+file(GLOB simulator_inc simulator/*.h)
+
+add_executable(bayonne-simulator ${simulator_src} ${simulator_inc})
+add_dependencies(bayonne-simulator bayonne-server bayonne-runtime ucommon)
+target_link_libraries(bayonne-simulator bayonne-server bayonne-runtime ucommon ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
+
+install(TARGETS bayonne-simulator DESTINATION ${INSTALL_BINDIR})
+
