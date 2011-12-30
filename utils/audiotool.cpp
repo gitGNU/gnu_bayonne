@@ -1112,6 +1112,7 @@ PROGRAM_MAIN(argc, argv)
 
     Env::tool(&args);
 
+    rules.appname = rules.extension = NULL;
     rules.voices = *voice;
 
     if(is(prefix))

@@ -67,7 +67,9 @@ static void corefiles(void)
 #ifdef  DEBUG
 static void dumpconfig(void)
 {
-    printf("definitions = %s\n", Env::get("definitions"));
+    printf("configs = %s\n", BAYONNE_CFGPATH);
+    printf("defines = %s\n", Env::get("definitions"));
+    printf("libexec = %s\n", BAYONNE_LIBEXEC);
     printf("scripts = %s\n", Env::get("scripts"));
     printf("voices = %s\n", Env::get("voices"));
     exit(0);

@@ -104,6 +104,7 @@ static void display(char **args)
         else
             ruleset->literal(arg, &state.rule);
 
+        ruleset.appname = ruleset.extension = NULL;
         ruleset.voices = *voice;
 
         if(*out == NULL) {

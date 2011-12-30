@@ -303,6 +303,7 @@ typedef union {
             Phrasebook::rule_t rule;
             char path[1024];
         } list;
+        Env::pathinfo_t pathinfo;
         unsigned index;             // index into parsed rule list
         unsigned long offset;
         unsigned long limit;
@@ -315,6 +316,7 @@ typedef union {
     } play;
 
     struct {
+        Env::pathinfo_t pathinfo;
         const char *name, *save;
         const char *annotation, *encoding, *text;
         timeout_t timeout;          // max record time

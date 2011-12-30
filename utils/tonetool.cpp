@@ -90,6 +90,7 @@ void writeTones(char **argv, bool append)
     if(!append)
         make.encoding = Audio::getEncoding(*encoding);
 
+    ruleset.appname = ruleset.extension = NULL;
     ruleset.voices = *voice;
 
     if(!Env::path(ruleset, target, pathbuf, sizeof(pathbuf), true))

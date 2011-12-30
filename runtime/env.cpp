@@ -199,6 +199,8 @@ const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t siz
 
     if(ext)
         ext = "";
+    else if(pi.extension)
+        ext = pi.extension;
     else
         ext = env("extension");
 

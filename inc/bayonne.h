@@ -1254,9 +1254,7 @@ public:
         Phrasebook *book;
         const char *voices;
         const char *appname;
-
-        inline pathinfo_t()
-            {book = NULL; voices = appname = NULL;};
+        const char *extension;
 
         inline void reset(void)
             {book = NULL; voices = appname = NULL;};
