@@ -64,9 +64,9 @@ static void corefiles(void)
 #ifdef  DEBUG
 static void dumpconfig(void)
 {
-    printf("definitions = %s\n", Env::config("definitions"));
-    printf("scripts = %s\n", Env::config("scripts"));
-    printf("voices = %s\n", Env::config("voices"));
+    printf("definitions = %s\n", Env::get("definitions"));
+    printf("scripts = %s\n", Env::get("scripts"));
+    printf("voices = %s\n", Env::get("voices"));
     exit(0);
 }
 #endif

@@ -1278,8 +1278,6 @@ public:
     static inline const char *env(const char *id)
         {return sys->getsym(id);};
 
-    static const char *config(const char *name);
-
     static const char *path(pathinfo_t& pathinfo, const char *path, char *buffer, size_t size, bool write = false);
 };
 

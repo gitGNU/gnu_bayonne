@@ -18,9 +18,9 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-static keyfile keyserver(DEFAULT_CFGPATH "/bayonne/server.conf");
-static keyfile keydriver(DEFAULT_CFGPATH "/bayonne/driver.conf");
-static keyfile keyspans(DEFAULT_CFGPATH "/bayonne/spans.conf");
+static keyfile keyserver(BAYONNE_CFGPATH "/server.conf");
+static keyfile keydriver(BAYONNE_CFGPATH "/driver.conf");
+static keyfile keyspans(BAYONNE_CFGPATH "/spans.conf");
 static keyfile keygroup;
 static Group *groups = NULL, *spans = NULL;
 static unsigned spanid = 0;
@@ -80,7 +80,7 @@ Driver::Driver(const char *id, const char *registry)
     tsCount = tsUsed = tsSpan = active = down = 0;
     name = id;
 
-    keygroup.load(strdup(str(DEFAULT_CFGPATH "/bayonne/") + str(registry) + str(".conf")));
+    keygroup.load(strdup(str(BAYONNE_CFGPATH) + str(registry) + str(".conf")));
 
 #ifndef _MSWINDOWS_
     const char *home = NULL;

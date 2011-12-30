@@ -40,9 +40,6 @@ bool Env::init(shell_t *args)
     const char *prefix = "C:\\Program Files\\bayonne";
     const char *plugins = "C:\\Program Files\\bayonne\\plugins";
 
-    set("config", _STR(str(prefix) + "/bayonne.ini"));
-    set("configs", _STR(str(prefix) + "\\config\\"));
-    set("services", _STR(str(prefix) + "/services"));
     set("controls", rundir);
     set("control", "\\\\.\\mailslot\\bayonne_ctrl");
     set("snapshot", _STR(str(rundir) + "/snapshot.log"));
@@ -68,9 +65,6 @@ bool Env::init(shell_t *args)
     const char *plugins = DEFAULT_LIBPATH "/bayonne";
 
     set("reply", "/tmp/.bayonne.");
-    set("config", DEFAULT_CFGPATH "/bayonne.conf");
-    set("configs", DEFAULT_CFGPATH "/bayonne/");
-    set("services", DEFAULT_SCRPATH);
     set("controls", DEFAULT_VARPATH "/run/bayonne");
     set("control", DEFAULT_VARPATH "/run/bayonne/control");
     set("snapshot", DEFAULT_VARPATH "/run/bayonne/snapshot");
@@ -84,7 +78,7 @@ bool Env::init(shell_t *args)
     set("audio", DEFAULT_DATADIR "/bayonne");
     set("sounds", DEFAULT_DATADIR "/sounds");
     set("applications", DEFAULT_DATADIR "/bayonne");
-    set("definitions", DEFAULT_DATADIR "/bayonne");
+    set("definitions", DEFAULT_LIBPATH "/bayonne");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/phrasebook");
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");
@@ -116,11 +110,7 @@ bool Env::init(shell_t *args)
         rundir = strdup(str("/tmp/bayonne-") + str(pwd->pw_name));
         prefix = home_prefix;
 
-        set("config", _STR(str(pwd->pw_dir) + "/.bayonnerc"));
-        set("configs", home_prefix);
         set("scripts", home_prefix);
-        set("sysconfigs", _STR(str(DEFAULT_CFGPATH) + "/bayonne"));
-        set("services", prefix);
         set("controls", rundir);
         set("control", _STR(str(rundir) + "/control"));
         set("snapshot", _STR(str(rundir) + "/snapshot"));
@@ -148,25 +138,6 @@ void Env::tool(shell_t *args)
 {
     tool_flag = true;
     init(args);
-}
-
-const char *Env::config(const char *name)
-{
-    // if we have cached copy of config path, use it...
-    const char *result = env(name);
-    if(result)
-        return result;
-
-    const char *sysconfig = env("sysconfig");
-
-    string_t filename = str(env("configs")) + str(name);
-
-    if(sysconfig && !fsys::isfile(*filename))
-        filename = str(sysconfig) + str(name);
-
-    // cache and use requested config path...
-    set(name, *filename);
-    return env(name);
 }
 
 const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t size, bool writeflag)

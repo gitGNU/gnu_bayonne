@@ -62,7 +62,7 @@ BAYONNE_FLAGS=""
 
 test -z "$ac_with_malloc" && ac_with_malloc=""
 test -z "$plugindir" && plugindir='${libdir}'
-test -z "$scriptdir" && scriptdir='${sysconfdir}/bayonne.d'
+test -z "$scriptdir" && scriptdir='${datadir}/bayonne'
 
 AC_DEFUN([AC_SUBST_DIR], [
     ifelse($2,,,$1="[$]$2")
@@ -276,12 +276,11 @@ case "$BAYONNE_FLAGS -I/usr/include" in
     ;;
 esac
 
-AC_DEFINE_UNQUOTED(DEFAULT_SCRPATH, "$default_scrpath", [script path])
-AC_DEFINE_UNQUOTED(DEFAULT_CFGPATH, "$default_cfgpath", [config path])
-AC_DEFINE_UNQUOTED(DEFAULT_VARPATH, "$default_varpath", [run path])
-AC_DEFINE_UNQUOTED(DEFAULT_LIBPATH, "$default_libpath", [lib path])
-AC_DEFINE_UNQUOTED(DEFAULT_LIBEXEC, "$default_libexec", [script path])
-AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [data path])
+AC_DEFINE_UNQUOTED(BAYONNE_CFGPATH, "$default_cfgpath/bayonne", [config path])
+AC_DEFINE_UNQUOTED(BAYONNE_LIBEXEC, "$default_libexec/bayonne", [script path])
+AC_DEFINE_UNQUOTED(DEFAULT_LIBPATH, "$default_libpath", [default libs])
+AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [default data])
+AC_DEFINE_UNQUOTED(DEFAULT_VARPATH, "$default_varpath", [default varpath])
 AC_DEFINE_UNQUOTED(DEFAULT_PAGING, $default_paging, [default page size])
 
 AC_CHECK_LIB(msvcrt, fopen, [

@@ -9,11 +9,11 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
 LDADD = ../../common/libserver.a ../../runtime/libbayonne.la -lvpb @BAYONNE_LIBS@
 
 sbin_PROGRAMS = bayonne-server-vpbapi
 noinst_HEADERS = driver.h
 
-bayonne_server_exosip2_SOURCES = driver.cpp
+bayonne_server_vpbapi_SOURCES = driver.cpp
 
