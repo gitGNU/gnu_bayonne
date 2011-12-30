@@ -21,6 +21,7 @@ using namespace UCOMMON_NAMESPACE;
 #if defined(HAVE_SETRLIMIT) && defined(DEBUG)
 #include <sys/time.h>
 #include <sys/resource.h>
+#endif
 
 static shell::flagopt helpflag('h',"--help",    _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
@@ -38,6 +39,8 @@ static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext"
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
 static shell::flagopt version(0, "--version", _TEXT("show version information"));
 
+
+#if defined(HAVE_SETRLIMIT) && defined(DEBUG)
 static void corefiles(void)
 {
     struct rlimit core;
