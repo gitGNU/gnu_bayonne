@@ -499,17 +499,20 @@ public:
     static void shutdown(void);
 };
 
-class Timeslot : public Script::interp, public Mutex
+class Timeslot : protected Script::interp, protected Mutex
 {
 protected:
+    friend class Message;
+    friend class Driver;
+
     Group *incoming;        // incoming group to answer as...
     Group *span;
 
     virtual bool post(Event *event) = 0;
 
-public:
     Timeslot(unsigned port, Group *group = NULL);
 
+public:
     virtual unsigned long getIdle(void);        // idle time
 
     bool send(Event *event, tssend_t mode = SEND_NORMAL);

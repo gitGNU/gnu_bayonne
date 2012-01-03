@@ -89,7 +89,10 @@ void Message::deliver(void)
     linked_pointer<Message> mp;
 
     while(is(mp)) {
-        mp->ts->send(&mp->event);
+        register Timeslot *ts = mp->ts;
+        ts->lock();
+        ts->post(&mp->event);
+        ts->unlock();
         mp.next();
     }
     msgs = NULL;
