@@ -164,7 +164,18 @@ fi
 
 AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
 
+has_phonedev="no"
+
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
+AC_CHECK_HEADERS(sys/ixjuser.h linux/ixjuser.h)
+AC_CHECK_HEADER(sys/telephony.h, [
+    has_phonedev="yes"
+    AC_DEFINE(HAVE_SYS_TELEPHONY_H, [1], ["have bsd telephony"])
+])
+AC_CHECK_HEADER(linux/telephony.h, [
+    has_phonedev="yes"
+    AC_DEFINE(HAVE_LINUX_TELEPHONY_H, [1], ["have bsd telephony"])
+])
 
 PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
     has_eXosip2="yes"
@@ -209,6 +220,9 @@ fi
 
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
+
+if test x"$has_phonedev" = "xyes" ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS phonedev" ; fi
 
 #if test -z "$BUILD_SUBDIRS" ; then
 #   AC_ERROR([no buildable targets.  Stopped])
@@ -309,5 +323,6 @@ AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
 bayonne.pc bayonne-config server/Makefile common/Makefile
 server/simulator/Makefile
 server/exosip2/Makefile
-server/vpbapi/Makefile)
+server/vpbapi/Makefile
+server/phonedev/Makefile)
 

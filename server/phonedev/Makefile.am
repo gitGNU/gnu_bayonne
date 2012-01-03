@@ -1,4 +1,4 @@
-# Copyright (C) 2011 David Sugar, Tycho Softworks.
+# Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -9,8 +9,11 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-EXTRA_DIST = CMakeLists.txt
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
+LDADD = ../../common/libserver.a ../../runtime/libbayonne.la @BAYONNE_LIBS@
 
-SUBDIRS = simulator @BUILD_SUBDIRS@
-DIST_SUBDIRS = simulator exosip2 vpbapi phonedev
+sbin_PROGRAMS = bayonne-server-phonedev
+noinst_HEADERS = driver.h
+
+bayonne_server_phonedev_SOURCES = driver.cpp
 
