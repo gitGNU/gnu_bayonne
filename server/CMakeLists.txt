@@ -20,6 +20,17 @@ if(HAVE_VPBAPI)
     install(TARGETS bayonne-server-vpbapi DESTINATION ${INSTALL_SBINDIR})
 endif()
 
+if(HAVE_SYS_TELEPHONY_H OR HAVE_LINUX_TELEPHONY_H)
+    file(GLOB phonedev_src phonedev/*.cpp)
+    file(GLOB phonedev_inc phonedev/*.h)
+
+    add_executable(bayonne-server-phonedev ${phonedev_src} ${phonedev_inc})
+    add_dependencies(bayonne-server-phonedev bayonne-server bayonne-runtime ucommon)
+    target_link_libraries(bayonne-server-phonedev bayonne-server bayonne-runtime ucommon ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
+
+    install(TARGETS bayonne-server-phonedev DESTINATION ${INSTALL_SBINDIR})
+endif()
+
 file(GLOB simulator_src simulator/*.cpp)
 file(GLOB simulator_inc simulator/*.h)
 

@@ -18,6 +18,10 @@
 #define BAYONNE_CFGPATH "${BAYONNE_CFGPATH}"
 #define DEFAULT_PAGING  "${DEFAULT_PAGING}"
 
+#cmakedefine HAVE_SYS_TELEPHONY_H 1
+#cmakedefine HAVE_SYS_IXJUSER_H 1
+#cmakedefine HAVE_LINUX_TELEPHONY_H 1
+#cmakedefine HAVE_LINUX_IXJUSER_H 1
 #cmakedefine HAVE_SYS_RESOURCE_H 1
 #cmakedefine HAVE_PWD_H 1
 #cmakedefine HAVE_ENDIAN_H 1
