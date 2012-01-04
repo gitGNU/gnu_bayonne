@@ -218,6 +218,16 @@ if test x"$has_eXosip2" = "xyes" ; then
     esac
 fi
 
+AC_PATH_PROG([PTLIB_CONFIG],[ptlib-config],[none])
+if test "$PTLIB_CONFIG" != "none" ; then
+    OPENH323_PREFIX=`$PTLIB_CONFIG --prefix`
+    CXXFLAGS="$CXXFLAGS -I${OPENH323_PREFIX}/include/openh323"
+    OPENH323_FLAGS=`$PTLIB_CONFIG --ccflags`
+    OPENH323_LIBS=`$PTLIB_CONFIG --libs`
+    if test -d "${OPENH323_PREFIX}/include/openh323" ; then
+        BUILD_SUBDIRS="$BUILD_SUBDIRS openh323" ; fi
+fi
+
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
 
@@ -315,6 +325,8 @@ AC_SUBST(BAYONNE_FLAGS)
 AC_SUBST(BAYONNE_LIBS)
 AC_SUBST(EXOSIP2_LIBS)
 AC_SUBST(EXOSIP2_FLAGS)
+AC_SUBST(OPENH323_LIBS)
+AC_SUBST(OPENH323_FLAGS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)
@@ -324,5 +336,7 @@ bayonne.pc bayonne-config server/Makefile common/Makefile
 server/simulator/Makefile
 server/exosip2/Makefile
 server/vpbapi/Makefile
-server/phonedev/Makefile)
+server/phonedev/Makefile
+server/openh323/Makefile
+)
 
