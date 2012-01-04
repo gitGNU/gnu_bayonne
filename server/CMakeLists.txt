@@ -31,7 +31,16 @@ if(HAVE_CAPI20)
     install(TARGETS bayonne-server-capi20 DESTINATION ${INSTALL_SBINDIR})
 endif()
 
+if(HAVE_PIKA)
+    file(GLOB pika_src pika/*.cpp)
+    file(GLOB pika_inc pika/*.h)
 
+    add_executable(bayonne-server-pika ${pika_src} ${pika_inc})
+    add_dependencies(bayonne-server-pika bayonne-server bayonne-runtime ucommon)
+    target_link_libraries(bayonne-server-pika bayonne-server bayonne-runtime ucommon monty pk_cti pk_dsp ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
+
+    install(TARGETS bayonne-server-pika DESTINATION ${INSTALL_SBINDIR})
+endif()
 
 if(HAVE_SYS_TELEPHONY_H OR HAVE_LINUX_TELEPHONY_H)
     file(GLOB phonedev_src phonedev/*.cpp)

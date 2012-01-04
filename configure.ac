@@ -168,6 +168,7 @@ has_phonedev="no"
 
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
 AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
+AC_CHECK_HEADER(MonteCarlo.h, [has_pika="yes"],[has_pika="no"])
 AC_CHECK_HEADERS(sys/ixjuser.h linux/ixjuser.h)
 AC_CHECK_HEADER(sys/telephony.h, [
     has_phonedev="yes"
@@ -231,6 +232,9 @@ fi
 
 if test x"$has_capi20" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS capi20" ; fi
+
+if test x"$has_pika" = "xyes" ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS pika" ; fi
 
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
@@ -341,6 +345,7 @@ server/simulator/Makefile
 server/exosip2/Makefile
 server/vpbapi/Makefile
 server/capi20/Makefile
+server/pika/Makefile
 server/phonedev/Makefile
 server/openh323/Makefile
 )
