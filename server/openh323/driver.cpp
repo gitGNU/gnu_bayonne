@@ -24,6 +24,6 @@ public:
     driver();
 } _driver_;
 
-driver::driver() : Driver("vpb")
+driver::driver() : Driver("h323", "registry")
 {
 }
