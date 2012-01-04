@@ -166,9 +166,12 @@ AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
 
 has_phonedev="no"
 
+AC_LANG(C++)
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
-AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
 AC_CHECK_HEADER(MonteCarlo.h, [has_pika="yes"],[has_pika="no"])
+AC_LANG(C)
+
+AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
 AC_CHECK_HEADERS(sys/ixjuser.h linux/ixjuser.h)
 AC_CHECK_HEADER(sys/telephony.h, [
     has_phonedev="yes"
