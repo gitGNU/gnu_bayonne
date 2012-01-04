@@ -20,6 +20,19 @@ if(HAVE_VPBAPI)
     install(TARGETS bayonne-server-vpbapi DESTINATION ${INSTALL_SBINDIR})
 endif()
 
+if(HAVE_CAPI20)
+    file(GLOB capi20_src capi20/*.cpp)
+    file(GLOB capi20_inc capi20/*.h)
+
+    add_executable(bayonne-server-capi20 ${capi20_src} ${capi20_inc})
+    add_dependencies(bayonne-server-capi20 bayonne-server bayonne-runtime ucommon)
+    target_link_libraries(bayonne-server-capi20 bayonne-server bayonne-runtime ucommon capi20 ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
+
+    install(TARGETS bayonne-server-vpbapi DESTINATION ${INSTALL_SBINDIR})
+endif()
+
+
+
 if(HAVE_SYS_TELEPHONY_H OR HAVE_LINUX_TELEPHONY_H)
     file(GLOB phonedev_src phonedev/*.cpp)
     file(GLOB phonedev_inc phonedev/*.h)

@@ -167,6 +167,7 @@ AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
 has_phonedev="no"
 
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
+AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
 AC_CHECK_HEADERS(sys/ixjuser.h linux/ixjuser.h)
 AC_CHECK_HEADER(sys/telephony.h, [
     has_phonedev="yes"
@@ -227,6 +228,9 @@ if test "$PTLIB_CONFIG" != "none" ; then
     if test -d "${OPENH323_PREFIX}/include/openh323" ; then
         BUILD_SUBDIRS="$BUILD_SUBDIRS openh323" ; fi
 fi
+
+if test x"$has_capi20" = "xyes" ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS capi20" ; fi
 
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
@@ -336,6 +340,7 @@ bayonne.pc bayonne-config server/Makefile common/Makefile
 server/simulator/Makefile
 server/exosip2/Makefile
 server/vpbapi/Makefile
+server/capi20/Makefile
 server/phonedev/Makefile
 server/openh323/Makefile
 )
