@@ -1,4 +1,4 @@
-# Copyright (C) 2011 David Sugar, Tycho Softworks.
+# Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -9,9 +9,11 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-EXTRA_DIST = CMakeLists.txt
+AM_CXXFLAGS = -I$(top_srcdir)/inc @ACULAB_FLAGS@ @ACULAB_ASR_FLAGS@ @BAYONNE_FLAGS@ -DLINUX -DUNIX_SYSTEM -DSM_POLL_UNIX -DSM_THREAD_UNIX -Dfar= -DTiNGTYPE_LINUX
+LDADD = ../../common/libserver.a ../../runtime/libbayonne.la @ACULAB_ASR_LIBS@ @ACULAB_LIBS@ @BAYONNE_LIBS@
 
-SUBDIRS = simulator @BUILD_SUBDIRS@
-DIST_SUBDIRS = simulator exosip2 vpbapi phonedev openh323 capi20 \
-	pika dialogic aculab
+sbin_PROGRAMS = bayonne-server-aculab
+noinst_HEADERS = driver.h
+
+bayonne_server_aculab_SOURCES = driver.cpp
 

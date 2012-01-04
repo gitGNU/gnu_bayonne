@@ -223,8 +223,8 @@ fi
 AC_PATH_PROG([PTLIB_CONFIG],[ptlib-config],[none])
 if test "$PTLIB_CONFIG" != "none" ; then
     OPENH323_PREFIX=`$PTLIB_CONFIG --prefix`
-    CXXFLAGS="$CXXFLAGS -I${OPENH323_PREFIX}/include/openh323"
     OPENH323_FLAGS=`$PTLIB_CONFIG --ccflags`
+    OPENH323_FLAGS="$OPENH323_FLAGS -I${OPENH323_PREFIX}/include/openh323"
     OPENH323_LIBS=`$PTLIB_CONFIG --libs`
     if test -d "${OPENH323_PREFIX}/include/openh323" ; then
         BUILD_SUBDIRS="$BUILD_SUBDIRS openh323" ; fi
@@ -241,6 +241,78 @@ if test x"$has_vpbapi" = "xyes" ; then
 
 if test x"$has_phonedev" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS phonedev" ; fi
+
+if test -d /usr/dialogic/lib ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS dialogic" ; fi
+
+bayonne_cv_aculab_driver=false
+ACULAB_LIBS=""
+ACULAB_FLAGS=""
+ACULAB_ASR_LIBS=""
+ACULAB_ASR_FLAGS=""
+
+AC_CHECK_HEADERS(mvcldrvr.h,[
+    AC_DEFINE(HAVE_ACULAB_MVCLDRVR_H, [1], [aculab control driver])
+    bayonne_cv_aculab_driver=true
+    ACULAB_LIBS="$ACULAB_LIBS -lmvcl"])
+AC_CHECK_HEADERS(mvswdrvr.h,[
+    AC_DEFINE(HAVE_ACULAB_MVSWDRVR_H, [1], [aculab switch driver])
+    bayonne_cv_aculab_driver=true
+    ACULAB_LIBS="$ACULAB_LIBS -lmvsw"])
+AC_CHECK_HEADERS(smdrvr.h,[
+    AC_DEFINE(HAVE_ACULAB_SMDRVR_H, [1], [aculab support])
+    bayonne_cv_aculab_driver=true
+    ACULAB_LIBS="$ACULAB_LIBS -lmvsm"])
+
+if test $bayonne_cv_aculab_driver = false ; then
+    if test ! -z "$aculab_prefix" ; then
+        acudir=$aculab_prefix
+    elif test -d $prefix/$target ; then
+        acudir=$prefix/$target/dtk111
+    elif test -d $prefix/dtk111 ; then
+        acudir=$prefix/dtk111
+    else
+        acudir=/usr/src/aculab/dtk111
+    fi
+    AC_MSG_CHECKING([for Aculab api ($acudir)])
+    if test -e $acudir/setV6.sh ; then
+        AC_DEFINE(HAVE_ACULAB_MVCLDRVR_H)
+        AC_DEFINE(HAVE_ACULAB_MVSWDRVR_H)
+        AC_DEFINE(HAVE_ACULAB_SMDRVR_H)
+        ACULAB_LIBS="$ACULAB_LIBS -L$acudir/lib -lacu_cl -lacu_sw -lacu_iptel -lTiNGshared $acudir/ting/apilib/gen-LINUX_V6/TiNGcore.o $acudir/ting/highapi/gen-LINUX_V6/smhlib.o $acudir/ting/highapi/gen-LINUX_V6/smbfhlib.o $acudir/ting/highapi/gen-LINUX_V6/smclib.o $acudir/ting/libutil/gen-LINUX_V6/bfile.o $acudir/ting/apilib/gen-LINUX_V6/prosody_x.o $acudir/ting/apilib/gen-LINUX_V6/prosody_s.o $acudir/ting/apilib/gen-LINUX_V6/prosody_pci.o"
+        ACULAB_FLAGS="-I$acudir/include -I$acudir/ting -I$acudir/ting/include"
+        bayonne_cv_aculab_driver=true
+    fi
+    if test $bayonne_cv_aculab_driver = true ; then
+        BUILD_SUBDIRS="$BUILD_SUBDIRS aculab"
+        AC_MSG_RESULT(found)
+    else
+        AC_MSG_RESULT(missing)
+    fi
+
+    bayonne_cv_aculab_asr=false
+    if test ! -z "$acuasr_prefix"; then
+        acuasrdir=$acuasr_prefix
+    else
+        acuasrdir=$prefix/dtk132/asr
+    fi
+    AC_MSG_CHECKING([for Aculab ASR engine ($acuasrdir)])
+    if test -f $acuasrdir/ASRClient/smcwr_api.h; then
+        AC_DEFINE(HAVE_ACULAB_ASR, [1], [aculab asr engine])
+        ACULAB_ASR_LIBS="$acuasrdir/ASRCommon/ASRCommon.a $acuasrdir/ASRShare/ASRShare.a $acuasrdir/ASRClient/ASRClient.a"
+        ACULAB_ASR_FLAGS="-I$acuasrdir/ASRClient"
+        bayonne_cv_aculab_asr=true
+    fi
+    if test $bayonne_cv_aculab_asr = true ; then
+        AC_MSG_RESULT(found)
+    else
+        AC_MSG_RESULT(missing)
+    fi
+fi
+AC_SUBST(ACULAB_ASR_LIBS)
+AC_SUBST(ACULAB_ASR_FLAGS)
+AC_SUBST(ACULAB_LIBS)
+AC_SUBST(ACULAB_FLAGS)
 
 #if test -z "$BUILD_SUBDIRS" ; then
 #   AC_ERROR([no buildable targets.  Stopped])
@@ -348,5 +420,7 @@ server/capi20/Makefile
 server/pika/Makefile
 server/phonedev/Makefile
 server/openh323/Makefile
+server/dialogic/Makefile
+server/aculab/Makefile
 )
 
