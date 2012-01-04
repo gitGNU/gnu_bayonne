@@ -28,7 +28,7 @@ if(HAVE_CAPI20)
     add_dependencies(bayonne-server-capi20 bayonne-server bayonne-runtime ucommon)
     target_link_libraries(bayonne-server-capi20 bayonne-server bayonne-runtime ucommon capi20 ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
 
-    install(TARGETS bayonne-server-vpbapi DESTINATION ${INSTALL_SBINDIR})
+    install(TARGETS bayonne-server-capi20 DESTINATION ${INSTALL_SBINDIR})
 endif()
 
 
