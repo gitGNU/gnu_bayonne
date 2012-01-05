@@ -1,0 +1,43 @@
+This package is collectively known as GNU Bayonne.
+
+This package is collectively licensed using the GNU General Public License
+version 3.0 or later.
+
+The primary copyright holder is David Sugar and Tycho Softworks, both
+directly and through copyright assignment.
+
+GNU Bayonne was held in copyright directly and by assignment by Open Source
+Telecom corporation prior to dissolution in 2005.  At that time OST was
+dissolved full copyright to Bayonne, as well as to Common C++, ccScript, and
+ccAudio, was reverted in full to David Sugar, as well as given separately and
+in full to Rich Bodo, Mark Lipscombe, and Martin Clinton.  This branch is
+derived from my distribution and is held in copyright by me and Tycho
+Softworks.
+
+While under OST Bayonne was licensed using the GNU General Public License, and
+explicit exceptions were offered to link with the Dialogic, Pika Technologies,
+and Aculab runtime libraries so that everyone receiving the software had the
+same rights and freedom to modify it and distribute their modifications that
+OST itself already enjoyed as an exclusive copyright holder.
+
+While there is no new support for these runtime environments and hardware, we
+have chosen to continue these drivers for those who may have existing hardware
+in the field they wish to support and upgrade to newer maintained releases of
+GNU Bayonne, and to do so offering the very same freedoms as before.  
+
+If you do not wish to apply these exceptions downstream and distribute only
+supporting hardware that offers free software drivers and api's, you are free
+to do so, to remove this privilege from the license, and to remove the
+dialogic, aculab, and pika subdirectories from your re-distribution.  
+
+This privilege to link with these specific runtime libraries does not mean that
+your own resulting code may not fall under the GNU General Public License for
+other reasons, nor does it in any way allow you to distribute modified versions
+of GNU Bayonne or parts of it outside of the conditions of the GNU General
+Public License.  If you distribute or otherwise convey GNU Bayonne binaries
+built with the Intel-Dialogic driver, for one example, that which was received
+as GNU Bayonne must also be redistributed or otherwise made available in source
+in full, including local modifications if any, as per the GNU General Public
+License.
+
+
