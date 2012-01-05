@@ -14,8 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <common/server.h>
-#include <eXosip2/eXosip.h>
 #include <ucommon/secure.h>
+#include <eXosip2/eXosip.h>
+#include <ortp/ortp.h>
 
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"
