@@ -208,8 +208,6 @@ PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
 ])
 
 if test x"$has_eXosip2" = "xyes" ; then
-    BUILD_SUBDIRS="$BUILD_SUBDIRS exosip2"
-
     PKG_CHECK_MODULES(LIBOSIP2, libosip2 >= 3.0.0)
     AC_DEFINE(OSIP2_LIST_PTR, [&], [define pointer mode])
     EXOSIP2_LIBS="$EXOSIP2_LIBS $LIBOSIP2_LIBS"
@@ -220,6 +218,14 @@ if test x"$has_eXosip2" = "xyes" ; then
         EXOSIP2_LIBS="$EXOSIP2_LIBS -liphlpapi -ldnsapi"
         ;;
     esac
+
+    PKG_CHECK_MODULES(ORTP, ortp >= 0.16.0, [
+        EXOSIP2_LIBS="$EXOSIP2_LIBS $ORTP_LIBS"
+        EXOSIP2_FLAGS="$EXOSIP2_FLAGS $ORTP_CFLAGS"
+        BUILD_SUBDIRS="$BUILD_SUBDIRS exosip2"
+    ],[
+        has_eXosip2="no"
+    ])
 fi
 
 AC_PATH_PROG([PTLIB_CONFIG],[ptlib-config],[none])
