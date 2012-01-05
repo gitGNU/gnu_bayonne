@@ -244,7 +244,7 @@ if test x"$has_phonedev" = "xyes" ; then
 AC_ARG_ENABLE(nonfree,
     AC_HELP_STRING([--enable-nonfree],[enable non-free drivers]))
 
-if test $enable_nonfree = "yes" ; then
+if test "x$enable_nonfree" = "xyes" ; then
     AC_LANG(C++)
     AC_CHECK_HEADER(MonteCarlo.h, [has_pika="yes"],[has_pika="no"])
     AC_LANG(C)
