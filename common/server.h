@@ -235,15 +235,6 @@ typedef enum {
 } tsevent_t;
 
 /**
- * Posting mode for messages.
- */
-typedef enum {
-    SEND_LOCKED,    // assumed already locked...
-    SEND_NORMAL,    // normal mode, locks and unlocks
-    SEND_QUEUED     // queues message for delivery by dispatch thread
-}   tssend_t;
-
-/**
  * Speed adjustments for audio.  For timeslot drivers which can do this.
  */
 typedef enum {
@@ -508,14 +499,17 @@ protected:
     Group *incoming;        // incoming group to answer as...
     Group *span;
 
-    virtual bool post(Event *event) = 0;
-
     Timeslot(unsigned port, Group *group = NULL);
 
 public:
     virtual unsigned long getIdle(void);        // idle time
 
-    bool send(Event *event, tssend_t mode = SEND_NORMAL);
+    virtual bool post(Event *event);
+
+    bool send(Event *event);
+
+    inline void notify(Event *event)
+        {new Message(this, event);};
 };
 
 END_NAMESPACE

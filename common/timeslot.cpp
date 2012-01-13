@@ -42,21 +42,18 @@ unsigned long Timeslot::getIdle(void)
     return 0l;
 }
 
-bool Timeslot::send(Event *msg, tssend_t mode)
+bool Timeslot::post(Event *msg)
 {
-    if(mode == SEND_QUEUED) {
-        new Message(this, msg);
-        return true;
-    }
+    return false;
+}
 
-    if(mode == SEND_NORMAL)
-        lock();
+bool Timeslot::send(Event *msg)
+{
+    lock();
 
     bool rtn = post(msg);
 
-    if(mode == SEND_NORMAL)
-        unlock();
-
+    unlock();
     return rtn;
 }
 

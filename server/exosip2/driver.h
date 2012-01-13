@@ -15,6 +15,8 @@
 
 #include <common/server.h>
 #include <ucommon/secure.h>
+
+#pragma GCC diagnostic ignored "-Wvariadic-macros"
 #include <eXosip2/eXosip.h>
 #include <ortp/ortp.h>
 
