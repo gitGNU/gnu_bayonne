@@ -199,9 +199,25 @@ bool serial::set(const char *format)
             case 8:
                 current.ByteSize = (unsigned char)opt;
                 break;
-            default:
+            case 110:
+            case 300:
+            case 600:
+            case 1200:
+            case 2400:
+            case 4800:
+            case 9600:
+            case 14400:
+            case 19200:
+            case 38400:
+            case 57600:
+            case 115200:
+            case 128000:
+            case 256000:
                 current.BaudRate = opt;
                 break;
+            default:
+                error = EINVAL;
+                return false;
             }
             break;
         default:
