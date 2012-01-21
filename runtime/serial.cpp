@@ -41,7 +41,7 @@ Serial *Serial::create(const char *name)
 
 stringpager *Serial::list(void)
 {
-    return new stringpager();
+    return NULL;
 }
 
 #endif
