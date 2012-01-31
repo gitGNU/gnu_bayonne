@@ -296,6 +296,7 @@ CountedObject(), memalloc()
     global = NULL;
     headers = NULL;
     stack = NULL;
+    scheduler = NULL;
     scripts = (LinkedObject **)alloc(sizeof(LinkedObject **) * Script::indexing);
     memset(scripts, 0, sizeof(LinkedObject **) * Script::indexing);
 }

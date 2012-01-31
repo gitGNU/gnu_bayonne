@@ -18,6 +18,32 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
+static unsigned months(const char *text)
+{
+    static const char *table[] = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+
+    unsigned index = 0;
+    while(index < 12) {
+        if(case_eq(text, table[index++], 3))
+            return index;
+    }
+    return 0;
+}
+
+static unsigned days(const char *text)
+{
+    static const char *table[] = {"su", "mo", "tu", "we", "th", "fr", "sa"};
+
+    unsigned index = 0;
+    while(index < 7) {
+        if(case_eq(text, table[index++], 2))
+            return index;
+    }
+    return 0;
+}
+
+
+
 Scheduler::Scheduler(LinkedObject **root) :
 LinkedObject(root)
 {
@@ -50,11 +76,11 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
                 goto next;
         }
         // if we have dow and new one doesnt, we skip
-        if(selected_dow[7] && !sp->dow[7])
+        if(selected_dow[0] && !sp->dow[0])
             goto next;
 
         // if uses days, and not selected day, we skip...
-        if(sp->dow[7] && !sp->dow[now.getDayOfWeek()])
+        if(sp->dow[0] && !sp->dow[now.getDayOfWeek() + 1])
             goto next;
 
         // if we already have a month selection, skip
@@ -104,4 +130,88 @@ next:
         sp.next();
     }
     return selected_script;
+}
+
+void Scheduler::load(Script *image, const char *path)
+{
+    stringbuf<512> buffer;
+    charfile sf(path, "r");
+    char *group, *event, *token, *script;
+    char *tokens;
+    Scheduler *entry;
+    unsigned year, day, month, fdow, ldow;
+
+    if(!is(sf))
+        return;
+
+    while(sf.readline(buffer)) {
+        year = day = month = fdow = ldow = 0;
+        script = tokens = NULL;
+        group = String::token(buffer.c_mem(), &tokens, " \t", "{}\'\'\"\"");
+        if(!group || !event)
+            continue;
+
+        if(*group == '#')
+            continue;
+
+        event = strrchr(group, '/');
+        if(event)
+            *(event++) = 0;
+        else
+            event = (char *)"*";
+
+        if(eq(group, "*") || !*group)
+            group = NULL;
+        else
+            group = image->dup(group);
+
+        if(eq(event, "*"))
+            event = NULL;
+        else
+            event = image->dup(event);
+
+        while(NULL != (token = String::token(NULL, &tokens, " \t", "{}\'\'\"\""))) {
+            // if script, get it and done
+            if(*token == '@') {
+                script = image->dup(token);
+                break;
+            }
+            if(atoi(token) > 2000) {
+                year = atoi(token);
+                continue;
+            }
+            if(atoi(token)) {
+                day = atoi(token);
+                continue;
+            }
+            if((month = months(token)) > 0)
+                continue;
+
+            if((fdow = days(token)) > 0) {
+                token = strchr(token, '-');
+                if(!token) {
+                    ldow = fdow;
+                    continue;
+                }
+                ldow = days(++token);
+            }
+        }
+        if(!script)
+            continue;
+        caddr_t mp = (caddr_t)image->alloc(sizeof(Scheduler));
+        entry = new(mp) Scheduler(&image->scheduler);
+        entry->script = script;
+        entry->group = group;
+        entry->event = event;
+        if(month && day) {
+            entry->day = day;
+            entry->month = month;
+        }
+        if(fdow && ldow) {
+            entry->dow[0] = true;
+            while(fdow <= ldow) {
+                entry->dow[fdow++] = true;
+            }
+        }
+    }
 }

@@ -523,7 +523,7 @@ public:
     bool dow[8];
 
     static const char *select(Script *image, const char *group, const char *event);
-    static Scheduler *add(Script *image, const char *line);
+    static void load(Script *image, const char *path);
 };
 
 END_NAMESPACE
