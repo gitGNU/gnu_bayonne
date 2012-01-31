@@ -19,7 +19,7 @@ using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
 Timeslot::Timeslot(unsigned port, Group *group) :
-Script::interp(), Mutex()
+OrderedObject(), Script::interp(), Mutex()
 {
     const char *cp = NULL;
 

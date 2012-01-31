@@ -512,5 +512,20 @@ public:
         {new Message(this, event);};
 };
 
+class Schedule : public LinkedObject
+{
+protected:
+    void init(void);
+
+public:
+    const char *group, *event, *script;
+    unsigned year, month, start, end;
+    bool dow[8];
+
+    Schedule();
+
+    void select(LinkedObject *list);
+};
+
 END_NAMESPACE
 
