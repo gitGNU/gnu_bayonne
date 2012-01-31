@@ -151,6 +151,7 @@ if(NOT BUILD_RUNTIME_TYPE)
     set(BUILD_RUNTIME_TYPE ${BUILD_LIBRARY_TYPE})
 endif()
 
+check_include_files(sys/inotify.h HAVE_SYS_INOTIFY_H)
 check_include_files(sys/resource.h HAVE_SYS_RESOURCE_H)
 check_include_files(pwd.h HAVE_PWD_H)
 check_include_files(speex/speex.h HAVE_SPEEX_SPEEX_H)

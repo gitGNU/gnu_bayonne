@@ -102,6 +102,26 @@ AC_CACHE_CHECK(whether sigwait has 2 arguments,
 )
 if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
+    AC_DEFINE(HAVE_SIGWAIT, [1], [have sigwait])
+else
+    AC_CACHE_CHECK(whether has any sigwait support,
+        ac_cv_libc_sigwait,
+        AC_TRY_COMPILE([
+            #define _POSIX_PTHREAD_SEMANTICS
+            #define _GNU_SOURCE
+            #include <stdio.h>
+            #include <signal.h>],
+            [sigset_t sigs; int signo = sigwait(&sigs);],
+            ac_cv_libc_sigwait2=yes,
+            ac_cv_libc_sigwait2=no
+        )
+    )
+
+    if test "$ac_cv_libc_sigwait" = "yes" ; then
+        AC_DEFINE(HAVE_SIGWAIT, [1], [have sigwait])
+    else
+        AC_CHECK_FUNCS(sigwait)
+    fi
 fi
 
 # lets check init path
@@ -138,7 +158,7 @@ AC_ARG_WITH(pkg-config,
 if test "$UCOMMON_MODEL" = "CC" ; then
     LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
-AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h termios.h ioctl.h sys/ioctl.h)
+AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h termios.h ioctl.h sys/ioctl.h sys/inotify.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
 AC_CHECK_HEADER(gsm/gsm.h, [
@@ -163,8 +183,6 @@ if test "$enable_speex" != "no" ; then
 fi
 
 AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
-
-has_phonedev="no"
 
 #AC_LANG(C++)
 #AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])

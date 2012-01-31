@@ -526,5 +526,72 @@ public:
     static void load(Script *image, const char *path);
 };
 
+#ifdef HAVE_SIGWAIT
+
+class signals : private JoinableThread
+{
+private:
+    bool shutdown;
+    bool started;
+
+    sigset_t sigs;
+
+    void run(void);
+    void cancel(void);
+
+    signals();
+    ~signals();
+
+    static signals thread;
+
+public:
+    static void service(const char *name);
+    static void setup(void);
+    static void start(void);
+    static void stop(void);
+};
+
+#else
+class signals
+{
+public:
+    static void service(const char *name);
+    static void setup(void);
+    static void start(void);
+    static void stop(void);
+};
+#endif
+
+#ifdef  HAVE_SYS_INOTIFY_H
+
+class __LOCAL notify : private JoinableThread
+{
+private:
+    notify();
+
+    ~notify();
+
+    void run(void);
+
+    static notify thread;
+
+public:
+    static void start(void);
+    static void stop(void);
+};
+
+#else
+
+class __LOCAL notify
+{
+public:
+    static void start(void);
+    static void stop(void);
+};
+
+#endif
+
+
+
 END_NAMESPACE
 

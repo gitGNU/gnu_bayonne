@@ -50,7 +50,8 @@ bool Env::init(shell_t *args)
     set("calls", _STR(str(prefix) + "/logs/bayonne.calls"));
     set("stats", _STR(str(prefix) + "/logs/bayonne.stats"));
     set("scripts", _STR(str(prefix) + "/scripts"));
-    set("appaudio", _STR(str(prefix) + "/audio"));
+    set("examples", _STR(str(prefix) + "/examples"));
+    set("prompts", _STR(str(prefix) + "/prompts"));
     set("sounds", _STR(str(prefix) + "/sounds"));
     set("definitions", _STR(str(prefix) + "/scripts"));
     set("shell", "cmd.exe");
@@ -67,6 +68,7 @@ bool Env::init(shell_t *args)
     set("reply", "/tmp/.bayonne.");
     set("controls", DEFAULT_VARPATH "/run/bayonne");
     set("control", DEFAULT_VARPATH "/run/bayonne/control");
+    set("reply", "/tmp/.bayonne.");
     set("snapshot", DEFAULT_VARPATH "/run/bayonne/snapshot");
     set("boards", DEFAULT_VARPATH "/run/bayonne/boards");
     set("spans", DEFAULT_VARPATH "/run/bayonne/spans");
@@ -74,13 +76,13 @@ bool Env::init(shell_t *args)
     set("logfile", DEFAULT_VARPATH "/log/bayonne.log");
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
-    set("scripts", DEFAULT_DATADIR "/bayonne");
-    set("audio", DEFAULT_DATADIR "/bayonne");
+    set("scripts", DEFAULT_DATADIR "/scripts");
+    set("examples", DEFAULT_DATADIR "/examples");
+    set("prompts", DEFAULT_DATADIR "/bayonne/prompts");
     set("sounds", DEFAULT_DATADIR "/sounds");
-    set("applications", DEFAULT_DATADIR "/bayonne");
-    set("definitions", DEFAULT_LIBPATH "/bayonne");
+    set("definitions", DEFAULT_LIBPATH "/bayonne/definitions");
     set("shell", "/bin/sh");
-    set("voices", DEFAULT_DATADIR "/phrasebook");
+    set("voices", DEFAULT_DATADIR "/bayonne/voices");
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");
 #endif
 
