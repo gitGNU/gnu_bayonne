@@ -76,8 +76,8 @@ bool Env::init(shell_t *args)
     set("logfile", DEFAULT_VARPATH "/log/bayonne.log");
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
-    set("scripts", DEFAULT_DATADIR "/scripts");
-    set("examples", DEFAULT_DATADIR "/examples");
+    set("scripts", DEFAULT_DATADIR "/bayonne/scripts");
+    set("examples", DEFAULT_DATADIR "/bayonne/examples");
     set("prompts", DEFAULT_DATADIR "/bayonne/prompts");
     set("sounds", DEFAULT_DATADIR "/sounds");
     set("definitions", DEFAULT_LIBPATH "/bayonne/definitions");
