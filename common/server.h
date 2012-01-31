@@ -490,7 +490,7 @@ public:
     static void shutdown(void);
 };
 
-class Timeslot : protected Script::interp, protected Mutex
+class Timeslot : protected OrderedObject, protected Script::interp, protected Mutex
 {
 protected:
     friend class Message;
