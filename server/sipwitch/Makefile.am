@@ -12,8 +12,8 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
 LDADD = ../../common/libserver.a ../../runtime/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 
-sbin_PROGRAMS = bayonne-server-exosip2
+sbin_PROGRAMS = bayonne-sipwitch
 noinst_HEADERS = driver.h
 
-bayonne_server_exosip2_SOURCES = driver.cpp
+bayonne_sipwitch_SOURCES = driver.cpp
 

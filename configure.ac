@@ -166,20 +166,11 @@ AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
 
 has_phonedev="no"
 
-AC_LANG(C++)
-AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
-AC_LANG(C)
+#AC_LANG(C++)
+#AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
+#AC_LANG(C)
 
-AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
-AC_CHECK_HEADERS(sys/ixjuser.h linux/ixjuser.h)
-AC_CHECK_HEADER(sys/telephony.h, [
-    has_phonedev="yes"
-    AC_DEFINE(HAVE_SYS_TELEPHONY_H, [1], ["have bsd telephony"])
-])
-AC_CHECK_HEADER(linux/telephony.h, [
-    has_phonedev="yes"
-    AC_DEFINE(HAVE_LINUX_TELEPHONY_H, [1], ["have bsd telephony"])
-])
+#AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
 
 PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
     has_eXosip2="yes"
@@ -222,7 +213,7 @@ if test x"$has_eXosip2" = "xyes" ; then
     PKG_CHECK_MODULES(ORTP, ortp >= 0.16.0, [
         EXOSIP2_LIBS="$EXOSIP2_LIBS $ORTP_LIBS"
         EXOSIP2_FLAGS="$EXOSIP2_FLAGS $ORTP_CFLAGS"
-        BUILD_SUBDIRS="$BUILD_SUBDIRS exosip2"
+        BUILD_SUBDIRS="$BUILD_SUBDIRS sipwitch"
     ],[
         has_eXosip2="no"
     ])
@@ -235,105 +226,8 @@ if test "$PTLIB_CONFIG" != "none" ; then
     OPENH323_FLAGS="$OPENH323_FLAGS -I${OPENH323_PREFIX}/include/openh323"
     OPENH323_LIBS=`$PTLIB_CONFIG --libs`
     if test -d "${OPENH323_PREFIX}/include/openh323" ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS openh323" ; fi
+        BUILD_SUBDIRS="$BUILD_SUBDIRS gatekeeper" ; fi
 fi
-
-if test x"$has_capi20" = "xyes" ; then
-    BUILD_SUBDIRS="$BUILD_SUBDIRS capi20" ; fi
-
-if test x"$has_vpbapi" = "xyes" ; then
-    BUILD_SUBDIRS="$BUILD_SUBDIRS vpbapi" ; fi
-
-if test x"$has_phonedev" = "xyes" ; then
-    BUILD_SUBDIRS="$BUILD_SUBDIRS phonedev" ; fi
-
-AC_ARG_ENABLE(nonfree,
-    AC_HELP_STRING([--enable-nonfree],[enable non-free drivers]))
-
-if test "x$enable_nonfree" = "xyes" ; then
-    AC_LANG(C++)
-    AC_CHECK_HEADER(MonteCarlo.h, [has_pika="yes"],[has_pika="no"])
-    AC_LANG(C)
-
-    if test x"$has_pika" = "xyes" ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS pika" ; fi
-
-    if test -d /usr/dialogic/lib ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS dialogic" ; fi
-
-    bayonne_cv_aculab_driver=false
-    ACULAB_LIBS=""
-    ACULAB_FLAGS=""
-    ACULAB_ASR_LIBS=""
-    ACULAB_ASR_FLAGS=""
-
-    AC_CHECK_HEADERS(mvcldrvr.h,[
-        AC_DEFINE(HAVE_ACULAB_MVCLDRVR_H, [1], [aculab control driver])
-        bayonne_cv_aculab_driver=true
-        ACULAB_LIBS="$ACULAB_LIBS -lmvcl"])
-    AC_CHECK_HEADERS(mvswdrvr.h,[
-        AC_DEFINE(HAVE_ACULAB_MVSWDRVR_H, [1], [aculab switch driver])
-        bayonne_cv_aculab_driver=true
-        ACULAB_LIBS="$ACULAB_LIBS -lmvsw"])
-    AC_CHECK_HEADERS(smdrvr.h,[
-        AC_DEFINE(HAVE_ACULAB_SMDRVR_H, [1], [aculab support])
-        bayonne_cv_aculab_driver=true
-        ACULAB_LIBS="$ACULAB_LIBS -lmvsm"])
-
-    if test $bayonne_cv_aculab_driver = false ; then
-        if test ! -z "$aculab_prefix" ; then
-            acudir=$aculab_prefix
-        elif test -d $prefix/$target ; then
-            acudir=$prefix/$target/dtk111
-        elif test -d $prefix/dtk111 ; then
-            acudir=$prefix/dtk111
-        else
-            acudir=/usr/src/aculab/dtk111
-        fi
-        AC_MSG_CHECKING([for Aculab api ($acudir)])
-        if test -e $acudir/setV6.sh ; then
-            AC_DEFINE(HAVE_ACULAB_MVCLDRVR_H)
-            AC_DEFINE(HAVE_ACULAB_MVSWDRVR_H)
-            AC_DEFINE(HAVE_ACULAB_SMDRVR_H)
-            ACULAB_LIBS="$ACULAB_LIBS -L$acudir/lib -lacu_cl -lacu_sw -lacu_iptel -lTiNGshared $acudir/ting/apilib/gen-LINUX_V6/TiNGcore.o $acudir/ting/highapi/gen-LINUX_V6/smhlib.o $acudir/ting/highapi/gen-LINUX_V6/smbfhlib.o $acudir/ting/highapi/gen-LINUX_V6/smclib.o $acudir/ting/libutil/gen-LINUX_V6/bfile.o $acudir/ting/apilib/gen-LINUX_V6/prosody_x.o $acudir/ting/apilib/gen-LINUX_V6/prosody_s.o $acudir/ting/apilib/gen-LINUX_V6/prosody_pci.o"
-            ACULAB_FLAGS="-I$acudir/include -I$acudir/ting -I$acudir/ting/include"
-            bayonne_cv_aculab_driver=true
-        fi
-        if test $bayonne_cv_aculab_driver = true ; then
-            BUILD_SUBDIRS="$BUILD_SUBDIRS aculab"
-            AC_MSG_RESULT(found)
-        else
-            AC_MSG_RESULT(missing)
-        fi
-
-        bayonne_cv_aculab_asr=false
-        if test ! -z "$acuasr_prefix"; then
-            acuasrdir=$acuasr_prefix
-        else
-            acuasrdir=$prefix/dtk132/asr
-        fi
-        AC_MSG_CHECKING([for Aculab ASR engine ($acuasrdir)])
-        if test -f $acuasrdir/ASRClient/smcwr_api.h; then
-            AC_DEFINE(HAVE_ACULAB_ASR, [1], [aculab asr engine])
-            ACULAB_ASR_LIBS="$acuasrdir/ASRCommon/ASRCommon.a $acuasrdir/ASRShare/ASRShare.a $acuasrdir/ASRClient/ASRClient.a"
-            ACULAB_ASR_FLAGS="-I$acuasrdir/ASRClient"
-            bayonne_cv_aculab_asr=true
-        fi
-        if test $bayonne_cv_aculab_asr = true ; then
-            AC_MSG_RESULT(found)
-        else
-            AC_MSG_RESULT(missing)
-        fi
-    fi
-    AC_SUBST(ACULAB_ASR_LIBS)
-    AC_SUBST(ACULAB_ASR_FLAGS)
-    AC_SUBST(ACULAB_LIBS)
-    AC_SUBST(ACULAB_FLAGS)
-fi
-#if test -z "$BUILD_SUBDIRS" ; then
-#   AC_ERROR([no buildable targets.  Stopped])
-#   exit 1
-#fi
 
 AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
@@ -429,14 +323,6 @@ AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
 AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
 bayonne.pc bayonne-config server/Makefile common/Makefile
-server/simulator/Makefile
-server/exosip2/Makefile
-server/vpbapi/Makefile
-server/capi20/Makefile
-server/pika/Makefile
-server/phonedev/Makefile
-server/openh323/Makefile
-server/dialogic/Makefile
-server/aculab/Makefile
+server/sipwitch/Makefile server/gatekeeper/Makefile
 )
 

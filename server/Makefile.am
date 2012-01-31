@@ -11,7 +11,6 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 EXTRA_DIST = CMakeLists.txt
 
-SUBDIRS = simulator @BUILD_SUBDIRS@
-DIST_SUBDIRS = simulator exosip2 vpbapi phonedev openh323 capi20 \
-	pika dialogic aculab
+SUBDIRS = @BUILD_SUBDIRS@
+DIST_SUBDIRS = sipwitch gatekeeper
 

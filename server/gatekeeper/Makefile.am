@@ -9,11 +9,11 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-LDADD = ../../common/libserver.a ../../runtime/libbayonne.la @BAYONNE_LIBS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @OPENH323_FLAGS@
+LDADD = ../../common/libserver.a ../../runtime/libbayonne.la -lopenh323 @OPENH323_LIBS@ @BAYONNE_LIBS@
 
-sbin_PROGRAMS = bayonne-server-phonedev
+sbin_PROGRAMS = bayonne-gatekeeper
 noinst_HEADERS = driver.h
 
-bayonne_server_phonedev_SOURCES = driver.cpp
+bayonne_gatekeeper_SOURCES = driver.cpp
 
