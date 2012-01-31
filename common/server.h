@@ -512,19 +512,18 @@ public:
         {new Message(this, event);};
 };
 
-class Schedule : public LinkedObject
+class Scheduler : public LinkedObject
 {
 protected:
-    void init(void);
+    Scheduler(LinkedObject **list);
 
 public:
     const char *group, *event, *script;
-    unsigned year, month, start, end;
+    unsigned year, month, day, start, end;
     bool dow[8];
 
-    Schedule();
-
-    void select(LinkedObject *list);
+    static const char *select(Script *image, const char *group, const char *event);
+    static Scheduler *add(Script *image, const char *line);
 };
 
 END_NAMESPACE

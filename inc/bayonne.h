@@ -53,7 +53,7 @@ using namespace UCOMMON_NAMESPACE;
  * reference counted instance of a compiled script.
  * @author David Sugar <dyfet@gnutelephony.org>
  */
-class __EXPORT Script : public CountedObject, private memalloc
+class __EXPORT Script : public CountedObject, public memalloc
 {
 public:
     class interp;
@@ -463,6 +463,8 @@ public:
     static unsigned sizing;     /**< default symbol size */
     static unsigned stacking;   /**< stack frames in script runtime */
     static unsigned decimals;   /**< default decimal places */
+
+    LinkedObject *scheduler;    /**< scheduler list */
 
     /**
      * Append a file into an existing image.  A shared config script can be
