@@ -18,6 +18,31 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
+static unsigned tod(const char *text)
+{
+    unsigned hour, minute;
+    const char *sep = strchr(text, ':');
+
+    if(!sep)
+        return 0;
+
+    hour = atoi(text);
+    minute = atoi(++sep);
+
+    if(tolower(sep[2]) == 'a' && hour == 12)
+        hour = 0;
+    else if(tolower(sep[2]) == 'p' && hour < 12)
+        hour += 12;
+
+    if(hour == 24 && !minute)
+        hour = 0;
+
+    if(hour > 23 || minute > 60)
+        return 0;
+
+    return hour * 60 + minute;
+}
+
 static unsigned months(const char *text)
 {
     static const char *table[] = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
@@ -139,13 +164,17 @@ void Scheduler::load(Script *image, const char *path)
     char *group, *event, *token, *script;
     char *tokens;
     Scheduler *entry;
-    unsigned year, day, month, fdow, ldow;
+    unsigned year, day, month, fdow, ldow, start, end;
+    bool hours;
 
     if(!is(sf))
         return;
 
     while(sf.readline(buffer)) {
         year = day = month = fdow = ldow = 0;
+        hours = false;
+        start = 0;
+        end = (24 * 60) - 1;
         script = tokens = NULL;
         group = String::token(buffer.c_mem(), &tokens, " \t", "{}\'\'\"\"");
         if(!group || !event)
@@ -195,6 +224,19 @@ void Scheduler::load(Script *image, const char *path)
                 }
                 ldow = days(++token);
             }
+
+            if(strchr(token, ':')) {
+                if(hours) {
+                    end = tod(token);
+                    if(!end)
+                        end = (24 * 60) - 1;
+                    else
+                        --end;
+                }
+                else
+                    start = tod(token);
+                continue;
+            }
         }
         if(!script)
             continue;
@@ -203,6 +245,8 @@ void Scheduler::load(Script *image, const char *path)
         entry->script = script;
         entry->group = group;
         entry->event = event;
+        entry->start = start;
+        entry->end = end;
         if(month && day) {
             entry->day = day;
             entry->month = month;
