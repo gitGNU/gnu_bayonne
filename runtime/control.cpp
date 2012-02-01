@@ -306,3 +306,35 @@ FILE *Control::output(const char *id)
 #endif
 }
 
+void Control::log(const char *fmt, ...)
+{
+    assert(fmt != NULL && *fmt != 0);
+
+    fsys_t log;
+    va_list args;
+    char buf[1024];
+    int len;
+    char *cp;
+
+    va_start(args, fmt);
+
+    fsys::create(log, env("logfile"), fsys::ACCESS_APPEND, 0660);
+
+    vsnprintf(buf, sizeof(buf) - 1, fmt, args);
+    len = strlen(buf);
+    if(buf[len - 1] != '\n')
+        buf[len++] = '\n';
+
+    if(is(log)) {
+        fsys::write(log, buf, strlen(buf));
+        fsys::close(log);
+    }
+    cp = strchr(buf, '\n');
+    if(cp)
+        *cp = 0;
+
+    shell::debug(2, "logfile: %s", buf);
+    va_end(args);
+}
+
+

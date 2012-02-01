@@ -115,6 +115,63 @@ static void versioninfo(void)
     exit(0);
 }
 
+static void dispatch(int slots)
+{
+    int argc;
+    char *argv[65];
+    char *cp, *tokens;
+    DateTimeString dt;
+    const char *err;
+
+    Control::log("server starting %s", (const char *)dt);
+
+    if(slots > 0)
+        shell::log(shell::INFO, "started with %d timeslots active", slots);
+    else
+        shell::log(shell::ERR, "started with no timeslots active");
+
+    while(NULL != (cp = Control::receive())) {
+        shell::debug(9, "received request <%s>\n", cp);
+
+        dt.set();
+
+        if(eq(cp, "stop") || eq(cp, "down") || eq(cp, "exit"))
+            break;
+
+        if(eq(cp, "abort")) {
+            abort();
+            continue;
+        }
+
+        argc = 0;
+        tokens = NULL;
+        while(argc < 64 && NULL != (cp = const_cast<char *>(String::token(cp, &tokens, " \t", "{}")))) {
+            argv[argc++] = cp;
+        }
+        argv[argc] = NULL;
+        if(argc < 1)
+            continue;
+
+        if(eq(argv[0], "verbose")) {
+            if(argc != 2) {
+// invalid:
+                Control::reply("missing or invalid argument");
+                continue;
+            }
+            verbose = shell::loglevel_t(atoi(argv[1]));
+            continue;
+        }
+
+        err = "unknown command";
+
+//error:
+        Control::reply(err);
+    }
+
+    dt.set();
+    Control::log("server shutdown %s\n", (const char *)dt);
+}
+
 static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
 {
     const char *cp;
@@ -359,16 +416,14 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
         args.restart();
 
     // create threads, etc...
-    Driver::startup();
     signals::start();
     notify::start();
 
-    // wait on dispatcher and message parser loop would be here...
-    Thread::sleep(90);
+    dispatch(Driver::startup());
+    Driver::shutdown();
 
     notify::stop();
     signals::stop();
-    Driver::shutdown();
 }
 
 static SERVICE_MAIN(main, argc, argv)

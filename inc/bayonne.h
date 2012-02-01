@@ -1334,6 +1334,12 @@ public:
      * @return file handle to write to or NULL on failure.
      */
     static FILE *output(const char *id);
+
+    /**
+     * Print/produce log message.
+     * @param fmt string.
+     */
+    static void log(const char *fmt, ...) __PRINTF(1, 2);
 };
 
 /**
