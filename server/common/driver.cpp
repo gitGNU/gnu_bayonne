@@ -315,7 +315,10 @@ void Driver::release(Timeslot *timeslot)
 
 void Driver::release(Script *image)
 {
-    if(image)
+    if(image) {
+        imglock.acquire();
         image->release();
+        imglock.release();
+    }
 }
 
