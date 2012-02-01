@@ -295,16 +295,15 @@ CountedObject(), memalloc()
     first = NULL;
     global = NULL;
     headers = NULL;
-    stack = NULL;
     scheduler = NULL;
-    scripts = (LinkedObject **)alloc(sizeof(LinkedObject **) * Script::indexing);
+    stack = (line_t **)alloc(sizeof(line_t *) * Script::stacking);
+    scripts = (LinkedObject **)alloc(sizeof(LinkedObject *) * Script::indexing);
     memset(scripts, 0, sizeof(LinkedObject **) * Script::indexing);
 }
 
 Script::~Script()
 {
-    if(stack)
-        delete[] stack;
+    purge();
     shared = NULL;
 }
 
@@ -489,9 +488,6 @@ Script *Script::append(Script *merge, const char *fn, Script *cfg)
         img = merge;
     else
         img = new Script();
-
-    if(!img->stack)
-        img->stack = new line_t*[Script::stacking];
 
     img->shared = cfg;
     img->filename = strrchr(fn, '/');
@@ -909,8 +905,6 @@ closure:
         goto initial;
 
     delete[] argv;
-    delete[] img->stack;
-    img->stack = NULL;
 //  sp = img->global;
 //  while(is(sp)) {
 //      sp->put(stdout, "*");
