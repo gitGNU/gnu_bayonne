@@ -449,6 +449,7 @@ protected:
     virtual int setup(void);
     virtual int start(void);
     virtual void stop(void);
+    virtual Script *compile(Script *defs);
 
     keydata *getKeys(const char *groupid);
 
@@ -486,11 +487,17 @@ public:
 
     static keydata *getRegistry(void);
 
+    static Script *getImage(void);
+
+    static void release(Script *image);
+
     static int init(void);
 
     static int startup(void);
 
     static void shutdown(void);
+
+    static void reload(void);
 };
 
 class Timeslot : protected OrderedObject, protected Script::interp, protected Mutex

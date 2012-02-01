@@ -41,6 +41,7 @@ static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language
 static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
 static shell::stringopt prefix('P', "--prefix", _TEXT("specify alternate prefix path"), "path", NULL);
 static shell::stringopt scripts('A', "--scripts", _TEXT("specify script directory"), "path", NULL);
+static shell::stringopt definitions('I', "--definitions", _TEXT("specify script definitions"), "path", NULL);
 static shell::stringopt prompts('D', "--prompts", _TEXT("specify prompt directory"), "path", NULL);
 static shell::stringopt suffix('S', "--suffix", _TEXT("audio extension"), ".ext", ".au");
 static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "name", "default");
@@ -140,6 +141,11 @@ static void dispatch(int slots)
 
         if(eq(cp, "abort")) {
             abort();
+            continue;
+        }
+
+        if(eq(cp, "reload")) {
+            Driver::reload();
             continue;
         }
 
@@ -280,6 +286,9 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
 
     if(is(scripts))
         Env::set("scripts", *scripts);
+
+    if(is(definitions))
+        Env::set("definitions", *definitions);
 
     if(is(prompts))
         Env::set("prompts", *prompts);

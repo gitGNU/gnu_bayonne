@@ -24,6 +24,8 @@ static keyfile keyspans(BAYONNE_CFGPATH "/spans.conf");
 static keyfile keygroup;
 static Group *groups = NULL, *spans = NULL;
 static unsigned spanid = 0;
+static Script *image = NULL, *defs = NULL;
+static Mutex imglock;
 
 Driver *Driver::instance = NULL;
 
@@ -135,6 +137,12 @@ void Driver::stop(void)
 {
 }
 
+// eventually default compiler...
+Script *Driver::compile(Script *defs)
+{
+    return NULL;
+}
+
 int Driver::startup(void)
 {
     keydata *pri = keyserver.get("threads");
@@ -145,6 +153,9 @@ int Driver::startup(void)
     if(!cp)
         cp = "-1";
 
+    // TODO: compile definitions here!
+
+    reload();   // first load of image...
     Message::start(atoi(cp));
     return instance->start();
 }
@@ -153,6 +164,20 @@ void Driver::shutdown(void)
 {
     Message::stop();
     instance->stop();
+}
+
+void Driver::reload(void)
+{
+    Script *img = instance->compile(defs);
+    if(!img)
+        return;
+    imglock.acquire();
+    // disconnect current image, deletes if no attachments...
+    if(image)
+        image->release();
+    image=img;
+    image->retain();
+    imglock.release();
 }
 
 int Driver::init(void)
@@ -271,9 +296,26 @@ Timeslot *Driver::request(Group *group)
     return prior;
 }
 
+Script *Driver::getImage(void)
+{
+    Script *img;
+    imglock.acquire();
+    img = image;
+    if(image)
+        image->retain();
+    imglock.release();
+    return img;
+}
+
 void Driver::release(Timeslot *timeslot)
 {
     if(timeslot)
         timeslot->unlock();
+}
+
+void Driver::release(Script *image)
+{
+    if(image)
+        image->release();
 }
 
