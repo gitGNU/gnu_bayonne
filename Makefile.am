@@ -11,7 +11,7 @@
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = CMakeLists.txt config.h.cmake docs/script.tex \
 	*.pc.in *-config.in *-config.1 autogen.sh ChangeLog COPYRIGHT
-SUBDIRS = inc runtime common server utils test 
+SUBDIRS = inc runtime server utils test 
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = bayonne.pc

@@ -9,8 +9,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @OPENH323_FLAGS@
-LDADD = ../../common/libserver.a ../../runtime/libbayonne.la -lopenh323 @OPENH323_LIBS@ @BAYONNE_LIBS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server @BAYONNE_FLAGS@ @OPENH323_FLAGS@
+LDADD = ../common/libserver.a ../../runtime/libbayonne.la -lopenh323 @OPENH323_LIBS@ @BAYONNE_LIBS@
 
 sbin_PROGRAMS = bayonne-gatekeeper
 noinst_HEADERS = driver.h
