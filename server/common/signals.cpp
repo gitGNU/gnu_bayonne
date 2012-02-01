@@ -79,7 +79,7 @@ void signals::run(void)
 #endif
         alarm(0);
         if(shutdown)
-            return;
+            break;
 
         shell::log(DEBUG1, "received signal %d", signo);
 
@@ -229,7 +229,10 @@ notify::~notify()
 void notify::start(void)
 {
     dirpath = Env::get("scripts");
-    thread.background();
+    if(fsys::isdir(dirpath))
+        thread.background();
+    else
+        shell::log(shell::ERR, "notify failed; %s missing", dirpath);
 }
 
 void notify::run(void)

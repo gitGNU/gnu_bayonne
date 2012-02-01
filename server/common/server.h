@@ -436,7 +436,6 @@ private:
     static Driver *instance;
 
 protected:
-    bool detached;
     const char *name;
     unsigned tsCount, tsUsed, tsSpan;
     Timeslot **tsIndex;
@@ -447,6 +446,7 @@ protected:
 
     Driver(const char *name, const char *registry = "groups");
 
+    virtual int setup(void);
     virtual int start(void);
     virtual void stop(void);
 
@@ -455,9 +455,6 @@ protected:
 public:
     inline static Driver *getDriver(void)
         {return instance;};
-
-    inline static bool getDetached(void)
-        {return instance->detached;};
 
     inline static const char *getName(void)
         {return instance->name;};
@@ -484,6 +481,12 @@ public:
     static void release(Timeslot *timeslot);
 
     static keydata *getPaths(void);
+
+    static keydata *getSystem(void);
+
+    static keydata *getRegistry(void);
+
+    static int init(void);
 
     static int startup(void);
 

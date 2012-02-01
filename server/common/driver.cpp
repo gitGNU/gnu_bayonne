@@ -76,7 +76,6 @@ Driver::Driver(const char *id, const char *registry)
     assert(instance == NULL);
 
     instance = this;
-    detached = true;
     tsCount = tsUsed = tsSpan = active = down = 0;
     name = id;
 
@@ -112,9 +111,24 @@ keydata *Driver::getPaths(void)
     return keyserver.get("paths");
 }
 
+keydata *Driver::getSystem(void)
+{
+    return keyserver.get("system");
+}
+
+keydata *Driver::getRegistry(void)
+{
+    return keyserver.get("registry");
+}
+
 int Driver::start(void)
 {
     return 0;
+}
+
+int Driver::setup(void)
+{
+    return -1;
 }
 
 void Driver::stop(void)
@@ -139,6 +153,11 @@ void Driver::shutdown(void)
 {
     Message::stop();
     instance->stop();
+}
+
+int Driver::init(void)
+{
+    return instance->setup();
 }
 
 Group *Driver::getSpan(unsigned sid)
