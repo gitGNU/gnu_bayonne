@@ -25,5 +25,5 @@ tonetool_SOURCES = tonetool.cpp
 
 bayonne_SOURCES = bayonne.cpp
 
-baylint_SOURCES = baylint.cpp
+baylint_SOURCES = lint.cpp
 
