@@ -20,10 +20,15 @@ add_executable(audiotool audiotool.cpp)
 add_dependencies(audiotool bayonne-runtime ucommon)
 target_link_libraries(audiotool bayonne-runtime ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
 
+add_executable(bayonne-control bayonne.cpp)
+add_dependencies(bayonne-control bayonne-runtime ucommon)
+target_link_libraries(bayonne-control bayonne-runtime ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
+set_target_properties(bayonne-control PROPERTIES OUTPUT_NAME bayonne)
+
 add_executable(baylint baylint.cpp)
 add_dependencies(baylint bayonne-runtime ucommon)
 target_link_libraries(baylint bayonne-runtime ${USES_UCOMMON_LIBRARIES} ${EXPORT_LIBS})
 
-install(TARGETS phrasebook tonetool baylint audiotool DESTINATION ${INSTALL_BINDIR})
+install(TARGETS bayonne-control phrasebook tonetool baylint audiotool DESTINATION ${INSTALL_BINDIR})
 
 

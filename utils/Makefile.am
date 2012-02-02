@@ -14,8 +14,8 @@ INCLUDES = -I$(top_srcdir)/inc
 LDADD = ../runtime/libbayonne.la @BAYONNE_LIBS@
 EXTRA_DIST = *.1 CMakeLists.txt
 
-man_MANS = audiotool.1 tonetool.1 phrasebook.1 baylint.1
-bin_PROGRAMS = phrasebook tonetool baylint audiotool
+man_MANS = audiotool.1 tonetool.1 phrasebook.1 baylint.1 bayonne.1
+bin_PROGRAMS = phrasebook tonetool baylint audiotool bayonne
 
 phrasebook_SOURCES = phrasebook.cpp
 
@@ -23,4 +23,7 @@ audiotool_SOURCES = audiotool.cpp
 
 tonetool_SOURCES = tonetool.cpp
 
+bayonne_SOURCES = bayonne.cpp
+
 baylint_SOURCES = baylint.cpp
+
