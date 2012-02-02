@@ -80,7 +80,7 @@ bool Env::init(shell_t *args)
     set("examples", DEFAULT_DATADIR "/bayonne/examples");
     set("prompts", DEFAULT_DATADIR "/bayonne/prompts");
     set("sounds", DEFAULT_DATADIR "/sounds");
-    set("definitions", DEFAULT_LIBPATH "/bayonne/definitions");
+    set("definitions", DEFAULT_DATADIR "/bayonne/definitions");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/bayonne/voices");
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");

@@ -24,7 +24,7 @@ static keyfile keyspans(BAYONNE_CFGPATH "/spans.conf");
 static keyfile keygroup;
 static Group *groups = NULL, *spans = NULL;
 static unsigned spanid = 0;
-static Script *image = NULL, *defs = NULL;
+static Script *image = NULL;
 static Mutex imglock;
 
 Driver *Driver::instance = NULL;
@@ -80,6 +80,7 @@ Driver::Driver(const char *id, const char *registry)
     instance = this;
     tsCount = tsUsed = tsSpan = active = down = 0;
     name = id;
+    definitions = NULL;
 
     keygroup.load(strdup(str(BAYONNE_CFGPATH) + str(registry) + str(".conf")));
 
@@ -128,19 +129,76 @@ int Driver::start(void)
     return 0;
 }
 
-int Driver::setup(void)
-{
-    return -1;
-}
-
 void Driver::stop(void)
 {
 }
 
-// eventually default compiler...
-Script *Driver::compile(Script *defs)
+Script *Driver::load(void)
 {
-    return NULL;
+    char dirpath[256];
+    size_t len;
+    fsys_t dir;
+    Script *img = NULL;
+
+    String::set(dirpath, sizeof(dirpath), env("scripts"));
+    fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
+
+    if(!is(dir)) {
+        shell::log(shell::ERR, "cannot load scripts from %s", dirpath);
+        return NULL;
+    }
+
+    shell::debug(2, "loading scripts from %s", dirpath);
+    len = strlen(dirpath);
+    dirpath[len++] = '/';
+
+    while(is(dir) && fsys::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
+        char *ep = strrchr(dirpath + len, '.');
+        if(!ep)
+            continue;
+        if(!String::equal(ep, ".bcs"))
+            continue;
+        shell::log(shell::INFO, "loading %s", dirpath + len);
+        img = Script::append(img, dirpath, definitions);
+    }
+    fsys::close(dir);
+
+    if(!img)
+        return NULL;
+
+    Scheduler::load(img, BAYONNE_CFGPATH "/scheduler.conf");
+
+    return img;
+}
+
+void Driver::compile(void)
+{
+    char dirpath[256];
+    size_t len;
+    fsys_t dir;
+
+    String::set(dirpath, sizeof(dirpath), env("definitions"));
+    fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
+
+    if(!is(dir)) {
+        shell::log(shell::ERR, "cannot compile definitions from %s", dirpath);
+        return;
+    }
+
+    shell::debug(2, "compiling definitions from %s", dirpath);
+    len = strlen(dirpath);
+    dirpath[len++] = '/';
+
+    while(is(dir) && fsys::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
+        char *ep = strrchr(dirpath + len, '.');
+        if(!ep)
+            continue;
+        if(!String::equal(ep, ".bcs"))
+            continue;
+        shell::log(shell::INFO, "compiling %s", dirpath + len);
+        definitions = Script::append(definitions, dirpath, NULL);
+    }
+    fsys::close(dir);
 }
 
 int Driver::startup(void)
@@ -153,9 +211,8 @@ int Driver::startup(void)
     if(!cp)
         cp = "-1";
 
-    // TODO: compile definitions here!
-
-    reload();   // first load of image...
+    instance->compile();        // compile definitions
+    reload();                   // first load of image...
     Message::start(atoi(cp));
     return instance->start();
 }
@@ -168,7 +225,7 @@ void Driver::shutdown(void)
 
 void Driver::reload(void)
 {
-    Script *img = instance->compile(defs);
+    Script *img = instance->load();
     if(!img)
         return;
     imglock.acquire();
@@ -178,11 +235,6 @@ void Driver::reload(void)
     image=img;
     image->retain();
     imglock.release();
-}
-
-int Driver::init(void)
-{
-    return instance->setup();
 }
 
 Group *Driver::getSpan(unsigned sid)

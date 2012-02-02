@@ -428,7 +428,7 @@ public:
         {return id;};
 };
 
-class Driver
+class Driver : public Env
 {
 private:
     friend class Group;
@@ -441,15 +441,16 @@ protected:
     Timeslot **tsIndex;
     char *status;
     keydata *keys;
+    Script *definitions;
 
     volatile unsigned active, down;
 
     Driver(const char *name, const char *registry = "groups");
 
-    virtual int setup(void);
     virtual int start(void);
     virtual void stop(void);
-    virtual Script *compile(Script *defs);
+    virtual void compile(void);
+    virtual Script *load(void);
 
     keydata *getKeys(const char *groupid);
 
@@ -490,8 +491,6 @@ public:
     static Script *getImage(void);
 
     static void release(Script *image);
-
-    static int init(void);
 
     static int startup(void);
 

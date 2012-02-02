@@ -410,11 +410,6 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
         shell::errexit(1, "*** bayonne: %s\n",
             _TEXT("no control file; exiting"));
 
-    // driver init while still root
-    if(Driver::init() < -1)
-        shell::errexit(1, "*** bayonne: %s\n",
-            _TEXT("no timeslots created; exiting"));
-
     // drop root privilege
 #ifdef  HAVE_PWD_H
     if(uid)

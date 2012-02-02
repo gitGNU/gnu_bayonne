@@ -159,6 +159,8 @@ next:
 
 void Scheduler::load(Script *image, const char *path)
 {
+    assert(image != NULL && path != NULL && *path != 0);
+
     stringbuf<512> buffer;
     charfile sf(path, "r");
     char *group, *event, *token, *script;
@@ -167,8 +169,12 @@ void Scheduler::load(Script *image, const char *path)
     unsigned year, day, month, fdow, ldow, start, end;
     bool hours;
 
-    if(!is(sf))
+    if(!is(sf)) {
+        shell::log(shell::ERR, "cannot load schedule from %s", path);
         return;
+    }
+
+    shell::debug(2, "loading schedule from %s", path);
 
     while(sf.readline(buffer)) {
         year = day = month = fdow = ldow = 0;
