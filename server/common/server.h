@@ -425,7 +425,7 @@ protected:
     Group(keydata *keyset);
 
 public:
-    inline bool isSpan(void)
+    inline bool is_span(void)
         {return span != ((unsigned)(-1));};
 
     inline const char *get(const char *id)
@@ -436,6 +436,16 @@ public:
 
     bool assign(Timeslot *ts);
     void release(Timeslot *ts);
+
+    virtual void snapshot(FILE *fp);
+};
+
+class Registry : protected Group
+{
+protected:
+    Registry(keydata *keyset);
+
+    virtual void snapshot(FILE *fp);
 };
 
 class Driver : public Env
@@ -509,6 +519,8 @@ public:
     static void shutdown(void);
 
     static void reload(void);
+
+    static void snapshot(void);
 };
 
 class Timeslot : protected OrderedObject, protected Script::interp, protected Mutex

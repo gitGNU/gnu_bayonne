@@ -25,7 +25,7 @@ OrderedObject(), Script::interp(), Mutex()
 
     incoming = span = group = NULL;
 
-    if(grp && group->isSpan()) {
+    if(grp && group->is_span()) {
         span = grp;
         cp = span->get("group");
     }

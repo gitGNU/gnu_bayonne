@@ -149,6 +149,11 @@ static void dispatch(int slots)
             continue;
         }
 
+        if(eq(cp, "snapshot")) {
+            Driver::snapshot();
+            continue;
+        }
+
         argc = 0;
         tokens = NULL;
         while(argc < 64 && NULL != (cp = const_cast<char *>(String::token(cp, &tokens, " \t", "{}")))) {

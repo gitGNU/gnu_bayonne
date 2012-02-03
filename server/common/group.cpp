@@ -99,16 +99,14 @@ LinkedObject((LinkedObject **)&spans)
 
 bool Group::assign(Timeslot *ts)
 {
-    if(tsCount) {
-        lock.acquire();
-        if(tsUsed >= tsCount) {
-            lock.release();
-            return false;
-        }
-
-        ++tsUsed;
+    lock.acquire();
+    if(tsUsed >= tsCount) {
         lock.release();
+        return false;
     }
+
+    ++tsUsed;
+    lock.release();
 
     if(ts->span && ts->span != this)
         ts->span->assign(ts);
@@ -122,15 +120,45 @@ void Group::release(Timeslot *ts)
     if(ts->group != this)
         return;
 
-    if(tsCount) {
-        lock.acquire();
-        if(tsUsed)
-            --tsUsed;
-        lock.release();
-    }
+    lock.acquire();
+    if(tsUsed)
+        --tsUsed;
+    lock.release();
 
     if(ts->span && ts->span != this)
         ts->span->release(ts);
     else
         ts->group = NULL;
 }
+
+void Group::snapshot(FILE *fp)
+{
+    lock.acquire();
+    if(is_span()) {
+        fprintf(fp, "\t#%04d %04d-%04d %04d used\n",
+            spanid, tsFirst, tsFirst + tsCount - 1, tsUsed);
+    }
+    else if(tsCount)
+        fprintf(fp, "\t%-16s %04d-%04d %04d used\n",
+            id, tsFirst, tsFirst + tsCount - 1, tsUsed);
+    else
+        fprintf(fp, "\t%-16s %04d used\n", id, tsUsed);
+    lock.release();
+}
+
+Registry::Registry(keydata *keyset) :
+Group(keyset)
+{
+    tsFirst = 0;
+}
+
+void Registry::snapshot(FILE *fp)
+{
+    lock.acquire();
+    if(tsCount)
+        fprintf(fp, "\t%-16s %04d used of %04d\n", id, tsUsed, tsCount);
+    else
+        fprintf(fp, "\t%-16s %04d used\n", id, tsUsed);
+    lock.release();
+}
+

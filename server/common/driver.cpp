@@ -23,6 +23,7 @@ static keyfile keydriver(BAYONNE_CFGPATH "/driver.conf");
 static keyfile keygroup;
 static Script *image = NULL;
 static Mutex imglock;
+static const char *groupname;
 
 Driver *Driver::instance = NULL;
 
@@ -34,6 +35,7 @@ Driver::Driver(const char *id, const char *registry)
     tsCount = tsUsed = tsSpan = active = down = 0;
     name = id;
     definitions = NULL;
+    groupname = registry;
 
     keygroup.load(strdup(str(BAYONNE_CFGPATH) + str(registry) + str(".conf")));
 
@@ -225,7 +227,7 @@ Group *Driver::getContact(const char *id)
     linked_pointer<Group> gp = Group::groups;
 
     while(is(gp)) {
-        if(eq(gp->contact, id))
+        if(gp->contact && eq(gp->contact, id))
             return *gp;
         gp.next();
     }
@@ -339,3 +341,36 @@ void Driver::release(Script *image)
     }
 }
 
+void Driver::snapshot(void)
+{
+    FILE *fp = Control::output("snapshot");
+
+    if(!fp) {
+        shell::log(shell::ERR, "%s\n",
+            _TEXT("snapshot; cannot access file"));
+        return;
+    }
+
+    shell::log(DEBUG1, "%s\n", _TEXT("snapshot started"));
+
+    linked_pointer<Group> gp = Group::groups;
+    if(is(gp))
+        fprintf(fp, "%s:\n", groupname);
+
+    while(is(gp)) {
+        gp->snapshot(fp);
+        gp.next();
+    }
+
+    gp = Group::spans;
+    if(is(gp))
+        fprintf(fp, "spans:\n");
+
+    while(is(gp)) {
+        gp->snapshot(fp);
+        gp.next();
+    }
+
+    fclose(fp);
+    shell::log(DEBUG1, "%s\n", _TEXT("snapshot completed"));
+}
