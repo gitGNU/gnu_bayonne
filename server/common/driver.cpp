@@ -20,58 +20,11 @@ using namespace UCOMMON_NAMESPACE;
 
 static keyfile keyserver(BAYONNE_CFGPATH "/server.conf");
 static keyfile keydriver(BAYONNE_CFGPATH "/driver.conf");
-static keyfile keyspans(BAYONNE_CFGPATH "/spans.conf");
 static keyfile keygroup;
-static Group *groups = NULL, *spans = NULL;
-static unsigned spanid = 0;
 static Script *image = NULL;
 static Mutex imglock;
 
 Driver *Driver::instance = NULL;
-
-Group::Group(const char *name) :
-LinkedObject((LinkedObject **)&groups)
-{
-    keys = keygroup.get(name);
-    id = strdup(name);
-    tsFirst = tsCount;
-    span = (unsigned)-1;
-
-    if(!keys)
-        return;
-
-    const char *cp = keys->get("first");
-    if(cp)
-        tsFirst = atoi(cp);
-
-    cp = keys->get("count");
-    if(cp)
-        tsCount = atoi(cp);
-}
-
-Group::Group(unsigned count) :
-LinkedObject((LinkedObject **)&spans)
-{
-    char buf[32];
-    unsigned ts = Driver::instance->tsSpan;
-
-    snprintf(buf, sizeof(buf), "%d", spanid);
-
-    keys = keyspans.get(id);
-    if(keys)
-        id = keys->get("name");
-    else
-        id = NULL;
-
-    if(!id)
-        id = strdup(buf);
-
-    span = spanid;
-    tsFirst = ts;
-    tsCount = count;
-    Driver::instance->tsSpan += count;
-    ++spanid;
-}
 
 Driver::Driver(const char *id, const char *registry)
 {
@@ -239,7 +192,7 @@ void Driver::reload(void)
 
 Group *Driver::getSpan(unsigned sid)
 {
-    linked_pointer<Group> gp = spans;
+    linked_pointer<Group> gp = Group::spans;
 
     while(is(gp)) {
         if(gp->span == sid)
@@ -251,7 +204,7 @@ Group *Driver::getSpan(unsigned sid)
 
 Group *Driver::getSpan(const char *id)
 {
-    linked_pointer<Group> gp = spans;
+    linked_pointer<Group> gp = Group::spans;
     unsigned sid = (unsigned)-1;
 
     if(isdigit(*id))
@@ -267,9 +220,21 @@ Group *Driver::getSpan(const char *id)
     return NULL;
 }
 
+Group *Driver::getContact(const char *id)
+{
+    linked_pointer<Group> gp = Group::groups;
+
+    while(is(gp)) {
+        if(eq(gp->contact, id))
+            return *gp;
+        gp.next();
+    }
+    return NULL;
+}
+
 Group *Driver::getGroup(const char *id)
 {
-    linked_pointer<Group> gp = spans;
+    linked_pointer<Group> gp = Group::groups;
 
     while(is(gp)) {
         if(eq(gp->id, id))

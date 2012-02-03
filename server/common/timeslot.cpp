@@ -18,21 +18,21 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-Timeslot::Timeslot(unsigned port, Group *group) :
+Timeslot::Timeslot(unsigned port, Group *grp) :
 OrderedObject(), Script::interp(), Mutex()
 {
     const char *cp = NULL;
 
-    incoming = span = NULL;
+    incoming = span = group = NULL;
 
-    if(group && group->isSpan()) {
-        span = group;
+    if(grp && group->isSpan()) {
+        span = grp;
         cp = span->get("group");
     }
     if(cp)
-        group = Driver::getGroup(cp);
-    if(group)
-        incoming = group;
+        grp = Driver::getGroup(cp);
+    if(grp)
+        incoming = grp;
     else
         incoming = span;
 }

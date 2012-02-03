@@ -408,14 +408,21 @@ class Group : public LinkedObject
 protected:
     friend class Driver;
 
-    keydata *keys;
-    const char *id;
+    static Group *groups;
+    static Group *spans;
 
-    unsigned tsFirst, tsCount;
+    Mutex lock;
+    keydata *keys;
+    const char *id, *contact, *script;
+
+    volatile unsigned tsUsed;
+
+    unsigned tsFirst;
+    unsigned tsCount;
     unsigned span;
 
-    Group(const char *name);
     Group(unsigned count);
+    Group(keydata *keyset);
 
 public:
     inline bool isSpan(void)
@@ -426,6 +433,9 @@ public:
 
     inline const char *get(void)
         {return id;};
+
+    bool assign(Timeslot *ts);
+    void release(Timeslot *ts);
 };
 
 class Driver : public Env
@@ -472,6 +482,8 @@ public:
 
     static Group *getGroup(const char *id);
 
+    static Group *getContact(const char *id);
+
     static Group *getSpan(unsigned id);
 
     static Group *getSpan(const char *id);
@@ -504,9 +516,11 @@ class Timeslot : protected OrderedObject, protected Script::interp, protected Mu
 protected:
     friend class Message;
     friend class Driver;
+    friend class Group;
 
+    Group *group;           // active group of current call
     Group *incoming;        // incoming group to answer as...
-    Group *span;
+    Group *span;            // span entity associated with timeslot
 
     Timeslot(unsigned port, Group *group = NULL);
 
