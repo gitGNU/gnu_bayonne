@@ -428,6 +428,15 @@ public:
     inline bool is_span(void)
         {return span != ((unsigned)(-1));};
 
+    inline bool is_registry(void)
+        {return tsFirst == ((unsigned)(-1));};
+
+    inline bool is_mapped(void)
+        {return !is_span() && !is_registry() && (tsCount > 0);};
+
+    inline bool is_generic(void)
+        {return !is_span() && !is_registry() && (tsCount == 0);};
+
     inline const char *get(const char *id)
         {return (keys == NULL) ? NULL : keys->get(id);};
 

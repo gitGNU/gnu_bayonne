@@ -149,7 +149,7 @@ void Group::snapshot(FILE *fp)
 Registry::Registry(keydata *keyset) :
 Group(keyset)
 {
-    tsFirst = 0;
+    tsFirst = (unsigned)-1;
 }
 
 void Registry::snapshot(FILE *fp)
