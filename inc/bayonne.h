@@ -321,24 +321,6 @@ public:
         void setStack(header *scr, event *ev = NULL);
 
         /**
-         * Define pattern match virtual.  This is used for the "$"
-         * conditional expression, for event dispatch, and for some searches.
-         * @param pattern to match.
-         * @param name we match with.
-         * @return true if pattern matches.
-         */
-        virtual bool match(const char *pattern, const char *name);
-
-        /**
-         * Used to determine if an event handler should be treated as
-         * inherited/callable from the base script when requested from
-         * a defined block of code but not found there.
-         * @param name of event.
-         * @return true if is inherited.
-         */
-        virtual bool isInherited(const char *name);
-
-        /**
          * Try to branch to a named event handler.  If successful, the
          * interpreter transfers control to the start of the handler
          * for the next step.

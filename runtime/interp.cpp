@@ -770,10 +770,6 @@ void Script::interp::startScript(Script::header *scr)
 bool Script::interp::attach(Script *img, const char *entry)
 {
     Script::header *main = NULL;
-    linked_pointer<Script::header> hp;
-    unsigned path = 0;
-    const char *cp;
-
     image = img;
 
     if(!img)
@@ -781,17 +777,6 @@ bool Script::interp::attach(Script *img, const char *entry)
 
     if(entry && *entry == '@')
         main = Script::find(img, entry);
-    else while(entry && main == NULL && path < Script::indexing) {
-        hp = img->scripts[path++];
-        while(is(hp)) {
-            cp = hp->name;
-            if(*cp == '@' && match(cp, entry)) {
-                main = *hp;
-                break;
-            }
-            hp.next();
-        }
-    }
 
     if(!main)
         main = Script::find(img, "@main");
@@ -824,28 +809,12 @@ void Script::interp::skip(void)
     stack[frame].line = stack[frame].line->next;
 }
 
-bool Script::interp::match(const char *found, const char *name)
-{
-    assert(found != NULL);
-    assert(name != NULL);
-
-    if(*found == '@')
-        ++found;
-
-    return !stricmp(found, name);
-}
-
-bool Script::interp::isInherited(const char *name)
-{
-    return true;
-}
-
 Script::event *Script::interp::scriptMethod(const char *name)
 {
     linked_pointer<Script::event> mp = stack[frame].scr->methods;
 
     while(is(mp)) {
-        if(match(mp->name, name))
+        if(case_eq(mp->name, name))
             return *mp;
         mp.next();
     }
@@ -855,20 +824,19 @@ Script::event *Script::interp::scriptMethod(const char *name)
 bool Script::interp::scriptEvent(const char *name)
 {
     linked_pointer<Script::event> ep;
-    bool inherit = isInherited(name);
     unsigned stackp = frame;
 
     for(;;) {
         ep = stack[stackp].scr->events;
 
         while(is(ep)) {
-            if(match(ep->name, name))
+            if(case_eq(ep->name, name))
                 break;
 
             ep.next();
         }
 
-        if(!is(ep) && !inherit)
+        if(!is(ep) && case_eq(name, "timeout"))
             return false;
 
         if(is(ep)) {
@@ -1346,10 +1314,10 @@ bool Script::interp::getExpression(unsigned index)
     }
 
     if(eq(op, "!$") || eq(op, "isnot"))
-        return !match(v2, v1);
+        return !case_eq(v2, v1);
 
     if(eq(op, "$") || eq(op, "is"))
-        return match(v2, v1);
+        return case_eq(v2, v1);
 
 #ifdef  HAVE_REGEX_H
     if(eq(op, "~") || eq(op, "!~")) {
