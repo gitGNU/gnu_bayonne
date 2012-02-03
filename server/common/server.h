@@ -64,58 +64,6 @@ typedef enum {
     STEP_EXIT = STEP_HANGUP
 } tsstep_t;
 
-/**
-  * Signaled interpreter events.  These can be masked and accessed
-  * through ^xxx handlers in the scripting language.
-  */
-typedef enum {
-    SIGNAL_EXIT = 0,
-    SIGNAL_HANGUP = SIGNAL_EXIT,
-    SIGNAL_ERROR,
-    SIGNAL_TIMEOUT,
-    SIGNAL_DTMF,
-
-    SIGNAL_0,
-    SIGNAL_1,
-    SIGNAL_2,
-    SIGNAL_3,
-    SIGNAL_4,
-    SIGNAL_5,
-    SIGNAL_6,
-    SIGNAL_7,
-    SIGNAL_8,
-    SIGNAL_9,
-    SIGNAL_STAR,
-    SIGNAL_POUND,
-    SIGNAL_A,
-    SIGNAL_OVERRIDE = SIGNAL_A,
-    SIGNAL_B,
-    SIGNAL_FLASH = SIGNAL_B,
-    SIGNAL_C,
-    SIGNAL_IMMEDIATE = SIGNAL_C,
-    SIGNAL_D,
-    SIGNAL_PRIORITY = SIGNAL_D,
-
-    SIGNAL_SILENCE,
-    SIGNAL_BUSY,
-    SIGNAL_CANCEL,
-    SIGNAL_FAIL = SIGNAL_CANCEL,
-    SIGNAL_INVALID = SIGNAL_CANCEL,
-    SIGNAL_NOTIFY,
-
-    SIGNAL_NOANSWER,
-    SIGNAL_RING,
-    SIGNAL_ANSWER = SIGNAL_RING,
-    SIGNAL_PICKUP = SIGNAL_RING,
-    SIGNAL_TONE,
-    SIGNAL_EVENT,
-
-    SIGNAL_TIME,
-    SIGNAL_MAXTIME = SIGNAL_TIME,
-    SIGNAL_CHILD,
-    SIGNAL_ASR
-} tssignal_t;
-
 typedef enum {
     ENTER_STATE = 100,
     EXIT_STATE,
