@@ -99,17 +99,16 @@ LinkedObject((LinkedObject **)&spans)
 
 bool Group::assign(Timeslot *ts)
 {
-    if(!tsCount)
-            return true;
+    if(tsCount) {
+        lock.acquire();
+        if(tsUsed >= tsCount) {
+            lock.release();
+            return false;
+        }
 
-    lock.acquire();
-    if(tsUsed >= tsCount) {
+        ++tsUsed;
         lock.release();
-        return false;
     }
-
-    ++tsUsed;
-    lock.release();
 
     if(ts->span && ts->span != this)
         ts->span->assign(ts);
@@ -120,13 +119,15 @@ bool Group::assign(Timeslot *ts)
 
 void Group::release(Timeslot *ts)
 {
-    if(ts->group != this || !tsCount)
+    if(ts->group != this)
         return;
 
-    lock.acquire();
-    if(tsUsed)
-        --tsUsed;
-    lock.release();
+    if(tsCount) {
+        lock.acquire();
+        if(tsUsed)
+            --tsUsed;
+        lock.release();
+    }
 
     if(ts->span && ts->span != this)
         ts->span->release(ts);
