@@ -589,6 +589,10 @@ initial:
             continue;
 
         if(*token == '^' || *token == '-') {
+            if(scr == img->first) {
+                img->errlog(lnum, "events cannot be in init segment");
+                continue;
+            }
             current = (event *)img->alloc(sizeof(Script::event));
             if(!prior)
                 prior = current;
