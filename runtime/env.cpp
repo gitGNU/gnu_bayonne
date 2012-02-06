@@ -54,6 +54,7 @@ bool Env::init(shell_t *args)
     set("prompts", _STR(str(prefix) + "/prompts"));
     set("sounds", _STR(str(prefix) + "/sounds"));
     set("definitions", _STR(str(prefix) + "/scripts"));
+    set("modules", _STR(str(prefix) + "/modules"));
     set("shell", "cmd.exe");
     set("voices", _STR(str(prefix) + "\\voices"));
     set("temp", "C:\\Program Files\\bayonne\\temp");
@@ -81,6 +82,7 @@ bool Env::init(shell_t *args)
     set("prompts", DEFAULT_DATADIR "/bayonne/prompts");
     set("sounds", DEFAULT_DATADIR "/sounds");
     set("definitions", DEFAULT_DATADIR "/bayonne/definitions");
+    set("modules", DEFAULT_DATADIR "/bayonne/modules");
     set("shell", "/bin/sh");
     set("voices", DEFAULT_DATADIR "/bayonne/voices");
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");

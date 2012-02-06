@@ -28,14 +28,8 @@ public:
 static Script::keyword_t keywords[] = {
     {NULL}};
 
-static const char *defs[128];
-static const char *clist = " \t,;:";
-unsigned defcount = 0;
-
 static shell::flagopt helpflag('h',"--help", _TEXT("display this list"));
 static shell::flagopt althelp('?', NULL, NULL);
-static shell::stringopt driver('d', "--driver", _TEXT("driver lint definitions to use"), "name", NULL);
-static shell::stringopt modules('m', "--modules", _TEXT("names of optional modules we added"), "list", NULL);
 static shell::flagopt ver('v', "--version", _TEXT("version of application"));
 
 static void version(void)
@@ -60,12 +54,9 @@ static void usage(void)
 PROGRAM_MAIN(argc, argv)
 {
     linked_pointer<Script::error> ep;
-    const char *modname = NULL;
-    const char *fn, *dn;
+    const char *fn;
     Script *lib = NULL;
-    unsigned def = 0;
     char buffer[256];
-    char *tokens = NULL;
     const char *ext;
     size_t len;
     fsys_t dir;
@@ -74,8 +65,6 @@ PROGRAM_MAIN(argc, argv)
     shell args(argc, argv);
 
     Env::tool(&args);
-
-    const char *lintfiles = Env::env("definitions");
 
     if(is(helpflag) || is(althelp))
         usage();
@@ -98,9 +87,9 @@ PROGRAM_MAIN(argc, argv)
         exit(-1);
     }
 
-    if((is(driver) || is(modules)) && !fsys::isdir(lintfiles)) {
-        fprintf(stderr, "*** baylint: %s: invalid data directory\n", lintfiles);
-        exit(-1);
+    if(!String::equal(ext, ".bcs") && !String::equal(ext, ".scr")) {
+        fprintf(stderr, "*** %s: not a valid script file name\n", fn);
+        exit(1);
     }
 
     Script::init();
@@ -128,31 +117,31 @@ PROGRAM_MAIN(argc, argv)
         fsys::close(dir);
     }
 
-    if(is(driver))
-        defs[defcount++] = *driver;
+    String::set(buffer, sizeof(buffer), Env::env("modules"));
+    fsys::open(dir, buffer, fsys::ACCESS_DIRECTORY);
 
-    if(modules)
-        modname = String::token((char *)*modules, &tokens, clist);
+    if(!is(dir))
+        shell::log(shell::ERR, "cannot use module definitions from %s", buffer);
+    else {
+        shell::debug(2, "using module definitions from %s", buffer);
+        len = strlen(buffer);
+        buffer[len++] = '/';
 
-    while(modname) {
-        defs[defcount++] = modname;
-        modname = String::token(NULL, &tokens, clist);
-    }
-
-    while(def < defcount) {
-        dn = defs[def++];
-        if(!strchr(dn, '/') && !strchr(dn, '.')) {
-            snprintf(buffer, sizeof(buffer), "%s/%s.bcs", lintfiles, dn);
-            dn = buffer;
+        while(is(dir) && fsys::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+            char *ep = strrchr(buffer + len, '.');
+            if(!ep)
+                continue;
+            if(!String::equal(ep, ".bcs"))
+                continue;
+            shell::log(shell::INFO, "module %s", buffer + len);
+            lib = Script::compile(lib, buffer, NULL);
         }
-        if(!fsys::isfile(dn))
-            continue;
-
-        shell::log(shell::INFO, "compiling %s", buffer);
-        lib = Script::compile(lib, buffer, NULL);
+        fsys::close(dir);
     }
 
-    ep = lib->getListing();
+    if(lib)
+        ep = lib->getListing();
+
     while(is(ep)) {
         fprintf(stderr, "%s:%d: warning: %s\n", ep->filename, ep->errline, ep->errmsg);
         ep.next();
@@ -166,12 +155,6 @@ PROGRAM_MAIN(argc, argv)
     }
 
     unsigned errors = img->getErrors();
-
-    if(!String::equal(ext, ".ics") && !String::equal(ext, ".ocs") && !String::equal(ext, ".dcs")) {
-        fprintf(stderr, "*** %s: not a valid script file name\n", fn);
-        exit(1);
-    }
-
     if(errors) {
         fprintf(stderr, "*** %d total errors in %s\n", errors, fn);
         ep = img->getListing();
