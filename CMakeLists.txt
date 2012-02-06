@@ -75,6 +75,7 @@ else()
     option(EXOSIP2_TLS "Set to OFF to disable eXosip2 TLS support check" ON)
 endif()
 
+option(BUILD_TESTING "Set to ON to build test programs" OFF)
 MESSAGE( STATUS "Configuring GNU bayonne ${VERSION}...")
 
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME} server")
@@ -246,6 +247,11 @@ target_link_libraries(bayonne-runtime ${EXPORT_LIBS} ${USES_UCOMMON_LIBRARIES})
 
 add_subdirectory(server)
 add_subdirectory(utils)
+
+if(BUILD_TESTING)
+    ENABLE_TESTING()
+    add_subdirectory(test)
+endif()
 
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
 
