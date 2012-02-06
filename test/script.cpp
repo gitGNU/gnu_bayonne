@@ -158,7 +158,7 @@ int main(int argc, char **argv)
         {"check.loop", (Script::method_t)&testing::scrCheckLoop, &Script::checks::chkNop},
         {"check.refs", (Script::method_t)&testing::scrCheckRefs, &Script::checks::chkNop},
         {"check.manip", (Script::method_t)&testing::scrCheckManip, &Script::checks::chkNop},
-        {"ignore", (Script::method_t)&Script::methods::scrNop, &Script::checks::chkIgnore},
+        {"check.ignore", (Script::method_t)&Script::methods::scrNop, &Script::checks::chkIgnore},
         {"args", (Script::method_t)&testing::scrArgs, &Script::checks::chkIgnore},
         {"sleep", (Script::method_t)&testing::scrSleep, &Script::checks::chkNop},
         {NULL}};
@@ -182,11 +182,11 @@ int main(int argc, char **argv)
     Script *image;
 
     if(mergename) {
-        image = Script::compile(mergename);
-        image = Script::append(image, filename);
+        image = Script::compile(NULL, mergename);
+        image = Script::compile(image, filename);
     }
     else
-        image = Script::compile(filename);
+        image = Script::compile(NULL, filename);
 
     if(!image) {
         fprintf(stderr, "*** failed to load %s\n", filename);

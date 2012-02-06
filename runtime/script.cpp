@@ -284,6 +284,7 @@ OrderedObject(&img->errlist)
 {
     errmsg = img->dup(msg);
     errline = line;
+    filename = img->filename;
 }
 
 Script::Script() :
@@ -382,6 +383,7 @@ void Script::init(void)
         {"expr", (method_t)&methods::scrExpr, (check_t)&checks::chkExpr},
         {"strict", (method_t)NULL, (check_t)&checks::chkStrict},
         {"apply", (method_t)NULL, (check_t)&checks::chkApply},
+        {"ignore", (method_t)NULL, (check_t)&checks::chkIgnmask},
         {"_ifthen", (method_t)&methods::scrWhen, (check_t)&checks::chkWhen},
         {"_define", (method_t)&methods::scrDefine, (check_t)&checks::chkDefine},
         {"_invoke", (method_t)&methods::scrInvoke, (check_t)&checks::chkInvoke},
@@ -411,41 +413,7 @@ Script::header *Script::find(Script *img, const char *id)
     return *hp;
 }
 
-Script *Script::merge(const char *fn, Script *root)
-{
-    Script *img = compile(fn, root);
-    if(!root || !img)
-        return img;
-
-    return merge(img, root);
-}
-
-Script *Script::merge(Script *img, Script *root)
-{
-    assert(img != NULL && root != NULL);
-
-    for(unsigned index = 0; index < Script::indexing; ++index) {
-        header *prior = NULL;
-        linked_pointer<header> hp = img->scripts[index];
-        while(is(hp)) {
-            prior = *hp;
-            hp.next();
-        }
-        if(prior)
-            prior->link(static_cast<header *>(root->scripts[index]));
-        else
-            img->scripts[index] = root->scripts[index];
-    }
-
-    return img;
-}
-
-Script *Script::compile(const char *fn, Script *cfg)
-{
-    return Script::append(NULL, fn, cfg);
-}
-
-Script *Script::append(Script *merge, const char *fn, Script *cfg)
+Script *Script::compile(Script *merge, const char *fn, Script *cfg)
 {
 //  linked_pointer<script::strict> sp;
 
@@ -500,18 +468,29 @@ Script *Script::append(Script *merge, const char *fn, Script *cfg)
     else
         img->filename = fn;
 
+    img->filename = img->dup(img->filename);
+
 initial:
     current = NULL;
     prior = NULL;
     last = NULL;
 
-    scr = (header *)img->alloc(sizeof(header));
-    memset(scr, 0, sizeof(header));
-    scr->name = img->dup(name);
-    scr->events = NULL;
-    scr->first = NULL;
-    scr->resmask = 0;
-    scr->scoped = NULL;
+    if(img->first && eq(name, "_init_")) {
+        scr = img->first;
+        last = scr->first;
+        while(last && last->next)
+            last = last->next;
+    }
+    else {
+        scr = (header *)img->alloc(sizeof(header));
+        memset(scr, 0, sizeof(header));
+        scr->name = img->dup(name);
+        scr->events = NULL;
+        scr->first = NULL;
+        scr->resmask = 0;
+        scr->scoped = NULL;
+    }
+
     keyword_t *keyword;
     img->loop = 0;
     char *temp;

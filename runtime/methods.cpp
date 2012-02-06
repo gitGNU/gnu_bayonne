@@ -331,6 +331,19 @@ bool Script::methods::scrNop(void)
     return true;
 }
 
+bool Script::methods::scrIgnore(void)
+{
+    Script::line_t *line = stack[frame].line;
+    const char *cp = line->argv[0];
+
+    if((line->argc == 1) && eq(cp, "none"))
+        stack[frame].ignore = NULL;
+    else
+        stack[frame].ignore = line;
+    skip();
+    return true;
+}
+
 bool Script::methods::scrWhen(void)
 {
     if(!isConditional(0))

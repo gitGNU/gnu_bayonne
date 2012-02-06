@@ -232,7 +232,8 @@ public:
         static const char *chkWhen(Script *img, header *scr, line_t *line);
         static const char *chkStrict(Script *img, header *scr, line_t *line);
         static const char *chkExpr(Script *img, header *scr, line_t *line);
-        static const char *chkRef(Script *ing, header *scr, line_t *line);
+        static const char *chkRef(Script *img, header *scr, line_t *line);
+        static const char *chkIgnmask(Script *img, header *scr, line_t *line);
     };
 
     /**
@@ -244,6 +245,7 @@ public:
         header *scope;          /**< effective symbol scope */
         event_t *event;         /**< so we don't redo our event */
         line_t *line;           /**< executing line at stack level */
+        line_t *ignore;         /**< ignored events */
         unsigned short index;   /**< index marker for loops */
         unsigned short base;    /**< base stack of "@section" */
         unsigned short resmask; /**< effective dsp resource mask */
@@ -382,6 +384,7 @@ public:
         error(Script *img, unsigned line, const char *str);
 
     public:
+        const char *filename;
         char *errmsg;
         unsigned errline;
     };
@@ -435,6 +438,7 @@ public:
         bool scrInvoke(void);
         bool scrWhen(void);
         bool scrRef(void);
+        bool scrIgnore(void);
     };
 
     ~Script();
@@ -449,7 +453,7 @@ public:
     LinkedObject *scheduler;    /**< scheduler list */
 
     /**
-     * Append a file into an existing image.  A shared config script can be
+     * Compiled a file into an existing image.  A shared config script can be
      * used that holds common definitions.  Multiple script files can also be
      * merged together into a final image.
      * @param merge with prior compiled script.
@@ -457,39 +461,7 @@ public:
      * @param config image of script with common definitions.
      * @return compiled script object if successful.
      */
-    static Script *append(Script *merge, const char *filename, Script *config = NULL);
-
-    /**
-     * Compile a script file into an image.  Creates the new image that
-     * will be used.  A shared config script can be compiled and used
-     * to hold common definitions.
-     * @param filename to compile.
-     * @param config image of script with common definitions.
-     * @return compiled script object if successful.
-     */
-    static Script *compile(const char *filename, Script *config = NULL);
-
-
-
-    /**
-     * Compile and merge a script into an existing shared image.  This
-     * is related to compile, but the target script's definitions are
-     * linked into the base config script.  Use NULL if no base.  This
-     * is often used to compose lint images.
-     * @param filename to merge.
-     * @param root script to merge definitions with.
-     * @return compiled script instance if successful.
-     */
-    static Script *merge(const char *filename, Script *root = NULL);
-
-    /**
-     * Merge a compiled image into an existing image.  This is part of
-     * the operation of compile-merge.
-     * @param image to merge.
-     * @param root script to merge definitions with.
-     * @return compiled script instance if successful.
-     */
-    static Script *merge(Script *image, Script *root);
+    static Script *compile(Script *merge, const char *filename, Script *config = NULL);
 
     /**
      * Assign new keywords from extensions and derived service.  Must

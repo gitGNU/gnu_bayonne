@@ -114,7 +114,7 @@ Script *Driver::load(void)
         if(!String::equal(ep, ".bcs"))
             continue;
         shell::log(shell::INFO, "loading %s", dirpath + len);
-        img = Script::append(img, dirpath, definitions);
+        img = Script::compile(img, dirpath, definitions);
     }
     fsys::close(dir);
 
@@ -151,7 +151,7 @@ void Driver::compile(void)
         if(!String::equal(ep, ".bcs"))
             continue;
         shell::log(shell::INFO, "compiling %s", dirpath + len);
-        definitions = Script::append(definitions, dirpath, NULL);
+        definitions = Script::compile(definitions, dirpath, NULL);
     }
     fsys::close(dir);
 }

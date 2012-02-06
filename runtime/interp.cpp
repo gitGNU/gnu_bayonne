@@ -825,6 +825,14 @@ bool Script::interp::scriptEvent(const char *name)
 {
     linked_pointer<Script::event> ep;
     unsigned stackp = frame;
+    Script::line_t *ignore = stack[frame].ignore;
+    unsigned pos = 0;
+
+    // check if ignored event...
+    while(ignore && pos < ignore->argc) {
+        if(case_eq(name, ignore->argv[pos++]))
+            return false;
+    }
 
     for(;;) {
         ep = stack[stackp].scr->events;
@@ -867,6 +875,7 @@ void Script::interp::setStack(Script::header *scr, Script::event *ev)
     stack[frame].event = ev;
     stack[frame].index = 0;
     stack[frame].resmask = scr->resmask;
+    stack[frame].ignore = NULL;
 
     if(ev)
         stack[frame].line = ev->first;

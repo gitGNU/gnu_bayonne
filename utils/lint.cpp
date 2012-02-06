@@ -67,6 +67,8 @@ PROGRAM_MAIN(argc, argv)
     char buffer[256];
     char *tokens = NULL;
     const char *ext;
+    size_t len;
+    fsys_t dir;
 
     shell::bind("baylint");
     shell args(argc, argv);
@@ -104,6 +106,28 @@ PROGRAM_MAIN(argc, argv)
     Script::init();
     Script::assign(keywords);
 
+    String::set(buffer, sizeof(buffer), Env::env("definitions"));
+    fsys::open(dir, buffer, fsys::ACCESS_DIRECTORY);
+
+    if(!is(dir))
+        shell::log(shell::ERR, "cannot compile definitions from %s", buffer);
+    else {
+        shell::debug(2, "compiling definitions from %s", buffer);
+        len = strlen(buffer);
+        buffer[len++] = '/';
+
+        while(is(dir) && fsys::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+            char *ep = strrchr(buffer + len, '.');
+            if(!ep)
+                continue;
+            if(!String::equal(ep, ".bcs"))
+                continue;
+            shell::log(shell::INFO, "compiling %s", buffer + len);
+            lib = Script::compile(lib, buffer, NULL);
+        }
+        fsys::close(dir);
+    }
+
     if(is(driver))
         defs[defcount++] = *driver;
 
@@ -118,20 +142,23 @@ PROGRAM_MAIN(argc, argv)
     while(def < defcount) {
         dn = defs[def++];
         if(!strchr(dn, '/') && !strchr(dn, '.')) {
-            snprintf(buffer, sizeof(buffer), "%s/%s.lint", lintfiles, dn);
+            snprintf(buffer, sizeof(buffer), "%s/%s.bcs", lintfiles, dn);
             dn = buffer;
         }
         if(!fsys::isfile(dn))
             continue;
-        lib = Script::merge(dn, lib);
-        ep = lib->getListing();
-        while(is(ep)) {
-            fprintf(stderr, "%s:%d: warning: %s\n", lib->getFilename(), ep->errline, ep->errmsg);
-            ep.next();
-        }
+
+        shell::log(shell::INFO, "compiling %s", buffer);
+        lib = Script::compile(lib, buffer, NULL);
     }
 
-    Script *img = Script::compile(fn, lib);
+    ep = lib->getListing();
+    while(is(ep)) {
+        fprintf(stderr, "%s:%d: warning: %s\n", ep->filename, ep->errline, ep->errmsg);
+        ep.next();
+    }
+
+    Script *img = Script::compile(NULL, fn, lib);
 
     if(!img) {
         fprintf(stderr, "*** baylint: %s: failed to compile\n", fn);
@@ -149,7 +176,7 @@ PROGRAM_MAIN(argc, argv)
         fprintf(stderr, "*** %d total errors in %s\n", errors, fn);
         ep = img->getListing();
         while(is(ep)) {
-            fprintf(stderr, "%s:%d: error: %s\n", img->getFilename(), ep->errline, ep->errmsg);
+            fprintf(stderr, "%s:%d: error: %s\n", ep->filename, ep->errline, ep->errmsg);
             ep.next();
         }
         exit(2);

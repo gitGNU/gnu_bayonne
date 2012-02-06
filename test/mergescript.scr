@@ -1,7 +1,3 @@
-	ignore a="testing" b=%new #c d  # this is a comment
-	nop  %% another comment
-	check
-	nop
 
 define	reftest vars=required optional
 	if -modify %1 then set %1 := "result" 

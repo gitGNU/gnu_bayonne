@@ -1,5 +1,7 @@
-
-
+	check.ignore a="testing" b=%new #c d  # this is a comment
+	nop  %% another comment
+	check
+	nop
 
 @main
 	var local="initial"
