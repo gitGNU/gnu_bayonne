@@ -821,20 +821,35 @@ Script::event *Script::interp::scriptMethod(const char *name)
     return NULL;
 }
 
-bool Script::interp::scriptEvent(const char *name, const char *group)
+bool Script::interp::scriptEvent(const char *name)
 {
+    assert(name != NULL);
+
     linked_pointer<Script::event> ep;
     Script::event *egrp;
+    const char *group = NULL;
     unsigned stackp = frame;
     Script::line_t *ignore = stack[frame].ignore;
     unsigned pos = 0;
 
-    // check if ignored event...
+    // strip out lead event if passed here...
+    if(*name == '^')
+        ++name;
+
+    // single character key is a key group event
+    if(!name[1])
+        group = "key";
+
+    // check if ignoring event...
     while(ignore && pos < ignore->argc) {
+
+        // if entire group is ignored, drop all events of group
+        if(group && case_eq(group, ignore->argv[pos]))
+            return false;
+
+        // if our event is ignored, then exit out
         if(case_eq(name, ignore->argv[pos++]))
             return false;
-        if(group && case_eq(group, ignore->argv[pos++]))
-            group = NULL;
     }
 
     for(;;) {

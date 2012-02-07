@@ -735,8 +735,16 @@ const char *Script::checks::chkPush(Script *img, Script::header *scr, Script::li
 
 const char *Script::checks::chkIgnmask(Script *img, Script::header *scr, Script::line_t *line)
 {
+    unsigned pos = 0;
+
     if(!line->argc)
         return "no events listed";
+
+    while(pos < line->argc) {
+        if(line->argv[pos][0] == '^')
+            ++line->argv[pos];
+        ++pos;
+    }
 
     return NULL;
 }
