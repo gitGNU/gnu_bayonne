@@ -96,7 +96,7 @@ bool testing::scrCheckMain(void)
 {
     ++mainchecks;
     debug::print();
-    if(scriptEvent("event"))
+    if(scriptEvent("#"))
         return false;
     skip();
     return true;

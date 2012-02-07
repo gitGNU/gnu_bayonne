@@ -30,7 +30,7 @@
 	check
 	check.main
 
-^event
+^#
 	check.event
 	var counter:int
 	do
