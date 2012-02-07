@@ -821,9 +821,10 @@ Script::event *Script::interp::scriptMethod(const char *name)
     return NULL;
 }
 
-bool Script::interp::scriptEvent(const char *name)
+bool Script::interp::scriptEvent(const char *name, const char *group)
 {
     linked_pointer<Script::event> ep;
+    Script::event *egrp;
     unsigned stackp = frame;
     Script::line_t *ignore = stack[frame].ignore;
     unsigned pos = 0;
@@ -832,20 +833,26 @@ bool Script::interp::scriptEvent(const char *name)
     while(ignore && pos < ignore->argc) {
         if(case_eq(name, ignore->argv[pos++]))
             return false;
+        if(group && case_eq(group, ignore->argv[pos++]))
+            group = NULL;
     }
 
     for(;;) {
         ep = stack[stackp].scr->events;
+        egrp = NULL;
 
         while(is(ep)) {
             if(case_eq(ep->name, name))
                 break;
 
+            if(group && case_eq(ep->name, group))
+                egrp = *ep;
+
             ep.next();
         }
 
-        if(!is(ep) && case_eq(name, "timeout"))
-            return false;
+        if(!is(ep))
+            ep = egrp;
 
         if(is(ep)) {
 
@@ -858,6 +865,10 @@ bool Script::interp::scriptEvent(const char *name)
             setStack(stack[frame].scr, *ep);
             return true;
         }
+
+        // non-inherited test...
+        if(case_eq(name, "timeout"))
+            return false;
 
         while(stackp > stack[stackp].base && stack[stackp].line->loop)
             --stackp;

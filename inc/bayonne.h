@@ -327,9 +327,10 @@ public:
          * interpreter transfers control to the start of the handler
          * for the next step.
          * @param name of event to request.
+         * @param group event to also try, such as "digit"
          * @return true if found.
          */
-        bool scriptEvent(const char *name);
+        bool scriptEvent(const char *name, const char *group = NULL);
 
         /**
          * Search for an event object in the method table.
