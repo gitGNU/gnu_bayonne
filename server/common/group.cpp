@@ -28,10 +28,10 @@ static const char *getscr(keydata *keys)
 {
     char buf[65];
 
-    if(!keys)
-        return NULL;
-
     const char *cp = keys->get("script");
+    if(!cp)
+        cp = keys->get();
+
     if(cp && *cp == '@')
         return cp;
 
@@ -51,7 +51,7 @@ LinkedObject((LinkedObject **)&groups)
     tsFirst = tsCount = 0;
     tsUsed = 0;
     span = (unsigned)-1;
-    contact = NULL;
+    target = NULL;
 
     if(!keys)
         return;
@@ -78,7 +78,7 @@ LinkedObject((LinkedObject **)&spans)
 
     snprintf(buf, sizeof(buf), "%d", spanid);
 
-    contact = NULL;
+    target = NULL;
     keys = keyspans.get(id);
     if(keys)
         id = keys->get("name");
@@ -161,4 +161,52 @@ void Registry::snapshot(FILE *fp)
         fprintf(fp, "\t%-16s %04d used\n", id, tsUsed);
     lock.release();
 }
+
+const char *Registry::getHostid(const char *id)
+{
+    const char *cp = strrchr(id, '@');
+    if(cp)
+        return ++cp;
+
+    if(!schema)
+        return id;
+
+    size_t len = strlen(schema);
+    if(String::equal(schema, id, len))
+        id += len;
+
+    return id;
+}
+
+void Registry::getInterface(const char *uri, char *buffer, size_t size)
+{
+    struct sockaddr_storage iface;
+    struct sockaddr *address;
+    Socket::address resolver;
+    char *cp;
+
+    uri = getHostid(uri);
+
+    if(*uri == '[') {
+        String::set(buffer, size, ++uri);
+        cp = strchr(buffer, ']');
+        if(cp)
+            *(cp) = 0;
+    }
+    else {
+        String::set(buffer, size, uri);
+        cp = strchr(buffer, ':');
+        if(cp)
+            *(cp) = 0;
+    }
+    resolver.set(buffer, 6000);
+    address = resolver.getAddr();
+    if(address == NULL || Socket::getinterface((struct sockaddr *)&iface, address) != 0) {
+        String::set(buffer, sizeof(buffer), "localhost");
+        return;
+    }
+    resolver.clear();
+    Socket::getaddress((struct sockaddr *)&iface, buffer, size);
+}
+
 

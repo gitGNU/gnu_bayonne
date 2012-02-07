@@ -31,5 +31,22 @@
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
+class registry : public Registry
+{
+public:
+    int rid;
+    unsigned expires;
+    const char *contact;
+    const char *authid;
+    const char *userid;
+    const char *secret;
+    const char *server;
+    const char *domain;
+    const char *uri;
+    char uuid[38];
+
+    registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
+};
+
 END_NAMESPACE
 

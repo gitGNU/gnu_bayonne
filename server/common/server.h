@@ -361,7 +361,7 @@ protected:
 
     Mutex lock;
     keydata *keys;
-    const char *id, *contact, *script;
+    const char *id, *target, *script;
 
     volatile unsigned tsUsed;
 
@@ -400,9 +400,15 @@ public:
 class Registry : protected Group
 {
 protected:
+    const char *schema;
+
     Registry(keydata *keyset);
 
     virtual void snapshot(FILE *fp);
+
+    const char *getHostid(const char *id);
+
+    void getInterface(const char *uri, char *buffer, size_t size);
 };
 
 class Driver : public Env
@@ -449,7 +455,7 @@ public:
 
     static Group *getGroup(const char *id);
 
-    static Group *getContact(const char *id);
+    static Group *getTarget(const char *id);
 
     static Group *getSpan(unsigned id);
 
@@ -467,6 +473,8 @@ public:
 
     static keydata *getRegistry(void);
 
+    static keydata *getGroups(void);
+
     static Script *getImage(void);
 
     static void release(Script *image);
@@ -478,6 +486,10 @@ public:
     static void reload(void);
 
     static void snapshot(void);
+
+    static const char *dup(const char *str);
+
+    static void *alloc(size_t size);
 };
 
 class Timeslot : protected OrderedObject, protected Script::interp, protected Mutex

@@ -222,16 +222,21 @@ Group *Driver::getSpan(const char *id)
     return NULL;
 }
 
-Group *Driver::getContact(const char *id)
+Group *Driver::getTarget(const char *id)
 {
     linked_pointer<Group> gp = Group::groups;
 
     while(is(gp)) {
-        if(gp->contact && eq(gp->contact, id))
+        if(gp->target && eq(gp->target, id))
             return *gp;
         gp.next();
     }
     return NULL;
+}
+
+keydata *Driver::getGroups(void)
+{
+    return keygroup.begin();
 }
 
 Group *Driver::getGroup(const char *id)
@@ -373,4 +378,14 @@ void Driver::snapshot(void)
 
     fclose(fp);
     shell::log(DEBUG1, "%s\n", _TEXT("snapshot completed"));
+}
+
+const char *Driver::dup(const char *str)
+{
+    return keygroup.dup(str);
+}
+
+void *Driver::alloc(size_t size)
+{
+    return keygroup.alloc(size);
 }
