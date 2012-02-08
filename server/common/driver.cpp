@@ -18,9 +18,6 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-static keyfile keyserver(BAYONNE_CFGPATH "/server.conf");
-static keyfile keydriver(BAYONNE_CFGPATH "/driver.conf");
-static keyfile keygroup;
 static Script *image = NULL;
 static Mutex imglock;
 static const char *groupname;
@@ -36,7 +33,9 @@ Driver::Driver(const char *id, const char *registry)
     name = id;
     definitions = NULL;
     groupname = registry;
-
+    autotimer = 5000;
+    keyserver.load(BAYONNE_CFGPATH "/server.conf");
+    keyserver.load(BAYONNE_CFGPATH "/driver.conf");
     keygroup.load(strdup(str(BAYONNE_CFGPATH) + str(registry) + str(".conf")));
 
 #ifndef _MSWINDOWS_
@@ -61,22 +60,17 @@ Driver::Driver(const char *id, const char *registry)
 
 keydata *Driver::getKeys(const char *gid)
 {
-    return keygroup.get(gid);
+    return instance->keygroup.get(gid);
 }
 
 keydata *Driver::getPaths(void)
 {
-    return keyserver.get("paths");
+    return instance->keyserver.get("paths");
 }
 
 keydata *Driver::getSystem(void)
 {
-    return keyserver.get("system");
-}
-
-keydata *Driver::getRegistry(void)
-{
-    return keyserver.get("registry");
+    return instance->keyserver.get("system");
 }
 
 int Driver::start(void)
@@ -85,6 +79,10 @@ int Driver::start(void)
 }
 
 void Driver::stop(void)
+{
+}
+
+void Driver::automatic(void)
 {
 }
 
@@ -158,7 +156,7 @@ void Driver::compile(void)
 
 int Driver::startup(void)
 {
-    keydata *pri = keyserver.get("threads");
+    keydata *pri = instance->keyserver.get("threads");
     const char *cp;
 
     if(pri)
@@ -232,11 +230,6 @@ Group *Driver::getTarget(const char *id)
         gp.next();
     }
     return NULL;
-}
-
-keydata *Driver::getGroups(void)
-{
-    return keygroup.begin();
 }
 
 Group *Driver::getGroup(const char *id)
@@ -382,10 +375,10 @@ void Driver::snapshot(void)
 
 const char *Driver::dup(const char *str)
 {
-    return keygroup.dup(str);
+    return instance->dup(str);
 }
 
 void *Driver::alloc(size_t size)
 {
-    return keygroup.alloc(size);
+    return instance->alloc(size);
 }

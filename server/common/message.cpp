@@ -50,6 +50,9 @@ void msgthread::run(void)
 {
     shell::log(DEBUG1, "starting message thread");
 
+    timeout_t timeout, slice = Driver::getTimer();
+    Timer expires = slice;
+
     for(;;) {
         Conditional::lock();
         if(cancelled) {
@@ -61,7 +64,15 @@ void msgthread::run(void)
             shell::log(DEBUG2, "delivering messages");
             Message::deliver();
         }
-        Conditional::wait();
+        timeout = expires.get();
+        if(!timeout) {
+            Driver::sync();
+            timeout = slice;
+            expires += slice;
+        }
+        else if(timeout > slice)
+            timeout = slice;
+        Conditional::wait(timeout);
         Conditional::unlock();
     }
 }

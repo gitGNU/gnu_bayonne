@@ -25,15 +25,18 @@ public:
 
     int start(void);
 
+    void automatic(void);
+
 } _driver_;
 
 driver::driver() : Driver("sip", "registry")
 {
+    autotimer = 500;
 }
 
 int driver::start(void)
 {
-    linked_pointer<keydata> kp = getRegistry();
+    linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = keys->get("port");
     unsigned port = 5060, expires = 300;
     int protocol = IPPROTO_UDP;
@@ -106,10 +109,17 @@ int driver::start(void)
         return 0;
     }
 
-    keys = getGroups();
+    keys = keygroup.begin();
     while(is(kp)) {
         new registry(*kp, port, expires);
         kp.next();
     }
     return 0;
+}
+
+void driver::automatic(void)
+{
+    eXosip_lock();
+    eXosip_automatic_action();
+    eXosip_unlock();
 }

@@ -411,7 +411,7 @@ protected:
     void getInterface(const char *uri, char *buffer, size_t size);
 };
 
-class Driver : public Env
+class Driver : public Env, protected memalloc
 {
 private:
     friend class Group;
@@ -419,17 +419,20 @@ private:
     static Driver *instance;
 
 protected:
+    keyfile keyserver, keydriver, keygroup;
     const char *name;
     unsigned tsCount, tsUsed, tsSpan;
     Timeslot **tsIndex;
     char *status;
     keydata *keys;
     Script *definitions;
+    timeout_t autotimer;
 
     volatile unsigned active, down;
 
     Driver(const char *name, const char *registry = "groups");
 
+    virtual void automatic(void);
     virtual int start(void);
     virtual void stop(void);
     virtual void compile(void);
@@ -440,6 +443,9 @@ protected:
 public:
     inline static Driver *getDriver(void)
         {return instance;};
+
+    inline static timeout_t getTimer(void)
+        {return instance->autotimer;};
 
     inline static const char *getName(void)
         {return instance->name;};
@@ -452,6 +458,9 @@ public:
 
     inline static unsigned getUsed(void)
         {return instance->tsUsed;};
+
+    inline static void sync(void)
+        {instance->automatic();};
 
     static Group *getGroup(const char *id);
 
@@ -470,10 +479,6 @@ public:
     static keydata *getPaths(void);
 
     static keydata *getSystem(void);
-
-    static keydata *getRegistry(void);
-
-    static keydata *getGroups(void);
 
     static Script *getImage(void);
 
