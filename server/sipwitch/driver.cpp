@@ -18,7 +18,7 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-static class driver : public Driver
+class driver : public Driver
 {
 public:
     driver();
@@ -27,7 +27,7 @@ public:
 
     void automatic(void);
 
-} _driver_;
+};
 
 driver::driver() : Driver("sip", "registry")
 {
@@ -123,3 +123,18 @@ void driver::automatic(void)
     eXosip_automatic_action();
     eXosip_unlock();
 }
+
+static SERVICE_MAIN(main, argc, argv)
+{
+    signals::service("bayonne");
+    server::start(argc, argv);
+}
+
+PROGRAM_MAIN(argc, argv)
+{
+    new driver;
+    server::start(argc, argv, &service_main);
+    PROGRAM_EXIT(0);
+}
+
+

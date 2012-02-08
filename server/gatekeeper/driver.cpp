@@ -18,12 +18,27 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-static class driver : public Driver
+class driver : public Driver
 {
 public:
     driver();
-} _driver_;
+};
 
 driver::driver() : Driver("h323", "registry")
 {
 }
+
+static SERVICE_MAIN(main, argc, argv)
+{
+    signals::service("bayonne");
+    server::start(argc, argv);
+}
+
+PROGRAM_MAIN(argc, argv)
+{
+    new driver;
+    server::start(argc, argv, &service_main);
+    PROGRAM_EXIT(0);
+}
+
+

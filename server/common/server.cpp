@@ -183,7 +183,7 @@ static void dispatch(int slots)
     Control::log("server shutdown %s\n", (const char *)dt);
 }
 
-static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
+void server::start(int argc, char **argv, shell::mainproc_t svc)
 {
     const char *cp;
 
@@ -434,17 +434,4 @@ static void init(int argc, char **argv, shell::mainproc_t svc = NULL)
     notify::stop();
     signals::stop();
 }
-
-static SERVICE_MAIN(main, argc, argv)
-{
-    signals::service("bayonne");
-    init(argc, argv);
-}
-
-PROGRAM_MAIN(argc, argv)
-{
-    init(argc, argv, &service_main);
-    PROGRAM_EXIT(0);
-}
-
 

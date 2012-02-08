@@ -373,12 +373,13 @@ void Driver::snapshot(void)
     shell::log(DEBUG1, "%s\n", _TEXT("snapshot completed"));
 }
 
-const char *Driver::dup(const char *str)
+const char *Driver::dup(const char *text)
 {
-    return instance->dup(str);
+    return instance->dup(text);
 }
 
 void *Driver::alloc(size_t size)
 {
     return instance->alloc(size);
 }
+

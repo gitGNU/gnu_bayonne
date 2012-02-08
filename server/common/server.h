@@ -411,7 +411,7 @@ protected:
     void getInterface(const char *uri, char *buffer, size_t size);
 };
 
-class Driver : public Env, protected memalloc
+class Driver : public Env, public mempager
 {
 private:
     friend class Group;
@@ -492,7 +492,7 @@ public:
 
     static void snapshot(void);
 
-    static const char *dup(const char *str);
+    static const char *dup(const char *text);
 
     static void *alloc(size_t size);
 };
@@ -533,6 +533,12 @@ public:
 
     static const char *select(Script *image, const char *group, const char *event);
     static void load(Script *image, const char *path);
+};
+
+class server
+{
+public:
+    static void start(int argc, char **argv, shell::mainproc_t svc = NULL);
 };
 
 #ifdef HAVE_SIGWAIT
