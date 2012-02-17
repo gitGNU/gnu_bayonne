@@ -525,6 +525,7 @@ private:
 
     void errlog(unsigned line, const char *fmt, ...);
 
+    unsigned long instance;
     unsigned errors;
     unsigned loop;
     unsigned lines;

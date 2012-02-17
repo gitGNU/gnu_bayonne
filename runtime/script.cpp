@@ -27,6 +27,7 @@ using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
 static Script::keyword_t *keywords = NULL;
+static unsigned long icounter = 0;
 
 size_t Script::paging = 0;  // default page size used...
 unsigned Script::sizing = 64;   // default symbol size is 64...
@@ -290,6 +291,7 @@ OrderedObject(&img->errlist)
 Script::Script() :
 CountedObject(), memalloc()
 {
+    instance = icounter++;
     errors = 0;
     loop = 0;
     lines = 0;
@@ -300,12 +302,17 @@ CountedObject(), memalloc()
     stack = (line_t **)alloc(sizeof(line_t *) * Script::stacking);
     scripts = (LinkedObject **)alloc(sizeof(LinkedObject *) * Script::indexing);
     memset(scripts, 0, sizeof(LinkedObject **) * Script::indexing);
+
+    if(instance)
+        shell::log(shell::INFO, "creating image instance %lu\n", instance);
 }
 
 Script::~Script()
 {
     purge();
     shared = NULL;
+    if(instance)
+        shell::log(shell::INFO, "releasing image instance %lu\n", instance);
 }
 
 void Script::errlog(unsigned line, const char *fmt, ...)
