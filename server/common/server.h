@@ -395,6 +395,8 @@ public:
     void release(Timeslot *ts);
 
     virtual void snapshot(FILE *fp);
+
+    virtual void shutdown(void);
 };
 
 class Registry : protected Group

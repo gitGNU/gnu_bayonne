@@ -172,8 +172,24 @@ int Driver::startup(void)
 
 void Driver::shutdown(void)
 {
+    linked_pointer<Group> gp;
+
+    gp = Group::groups;
+
+    while(is(gp)) {
+        gp->shutdown();
+        gp.next();
+    }
+
     Message::stop();
     instance->stop();
+
+    gp = Group::spans;
+
+    while(is(gp)) {
+        gp->shutdown();
+        gp.next();
+    }
 }
 
 void Driver::reload(void)

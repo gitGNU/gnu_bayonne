@@ -146,6 +146,10 @@ void Group::snapshot(FILE *fp)
     lock.release();
 }
 
+void Group::shutdown(void)
+{
+}
+
 Registry::Registry(keydata *keyset) :
 Group(keyset)
 {

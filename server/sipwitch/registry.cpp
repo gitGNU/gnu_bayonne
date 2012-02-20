@@ -95,12 +95,28 @@ Registry(keyset)
         osip_message_set_header(msg, "Event", "Registration");
         osip_message_set_header(msg, "Allow-Events", "presence");
         eXosip_register_send_register(rid, msg);
+        shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
-    else
+    else {
+        shell::log(shell::ERR, "failed to register %s with %s", id, server);
         rid = -1;
+    }
 
     eXosip_unlock();
-
-    shell::debug(3, "registry id %d assigned to %s", rid, id);
 }
 
+void registry::shutdown()
+{
+    osip_message_t *msg = NULL;
+
+    if(rid == -1)
+        return;
+
+    eXosip_lock();
+    eXosip_register_build_register(rid, 0, &msg);
+    if(msg) {
+        shell::debug(3, "released registry id %d from %s", rid, server);
+        eXosip_register_send_register(rid, msg);
+    }
+    eXosip_unlock();
+}

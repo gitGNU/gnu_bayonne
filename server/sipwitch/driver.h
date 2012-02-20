@@ -46,6 +46,8 @@ public:
     char uuid[38];
 
     registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
+
+    void shutdown(void);
 };
 
 END_NAMESPACE
