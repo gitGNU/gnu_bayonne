@@ -100,7 +100,7 @@ Script *Driver::load(void)
     fsys_t dir;
     Script *img = NULL;
 
-    String::set(dirpath, sizeof(dirpath), path("scripts"));
+    String::set(dirpath, sizeof(dirpath), env("scripts"));
     fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
 
     if(!is(dir)) {
@@ -137,7 +137,7 @@ void Driver::compile(void)
     size_t len;
     fsys_t dir;
 
-    String::set(dirpath, sizeof(dirpath), path("definitions"));
+    String::set(dirpath, sizeof(dirpath), env("definitions"));
     fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
 
     if(!is(dir)) {

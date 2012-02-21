@@ -147,24 +147,6 @@ void Env::tool(shell_t *args)
     init(args);
 }
 
-String Env::path(const char *id)
-{
-    String result;
-    const char *cp = sys->getsym(id);
-
-#ifndef _MSWINDOWS_
-    if(eq(cp, "~/", 2) && getuid()) {
-        const char *home = getenv("HOME");
-        if(home) {
-            result = str(home) + ++cp;
-            return result;
-        }
-    }
-#endif
-    result = cp;
-    return result;
-}
-
 const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t size, bool writeflag)
 {
     const char *ext = strrchr(path, '/');
