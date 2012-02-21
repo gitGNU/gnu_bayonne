@@ -86,7 +86,9 @@ static void corefiles(void)
 #ifdef  DEBUG
 static void dumpconfig(void)
 {
-#ifndef _MSWINDOWS_
+#ifdef _MSWINDOWS_
+    printf("config = %s\n", BAYONNE_CFGPATH "/server.conf");
+#else
     printf("config = %s\n", getenv("BAYONNERC"));
 #endif
     printf("configs = %s\n", BAYONNE_CFGPATH);
