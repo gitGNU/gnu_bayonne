@@ -91,12 +91,12 @@ static void dumpconfig(void)
 #else
     printf("config = %s\n", getenv("BAYONNERC"));
 #endif
-    printf("configs = %s\n", *Env::path("configs"));
-    printf("controls = %s\n", *Env::path("controls"));
-    printf("defines = %s\n", *Env::path("definitions"));
-    printf("libexec = %s\n", *Env::path("libexec"));
-    printf("scripts = %s\n", *Env::path("scripts"));
-    printf("voices = %s\n", *Env::path("voices"));
+    printf("configs = %s\n", Env::get("configs"));
+    printf("controls = %s\n", Env::get("controls"));
+    printf("defines = %s\n", Env::get("definitions"));
+    printf("libexec = %s\n", Env::get("libexec"));
+    printf("scripts = %s\n", Env::get("scripts"));
+    printf("voices = %s\n", Env::get("voices"));
     exit(0);
 }
 #endif
