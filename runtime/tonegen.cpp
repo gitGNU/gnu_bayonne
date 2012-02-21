@@ -327,7 +327,7 @@ bool Tonegen::load(const char *l)
     char namebuf[65];
     bool loaded = false;
 
-    fp = fopen(Env::path("config") + "/tones.conf", "r");
+    fp = fopen(Env::path("configs") + "/tones.conf", "r");
     if(!fp)
         return false;
 

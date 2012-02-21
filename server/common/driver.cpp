@@ -126,7 +126,7 @@ Script *Driver::load(void)
     if(!img)
         return NULL;
 
-    Scheduler::load(img, path("config") + "/scheduler.conf");
+    Scheduler::load(img, path("configs") + "/scheduler.conf");
 
     return img;
 }

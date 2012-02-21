@@ -91,7 +91,7 @@ static void dumpconfig(void)
 #else
     printf("config = %s\n", getenv("BAYONNERC"));
 #endif
-    printf("configs = %s\n", *Env::path("config"));
+    printf("configs = %s\n", *Env::path("configs"));
     printf("controls = %s\n", *Env::path("controls"));
     printf("defines = %s\n", *Env::path("definitions"));
     printf("libexec = %s\n", *Env::path("libexec"));
@@ -119,6 +119,21 @@ static void versioninfo(void)
         "This is free software: you are free to change and redistribute it.\n"
         "There is NO WARRANTY, to the extent permitted by law.\n"));
     exit(0);
+}
+
+static const char *userpath(const char *path)
+{
+    if(!path)
+        return NULL;
+
+#ifndef _MSWINDOWS_
+    if(eq(path, "~/", 2) && getuid()) {
+        const char *home = getenv("HOME");
+        if(home)
+            return strdup(str(home) + ++path);
+    }
+#endif
+    return path;
 }
 
 static void dispatch(int slots)
@@ -227,31 +242,31 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
 
     keydata *paths = Driver::getPaths();
     if(paths) {
-        cp = paths->get("phrasebook");
+        cp = userpath(paths->get("phrasebook"));
         if(!cp)
-            cp = paths->get("voices");
+            cp = userpath(paths->get("voices"));
 
-        if(cp && *cp)
+        if(cp && *cp && fsys::isdir(cp))
             Env::set("voices", cp);
 
-        cp = paths->get("scripts");
-        if(cp && *cp)
+        cp = userpath(paths->get("scripts"));
+        if(cp && *cp && fsys::isdir(cp))
             Env::set("scripts", cp);
 
-        cp = paths->get("prompts");
-        if(cp && *cp)
+        cp = userpath(paths->get("prompts"));
+        if(cp && *cp && fsys::isdir(cp))
             Env::set("prompts", cp);
 
-        cp = paths->get("definitions");
-        if(cp && *cp)
+        cp = userpath(paths->get("definitions"));
+        if(cp && *cp && fsys::isdir(cp))
             Env::set("definitions", cp);
 
-        cp = paths->get("config");
-        if(cp && *cp)
-            Env::set("config", cp);
+        cp = userpath(paths->get("configs"));
+        if(cp && *cp && fsys::isdir(cp))
+            Env::set("configs", cp);
 
-        cp = paths->get("libexec");
-        if(cp && *cp)
+        cp = userpath(paths->get("libexec"));
+        if(cp && *cp && fsys::isdir(cp))
             Env::set("libexec", cp);
     }
 

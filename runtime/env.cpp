@@ -88,7 +88,7 @@ bool Env::init(shell_t *args)
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");
 #endif
 
-    set("config", BAYONNE_CFGPATH);
+    set("configs", BAYONNE_CFGPATH);
     set("libexec", BAYONNE_LIBEXEC);
 
 #ifdef  HAVE_PWD_H
