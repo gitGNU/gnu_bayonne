@@ -91,12 +91,12 @@ static void dumpconfig(void)
 #else
     printf("config = %s\n", getenv("BAYONNERC"));
 #endif
-    printf("configs = %s\n", BAYONNE_CFGPATH);
-    printf("controls = %s\n", Env::get("controls"));
-    printf("defines = %s\n", Env::get("definitions"));
-    printf("libexec = %s\n", BAYONNE_LIBEXEC);
-    printf("scripts = %s\n", Env::get("scripts"));
-    printf("voices = %s\n", Env::get("voices"));
+    printf("configs = %s\n", *Env::path("config"));
+    printf("controls = %s\n", *Env::path("controls"));
+    printf("defines = %s\n", *Env::path("definitions"));
+    printf("libexec = %s\n", *Env::path("libexec"));
+    printf("scripts = %s\n", *Env::path("scripts"));
+    printf("voices = %s\n", *Env::path("voices"));
     exit(0);
 }
 #endif
@@ -245,6 +245,14 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
         cp = paths->get("definitions");
         if(cp && *cp)
             Env::set("definitions", cp);
+
+        cp = paths->get("config");
+        if(cp && *cp)
+            Env::set("config", cp);
+
+        cp = paths->get("libexec");
+        if(cp && *cp)
+            Env::set("libexec", cp);
     }
 
     paths = Driver::getSystem();

@@ -88,6 +88,9 @@ bool Env::init(shell_t *args)
     set("temp", DEFAULT_VARPATH "/tmp/bayonne");
 #endif
 
+    set("config", BAYONNE_CFGPATH);
+    set("libexec", BAYONNE_LIBEXEC);
+
 #ifdef  HAVE_PWD_H
     const char *home_prefix = NULL;
     struct passwd *pwd = getpwuid(getuid());
@@ -142,6 +145,24 @@ void Env::tool(shell_t *args)
 {
     tool_flag = true;
     init(args);
+}
+
+String Env::path(const char *id)
+{
+    String result;
+    const char *cp = sys->getsym(id);
+
+#ifndef _MSWINDOWS_
+    if(eq(cp, "~/", 2) && getuid()) {
+        const char *home = getenv("HOME");
+        if(home) {
+            result = str(home) + ++cp;
+            return result;
+        }
+    }
+#endif
+    result = cp;
+    return result;
 }
 
 const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t size, bool writeflag)

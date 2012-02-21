@@ -100,7 +100,7 @@ Script *Driver::load(void)
     fsys_t dir;
     Script *img = NULL;
 
-    String::set(dirpath, sizeof(dirpath), env("scripts"));
+    String::set(dirpath, sizeof(dirpath), path("scripts"));
     fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
 
     if(!is(dir)) {
@@ -126,7 +126,7 @@ Script *Driver::load(void)
     if(!img)
         return NULL;
 
-    Scheduler::load(img, BAYONNE_CFGPATH "/scheduler.conf");
+    Scheduler::load(img, path("config") + "/scheduler.conf");
 
     return img;
 }
@@ -137,7 +137,7 @@ void Driver::compile(void)
     size_t len;
     fsys_t dir;
 
-    String::set(dirpath, sizeof(dirpath), env("definitions"));
+    String::set(dirpath, sizeof(dirpath), path("definitions"));
     fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
 
     if(!is(dir)) {
