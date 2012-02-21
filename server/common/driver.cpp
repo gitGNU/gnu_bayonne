@@ -42,15 +42,22 @@ Driver::Driver(const char *id, const char *registry)
     const char *home = NULL;
 
     if(getuid())
+        home = getenv("BAYONNERC");
+
+    if(getuid() && !home) {
         home = getenv("HOME");
 
-    if(home)
-        home = strdup(str(home) + str("/.bayonnerc"));
+        if(home)
+            home = strdup(str(home) + str("/.bayonnerc"));
+    }
 
-    if(home) {
+    if(home && fsys::isfile(home)) {
+        setenv("BAYONNERC", home, 1);
         keyserver.load(home);
         keydriver.load(home);
     }
+    else
+        setenv("BAYONNERC", BAYONNE_CFGPATH "/server.conf", 1);
 #endif
 
     keys = keydriver.get(id);
