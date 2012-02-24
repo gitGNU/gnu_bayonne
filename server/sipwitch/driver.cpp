@@ -25,6 +25,8 @@ public:
 
     int start(void);
 
+    void stop(void);
+
     void automatic(void);
 
 };
@@ -38,12 +40,14 @@ int driver::start(void)
 {
     linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
-    unsigned port = 5060, expires = 300;
+    unsigned port = 5060, expires = 300, threads = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
     int tlsmode = 0;
     int socktype = SOCK_DGRAM;
     int send101 = 1;
+    size_t stack = 0;
+    unsigned priority = 0;
 
     if(keys)
         cp = keys->get("port");
@@ -54,6 +58,16 @@ int driver::start(void)
         cp = keys->get("expires");
     if(cp)
         expires = atoi(cp);
+
+    if(keys)
+        cp = keys->get("stack");
+    if(cp)
+        stack = atoi(cp);
+
+    if(keys)
+        cp = keys->get("priority");
+    if(cp)
+        priority = atoi(cp);
 
     if(keys)
         iface = keys->get("interface");
@@ -109,6 +123,18 @@ int driver::start(void)
     eXosip_set_option(EXOSIP_OPT_DONT_SEND_101, &send101);
 #endif
 
+    if(keys)
+        cp = keys->get("threads");
+    if(cp)
+        threads = atoi(cp);
+
+    if(!threads)
+        ++threads;
+    while(threads--) {
+        thread *t = new thread(stack * 1024l);
+        t->start(priority);
+    }
+
     if(is(kp)) {
         new registry(*kp, port, expires);
         return 0;
@@ -120,6 +146,12 @@ int driver::start(void)
         kp.next();
     }
     return 0;
+}
+
+void driver::stop(void)
+{
+    eXosip_quit();
+    thread::shutdown();
 }
 
 void driver::automatic(void)

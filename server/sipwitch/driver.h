@@ -31,7 +31,7 @@
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
-class registry : public Registry
+class __LOCAL registry : public Registry
 {
 public:
     int rid;
@@ -48,6 +48,20 @@ public:
     registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
 
     void shutdown(void);
+};
+
+class __LOCAL thread : public DetachedThread
+{
+private:
+    unsigned instance;
+    eXosip_event_t *sevent;
+
+    void run(void);
+
+public:
+    thread(size_t size);
+
+    static void shutdown();
 };
 
 END_NAMESPACE

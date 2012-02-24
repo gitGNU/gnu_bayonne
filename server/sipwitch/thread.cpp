@@ -41,7 +41,7 @@ static char *remove_quotes(char *c)
     return o;
 }
 
-thread::thread() : DetachedThread(4096)
+thread::thread(size_t size) : DetachedThread(size)
 {
 }
 
@@ -52,7 +52,7 @@ void thread::run(void)
 
     for(;;) {
         if(!shutdown_flag)
-            sevent = eXosip_event_wait(0, 1000);
+            sevent = eXosip_event_wait(1, 0);
 
         if(shutdown_flag) {
             shell::log(DEBUG1, "stopping event thread %d", instance);
@@ -71,5 +71,15 @@ void thread::run(void)
         eXosip_event_free(sevent);
         --active_count;
     }
+}
+
+void thread::shutdown(void)
+{
+    shutdown_flag = true;
+    while(active_count)
+        Thread::sleep(50);
+    eXosip_quit();
+    while(shutdown_count < startup_count)
+        Thread::sleep(50);
 }
 
