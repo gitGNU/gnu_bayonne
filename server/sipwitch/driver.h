@@ -37,11 +37,13 @@ public:
     int rid;
     unsigned expires;
     const char *contact;
-    const char *authid;
     const char *userid;
     const char *secret;
+    const char *digest;
     const char *server;
     const char *domain;
+    const char *method;
+    const char *realm;
     const char *uri;
     char uuid[38];
 

@@ -22,17 +22,13 @@ registry::registry(keydata *keyset, unsigned myport, unsigned expiration) :
 Registry(keyset)
 {
     const char *cp = keys->get("expires");
-    const char *auth = keys->get("authorize");
     const char *schema = keys->get("protocol");
-    char buffer[256];
+    char buffer[1024];
     char iface[180];
     osip_message_t *msg = NULL;
 
     if(!schema)
         schema = "sip";
-
-    if(!auth)
-        authid = uuid;
 
     if(cp)
         expires = atoi(cp);
@@ -41,14 +37,31 @@ Registry(keyset)
 
     userid = keys->get("userid");
     secret = keys->get("secret");
+    digest = keys->get("digest");
     domain = keys->get("domain");
+    method = keys->get("method");
+    realm = keys->get("realm");
     rid = -1;
 
-    if(!userid)
+    if(!realm || !*realm)
+        realm = domain;
+
+    if(!domain || !*domain)
+        domain = "localdomain";
+
+    if(!userid || !*userid)
         userid = keys->get("user");
 
-    if(!secret)
-        authid = NULL;
+    if(!method || !*method)
+        method = "md5";
+
+    if(!digest && secret && userid && realm) {
+        digest_t tmp = method;
+        if(tmp.puts(str(userid) + ":" + realm + ":" + secret))
+            digest = strdup(*tmp);
+        else
+            shell::errexit(6, "*** bayonne: digest: unsupported computation");
+    }
 
     unsigned port = 0;
     cp = keys->get("port");
@@ -94,6 +107,34 @@ Registry(keyset)
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
         osip_message_set_header(msg, "Allow-Events", "presence");
+
+        if(digest) {
+            stringbuf<64> response;
+            stringbuf<64> once;
+            char nounce[64];
+            snprintf(buffer, sizeof(buffer), "%s:%s", "REGISTER", uri);
+            Random::uuid(nounce);
+            digest_t auth = "md5";
+            auth.puts(nounce);
+            once = *auth;
+            auth = method;
+            auth.puts(buffer);
+            response = *auth;
+            snprintf(buffer, sizeof(buffer), "%s:%s:%s", digest, *once, *response);
+            auth.reset();
+            auth.puts(buffer);
+            response = *auth;
+            snprintf(buffer, sizeof(buffer),
+                "Digest username=\"%s\""
+                ",realm=\"%s\""
+                ",uri=\"%s\""
+                ",response=\"%s\""
+                ",nonce=\"%s\""
+                ",algorithm=%s"
+                ,userid, realm, uri, *response, *once, method);
+            osip_message_set_header(msg, AUTHORIZATION, buffer);
+        }
+
         eXosip_register_send_register(rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
