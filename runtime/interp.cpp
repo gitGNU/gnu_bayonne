@@ -752,6 +752,11 @@ void Script::interp::detach(void)
     image = NULL;
 }
 
+const char *Script::interp::getFilename(void)
+{
+    return stack[stack[frame].base].scr->file;
+}
+
 void Script::interp::startScript(Script::header *scr)
 {
     linked_pointer<Script::event> ep = scr->events;

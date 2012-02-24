@@ -172,6 +172,7 @@ public:
         LinkedObject *events;   /**< named events */
         LinkedObject *methods;  /**< named members */
         line_t *first;          /**< first line of section or define */
+        const char *file;       /**< filename of script */
         const char *name;       /**< name of script section or define */
         unsigned resmask;       /**< post-compile processing resource mask */
 
@@ -309,6 +310,12 @@ public:
          * @return resource mask.
          */
         unsigned getResource(void);
+
+        /**
+         * Get effective filename of base.
+         * @return filename.
+         */
+        const char *getFilename(void);
 
     protected:
         symbol *find(const char *id);
