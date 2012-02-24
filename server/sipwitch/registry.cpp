@@ -63,6 +63,12 @@ Registry(keyset)
             shell::errexit(6, "*** bayonne: digest: unsupported computation");
     }
 
+    if(secret && userid && realm) {
+        eXosip_lock();
+        eXosip_add_authentication_info(userid, userid, secret, NULL, realm);
+        eXosip_unlock();
+    }
+
     unsigned port = 0;
     cp = keys->get("port");
     if(cp)

@@ -67,6 +67,12 @@ void thread::run(void)
         shell::debug(2, "sip: event %d; cid=%d, did=%d, instance=%d",
             sevent->type, sevent->cid, sevent->did, instance);
 
+        switch(sevent->type) {
+        default:
+            eXosip_lock();
+            eXosip_default_action(sevent);
+            eXosip_unlock();
+        }
 
         eXosip_event_free(sevent);
         --active_count;
