@@ -60,9 +60,9 @@ Registry(keyset)
         cp = id;
 
     if(port)
-        snprintf(buffer, sizeof(buffer), "%s%s:%u", schema, cp, port);
+        snprintf(buffer, sizeof(buffer), "%s:%s:%u", schema, cp, port);
     else
-        snprintf(buffer, sizeof(buffer), "%s%s", schema, cp);
+        snprintf(buffer, sizeof(buffer), "%s:%s", schema, cp);
 
     server = Driver::dup(buffer);
 
@@ -70,11 +70,11 @@ Registry(keyset)
         domain = getHostid(server);
 
     if(userid) {
-        snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, userid, domain);
+        snprintf(buffer, sizeof(buffer), "%s:%s@%s", schema, userid, domain);
         uri = Driver::dup(buffer);
     }
     else {
-        snprintf(buffer, sizeof(buffer), "%s%s", schema, domain);
+        snprintf(buffer, sizeof(buffer), "%s:%s", schema, domain);
         uri = Driver::dup(buffer);
     }
 
@@ -83,9 +83,9 @@ Registry(keyset)
     target = uuid;
 
     if(strchr(iface, ':'))
-        snprintf(buffer, sizeof(buffer), "%s%s@[%s]:%u", schema, uuid, iface, myport);
+        snprintf(buffer, sizeof(buffer), "%s:%s@[%s]:%u", schema, uuid, iface, myport);
     else
-        snprintf(buffer, sizeof(buffer), "%s%s@%s:%u", schema, uuid, iface, myport);
+        snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
     eXosip_lock();

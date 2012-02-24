@@ -398,11 +398,11 @@ void Driver::snapshot(void)
 
 const char *Driver::dup(const char *text)
 {
-    return instance->dup(text);
+    return instance->memalloc::dup(text);
 }
 
 void *Driver::alloc(size_t size)
 {
-    return instance->alloc(size);
+    return instance->memalloc::alloc(size);
 }
 
