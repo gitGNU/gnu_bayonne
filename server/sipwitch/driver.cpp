@@ -37,7 +37,7 @@ driver::driver() : Driver("sip", "registry")
 int driver::start(void)
 {
     linked_pointer<keydata> kp = keyserver.get("registry");
-    const char *cp = keys->get("port");
+    const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
     unsigned port = 5060, expires = 300;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
@@ -45,14 +45,18 @@ int driver::start(void)
     int socktype = SOCK_DGRAM;
     int send101 = 1;
 
+    if(keys)
+        cp = keys->get("port");
     if(cp)
         port = atoi(cp);
 
-    cp = keys->get("expires");
+    if(keys)
+        cp = keys->get("expires");
     if(cp)
         expires = atoi(cp);
 
-    const char *iface = keys->get("interface");
+    if(keys)
+        iface = keys->get("interface");
     if(iface) {
 #ifdef  AF_INET6
         if(strchr(iface, ':'))
@@ -62,7 +66,8 @@ int driver::start(void)
             iface = NULL;
     }
 
-    const char *transport = keys->get("transport");
+    if(keys)
+        transport = keys->get("transport");
     if(transport && eq(transport, "tcp")) {
         socktype = SOCK_STREAM;
         protocol = IPPROTO_TCP;
@@ -73,10 +78,10 @@ int driver::start(void)
         tlsmode = 1;
     }
 
-    const char *agent = keys->get("agent");
+    if(keys)
+        agent = keys->get("agent");
     if(!agent)
         agent = "bayonne-" VERSION "/exosip2";
-
 
     const char *addr = iface;
 
@@ -109,7 +114,7 @@ int driver::start(void)
         return 0;
     }
 
-    keys = keygroup.begin();
+    kp = keygroup.begin();
     while(is(kp)) {
         new registry(*kp, port, expires);
         kp.next();
