@@ -875,6 +875,7 @@ const char *Script::checks::chkGoto(Script *img, Script::header *scr, Script::li
 {
     unsigned index = 0;
     const char *cp;
+    char localname[128];
 
     if(eq(scr->name, "_init_"))
         return "this command cannot be used to initialize";
@@ -884,7 +885,11 @@ const char *Script::checks::chkGoto(Script *img, Script::header *scr, Script::li
 
     while(index < line->argc) {
         cp = line->argv[index++];
-        if(*cp != '@' && *cp != '^')
+        if(*cp == ':') {
+            snprintf(localname, sizeof(localname), "@%04x%s", img->serial, cp);
+            line->argv[index - 1] = img->dup(localname);
+        }
+        else if(*cp != '@' && *cp != '^')
             return "goto only allows scripts and handlers";
     }
     return NULL;
@@ -894,6 +899,7 @@ const char *Script::checks::chkGosub(Script *img, Script::header *scr, Script::l
 {
     unsigned index = 0;
     const char *cp;
+    char localname[128];
 
     if(eq(scr->name, "_init_"))
         return "this command cannot be used to initialize";
@@ -903,7 +909,11 @@ const char *Script::checks::chkGosub(Script *img, Script::header *scr, Script::l
 
     while(index < line->argc) {
         cp = line->argv[index++];
-        if(*cp != '@' && !isalnum(*cp))
+        if(*cp == ':') {
+            snprintf(localname, sizeof(localname), "@%04x%s", img->serial, cp);
+            line->argv[index - 1] = img->dup(localname);
+        }
+        else if(*cp != '@' && !isalnum(*cp))
             return "gosub only allows script sections and named methods";
     }
 

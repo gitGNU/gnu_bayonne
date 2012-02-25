@@ -211,6 +211,8 @@ static bool preparse(char **tokens)
     case ':':
         if(str[1] == '=' && isspace(str[2]))
             return true;
+        if(isalnum(str[1]))
+            break;
     case ',':
     case '`':
     case '(':
@@ -428,7 +430,7 @@ Script *Script::compile(Script *merge, const char *fn, Script *cfg)
 
     char **argv = new char *[256];
     stringbuf<512> buffer;
-    char localname[256];
+    char localname[128];
     Script *img;
     charfile cf(fn, "r");
     header *scr = NULL;

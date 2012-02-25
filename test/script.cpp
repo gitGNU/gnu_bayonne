@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 
     if(argc < 2) {
         // enter correct generic number of "checks"
-        assert(checks == 3);
+        assert(checks == 4);
 
         // enter validation of defined call by ref
         assert(refchecks == 1);

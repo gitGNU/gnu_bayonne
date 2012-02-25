@@ -19,6 +19,7 @@
 	if $list == {backer='middle',last='unicorn'} then check.manip
 
 	gosub @other
+	gosub :other
 	reftest vars="test of define 1"
 	reftest vars="test of define 2" "arg 1 set"
 	reftest vars="test of define 3" %local
@@ -44,4 +45,7 @@
 
 :exit-local
 	check.exit
+
+:other
+	check
 
