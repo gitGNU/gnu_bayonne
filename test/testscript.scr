@@ -42,3 +42,6 @@
 @exit
 	check.exit
 
+:exit-local
+	check.exit
+

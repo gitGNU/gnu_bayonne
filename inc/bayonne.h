@@ -542,6 +542,7 @@ private:
     OrderedIndex errlist;
     object_pointer<Script> shared;
     const char *filename;
+    unsigned serial;
     LinkedObject *headers;
 };
 

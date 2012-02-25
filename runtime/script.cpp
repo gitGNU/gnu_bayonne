@@ -424,8 +424,11 @@ Script *Script::compile(Script *merge, const char *fn, Script *cfg)
 {
 //  linked_pointer<script::strict> sp;
 
+    static unsigned serial;
+
     char **argv = new char *[256];
     stringbuf<512> buffer;
+    char localname[256];
     Script *img;
     charfile cf(fn, "r");
     header *scr = NULL;
@@ -476,6 +479,7 @@ Script *Script::compile(Script *merge, const char *fn, Script *cfg)
         img->filename = fn;
 
     img->filename = img->dup(img->filename);
+    img->serial = ++serial;
 
 initial:
     current = NULL;
@@ -622,6 +626,14 @@ initial:
         if(*token == '@') {
             section = true;
             name = token;
+            label = true;
+            goto closure;
+        }
+
+        if(*token == ':') {
+            section = true;
+            snprintf(localname, sizeof(localname), "@%04x%s", serial, token);
+            name = localname;
             label = true;
             goto closure;
         }
