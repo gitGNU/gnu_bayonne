@@ -47,9 +47,16 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
 
 void Timeslot::setHandler(handler_t proc, const char *name, char code)
 {
+    Event entry;
+
+    shell::debug(4, "timeslot %d entering %s",
+        tsid, name);
+
     handler = proc;
     state = name;
     server::status[tsid] = code;
+    entry.id = ENTER_STATE;
+    (this->*handler)(&entry);
 }
 
 bool Timeslot::idleHandler(Event *event)
