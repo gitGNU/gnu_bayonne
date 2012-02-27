@@ -237,16 +237,6 @@ if test x"$has_eXosip2" = "xyes" ; then
     ])
 fi
 
-AC_PATH_PROG([PTLIB_CONFIG],[ptlib-config],[none])
-if test "$PTLIB_CONFIG" != "none" ; then
-    OPENH323_PREFIX=`$PTLIB_CONFIG --prefix`
-    OPENH323_FLAGS=`$PTLIB_CONFIG --ccflags`
-    OPENH323_FLAGS="$OPENH323_FLAGS -I${OPENH323_PREFIX}/include/openh323"
-    OPENH323_LIBS=`$PTLIB_CONFIG --libs`
-    if test -d "${OPENH323_PREFIX}/include/openh323" ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS gatekeeper" ; fi
-fi
-
 AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
 
@@ -342,6 +332,6 @@ AC_SUBST(DLOPEN)
 AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
 bayonne.pc bayonne-config
 server/Makefile server/common/Makefile
-server/sipwitch/Makefile server/gatekeeper/Makefile
+server/sipwitch/Makefile
 )
 

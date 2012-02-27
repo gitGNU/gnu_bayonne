@@ -12,5 +12,5 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 EXTRA_DIST = CMakeLists.txt
 
 SUBDIRS = common @BUILD_SUBDIRS@
-DIST_SUBDIRS = common sipwitch gatekeeper
+DIST_SUBDIRS = common sipwitch
 
