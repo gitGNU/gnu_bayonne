@@ -39,7 +39,8 @@ typedef uint32_t    sigmask_t;
  * the state completes.
  */
 typedef enum {
-    STEP_HANGUP = 0,
+    STEP_IDLE = 0,
+    STEP_HANGUP,
     STEP_SLEEP,
     STEP_ACCEPT,
     STEP_REJECT,
@@ -507,13 +508,22 @@ protected:
     friend class Driver;
     friend class Group;
 
+    typedef bool (Timeslot::*handler_t)(Event *event);
+
     Group *group;           // active group of current call
     Group *incoming;        // incoming group to answer as...
     Group *span;            // span entity associated with timeslot
     unsigned tsid;
     bool inUse;
+    handler_t handler;
+    tsstep_t step;
 
     Timeslot(Group *group = NULL);
+
+    // generic idle handling
+    bool idleHandler(Event *event);
+
+    void setIdle(void);
 
 public:
     virtual unsigned long getIdle(void);        // idle time
