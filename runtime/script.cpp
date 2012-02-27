@@ -452,6 +452,7 @@ Script *Script::compile(Script *merge, const char *fn, Script *cfg)
     bool define = false;
     bool when = false;
     bool label = false;
+    bool branching;
     unsigned pos;
     const char *cp;
     bool requires = false;
@@ -683,6 +684,12 @@ initial:
 parse:
         assigned = NULL;
         op = NULL;
+
+        branching = false;
+
+        if(eq(token, "goto") || eq(token, "gosub"))
+            branching = true;
+
         if(*token == '%') {
             assigned = img->dup(token);
             op = String::token(NULL, &tokens, " \t", "{}\'\'\"\"");
@@ -786,6 +793,17 @@ parse:
                         img->thencheck = when = true;
                     break;
                 }
+            }
+
+            // compute script local label or symbol name...
+            if(*arg == ':' && branching) {
+                snprintf(localname, sizeof(localname), "@%04x%s", serial, arg);
+                arg = localname;
+            }
+            else if(*arg == ':' && isalnum(arg[1])) {
+                snprintf(localname, sizeof(localname), "%c_%04x_.%s",
+                    '%', serial, ++arg);
+                arg = localname;
             }
 
             ep = strchr(arg, '<');
