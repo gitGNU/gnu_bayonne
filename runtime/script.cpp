@@ -635,7 +635,7 @@ initial:
 
         if(*token == ':') {
             section = true;
-            snprintf(localname, sizeof(localname), "@%04x%s", serial, token);
+            snprintf(localname, sizeof(localname), "@%04x%s", serial & 0xffff, token);
             name = localname;
             label = true;
             goto closure;
@@ -797,12 +797,12 @@ parse:
 
             // compute script local label or symbol name...
             if(*arg == ':' && branching) {
-                snprintf(localname, sizeof(localname), "@%04x%s", serial, arg);
+                snprintf(localname, sizeof(localname), "@%04x%s", serial & 0xffff, arg);
                 arg = localname;
             }
             else if(*arg == ':' && isalnum(arg[1])) {
                 snprintf(localname, sizeof(localname), "%c_%04x_.%s",
-                    '%', serial, ++arg);
+                    '%', serial & 0xffff, ++arg);
                 arg = localname;
             }
 
