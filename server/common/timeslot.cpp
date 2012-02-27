@@ -18,11 +18,16 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-Timeslot::Timeslot(Group *grp) : OrderedObject(), Script::interp(), Mutex()
+static Mutex locking;
+static unsigned tscount = 0;
+static OrderedIndex list;
+
+Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
 {
     const char *cp = NULL;
 
     incoming = span = group = NULL;
+    tsid = tscount++;
 
     if(grp && group->is_span()) {
         span = grp;
@@ -56,3 +61,38 @@ bool Timeslot::send(Event *msg)
     return rtn;
 }
 
+void Timeslot::shutdown(void)
+{
+}
+
+void Timeslot::release(Timeslot *ts)
+{
+    locking.acquire();
+    ts->enlist(&list);
+    ++tscount;
+    locking.release();
+}
+
+Timeslot *Timeslot::request(void)
+{
+    Timeslot *ts;
+
+    locking.acquire();
+    ts = (Timeslot *)list.begin();
+    if(ts) {
+        ts->delist(&list);
+        --tscount;
+    }
+    locking.release();
+    return ts;
+}
+
+unsigned Timeslot::available(void)
+{
+    unsigned count;
+
+    locking.acquire();
+    count = tscount;
+    locking.release();
+    return count;
+}

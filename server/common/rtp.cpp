@@ -19,8 +19,8 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-RTPTimeslot::RTPTimeslot(const char *address, unsigned short port, int family, Group *grp) :
-Timeslot(grp), JoinableThread()
+RTPTimeslot::RTPTimeslot(const char *address, unsigned short port, int family) :
+Timeslot(NULL), JoinableThread()
 {
     rtp_address = Driver::dup(address);
     rtp_family = family;
@@ -57,3 +57,11 @@ void RTPTimeslot::run(void)
         }
     }
 }
+
+void RTPTimeslot::shutdown(void)
+{
+    lock();
+    join();
+    unlock();
+}
+

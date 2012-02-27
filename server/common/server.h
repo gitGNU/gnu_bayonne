@@ -510,6 +510,7 @@ protected:
     Group *group;           // active group of current call
     Group *incoming;        // incoming group to answer as...
     Group *span;            // span entity associated with timeslot
+    unsigned tsid;
 
     Timeslot(Group *group = NULL);
 
@@ -518,10 +519,18 @@ public:
 
     virtual bool post(Event *event);
 
+    virtual void shutdown(void);
+
     bool send(Event *event);
 
     inline void notify(Event *event)
         {new Message(this, event);};
+
+    static Timeslot *request(void);
+
+    static void release(Timeslot *ts);
+
+    static unsigned available(void);
 };
 
 class RTPTimeslot : public Timeslot, public JoinableThread
@@ -533,9 +542,11 @@ protected:
     unsigned rtp_port;
     const char *rtp_address;
 
-    RTPTimeslot(const char *address, unsigned short port, int family, Group *group);
+    RTPTimeslot(const char *address, unsigned short port, int family);
 
     void run(void);
+
+    void shutdown(void);
 };
 
 class Scheduler : public LinkedObject

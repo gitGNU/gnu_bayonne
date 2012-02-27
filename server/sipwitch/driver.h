@@ -89,5 +89,11 @@ public:
     static void shutdown();
 };
 
+class __LOCAL timeslot : public RTPTimeslot
+{
+public:
+    timeslot(const char *addr, unsigned short port, int family);
+};
+
 END_NAMESPACE
 

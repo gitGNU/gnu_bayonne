@@ -27,7 +27,8 @@ int driver::start(void)
 {
     linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
-    unsigned port = 5060, expires = 300, threads = 0;
+    unsigned port = 5060, expires = 300, threads = 0, timeslots = 16;
+    unsigned rtp = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
     int tlsmode = 0;
@@ -132,13 +133,39 @@ int driver::start(void)
         new registry(*kp, port, expires);
         kp.next();
     }
-    return 0;
+
+    if(keys)
+        cp = keys->get("timeslots");
+    if(cp)
+        timeslots = atoi(cp);
+
+    if(keys)
+        cp = keys->get("rtp");
+    if(cp)
+        rtp = atoi(cp);
+
+    if(!rtp)
+        rtp = ((port / 2) * 2) + 2;
+
+    tsIndex = new Timeslot *[timeslots];
+    while(timeslots--) {
+        timeslot *ts = new timeslot(iface, rtp, family);
+        tsIndex[tsCount++] = (Timeslot *)ts;
+    }
+
+    return tsCount;
 }
 
 void driver::stop(void)
 {
     eXosip_quit();
     thread::shutdown();
+
+    unsigned index = 0;
+    while(index < tsCount) {
+        Timeslot *ts = tsIndex[index++];
+        ts->shutdown();
+    }
 }
 
 void driver::automatic(void)
