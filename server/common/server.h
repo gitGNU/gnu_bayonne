@@ -511,7 +511,7 @@ protected:
     Group *incoming;        // incoming group to answer as...
     Group *span;            // span entity associated with timeslot
 
-    Timeslot(unsigned port, Group *group = NULL);
+    Timeslot(Group *group = NULL);
 
 public:
     virtual unsigned long getIdle(void);        // idle time
@@ -522,6 +522,20 @@ public:
 
     inline void notify(Event *event)
         {new Message(this, event);};
+};
+
+class RTPTimeslot : public Timeslot, public JoinableThread
+{
+protected:
+    socket_t rtp, rtcp;
+    timeout_t rtp_slice;
+    int rtp_family;
+    unsigned rtp_port;
+    const char *rtp_address;
+
+    RTPTimeslot(const char *address, unsigned short port, int family, Group *group);
+
+    void run(void);
 };
 
 class Scheduler : public LinkedObject
