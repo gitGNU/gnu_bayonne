@@ -59,6 +59,8 @@ static shell::stringopt user('u', "--user", _TEXT("user to run as"), "userid", "
 static shell::flagopt verbose('v', NULL, _TEXT("set verbosity, can be used multiple times"), false);
 static shell::numericopt debuglevel('x', "--debug", _TEXT("set debug level directly"), "level", 0);
 
+char *server::status = NULL;
+
 #if defined(HAVE_SETRLIMIT) && defined(DEBUG)
 static void corefiles(void)
 {
@@ -456,7 +458,13 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     signals::start();
     notify::start();
 
-    dispatch(Driver::startup());
+    unsigned tsc = Driver::startup();
+    if(tsc) {
+        status = (char *)Driver::alloc(tsc + 1);
+        memset(status, '?', tsc);
+        status[tsc] = 0;
+    }
+    dispatch(tsc);
     Driver::shutdown();
 
     notify::stop();

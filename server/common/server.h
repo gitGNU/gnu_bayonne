@@ -31,40 +31,6 @@ class Timeslot;
 typedef uint16_t    keymask_t;
 typedef uint32_t    sigmask_t;
 
-/**
- * Bayonne driver state tables.  When a script command requires the driver to
- * be in a specific processing state to perform a blocking operation, it sends
- * a step() request to the driver.  Different step() requests put the driver
- * into different processing states, which then fall back to scripting when
- * the state completes.
- */
-typedef enum {
-    STEP_IDLE = 0,
-    STEP_HANGUP,
-    STEP_SLEEP,
-    STEP_ACCEPT,
-    STEP_REJECT,
-    STEP_ANSWER,
-    STEP_COLLECT,
-    STEP_PLAY,
-    STEP_PLAYWAIT,
-    STEP_RECORD,
-    STEP_TONE,
-    STEP_DIALXFER,
-    STEP_SOFTDIAL,
-    STEP_FLASH,
-    STEP_JOIN,
-    STEP_LISTEN,
-    STEP_DETECT,
-    STEP_TRANSFER,
-    STEP_INTERCOM,
-    STEP_PICKUP,
-    STEP_THREAD,
-    STEP_SENDFAX,
-    STEP_RECVFAX,
-    STEP_EXIT = STEP_HANGUP
-} tsstep_t;
-
 typedef enum {
     ENTER_STATE = 100,
     EXIT_STATE,
@@ -331,7 +297,6 @@ typedef struct {
         int status;
         pid_t pid;
         fd_t fd;
-        tsstep_t step;
         char dn[8];
         const char *error;
         dspmode_t dsp;
@@ -516,25 +481,27 @@ protected:
     unsigned tsid;
     bool inUse;
     handler_t handler;
-    tsstep_t step;
+    const char *state;
 
     Timeslot(Group *group = NULL);
 
     // generic idle handling
     bool idleHandler(Event *event);
 
-    void setIdle(void);
+    // set state handler...
+    void setHandler(handler_t proc, const char *name, char code);
 
 public:
     virtual unsigned long getIdle(void);        // idle time
-
-    virtual bool post(Event *event);
 
     virtual void startup(void);
 
     virtual void shutdown(void);
 
-    bool send(Event *event);
+    bool post(Event *event);
+
+    inline bool exec(Event *event)
+        {return (this->*handler)(event);};
 
     inline void notify(Event *event)
         {new Message(this, event);};
@@ -583,6 +550,7 @@ public:
 class server
 {
 public:
+    static char *status;
     static void start(int argc, char **argv, shell::mainproc_t svc = NULL);
 };
 

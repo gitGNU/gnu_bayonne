@@ -30,7 +30,8 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
     tsid = tscount++;
     inUse = false;
 
-    setIdle();
+    handler = &Timeslot::idleHandler;
+    state = "initial";
 
     if(grp && group->is_span()) {
         span = grp;
@@ -44,10 +45,11 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
         incoming = span;
 }
 
-void Timeslot::setIdle(void)
+void Timeslot::setHandler(handler_t proc, const char *name, char code)
 {
-    step = STEP_IDLE;
-    handler = &Timeslot::idleHandler;
+    handler = proc;
+    state = name;
+    server::status[tsid] = code;
 }
 
 bool Timeslot::idleHandler(Event *event)
@@ -62,17 +64,9 @@ unsigned long Timeslot::getIdle(void)
 
 bool Timeslot::post(Event *msg)
 {
-    shell::debug(4, "timeslot %d step %d; event=%d\n",
-        tsid, step, msg->id);
-
-    return (this->*handler)(msg);
-}
-
-bool Timeslot::send(Event *msg)
-{
     lock();
 
-    bool rtn = post(msg);
+    bool rtn = (this->*handler)(msg);
 
     unlock();
     return rtn;
@@ -85,6 +79,7 @@ void Timeslot::startup(void)
 
 void Timeslot::shutdown(void)
 {
+    setHandler(&Timeslot::idleHandler, "idle", '-');
     inUse = false;
 }
 
