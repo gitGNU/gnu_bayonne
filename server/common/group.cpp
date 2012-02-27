@@ -51,7 +51,6 @@ LinkedObject((LinkedObject **)&groups)
     tsFirst = tsCount = 0;
     tsUsed = 0;
     span = (unsigned)-1;
-    target = NULL;
 
     if(!keys)
         return;
@@ -78,7 +77,6 @@ LinkedObject((LinkedObject **)&spans)
 
     snprintf(buf, sizeof(buf), "%d", spanid);
 
-    target = NULL;
     keys = keyspans.get(id);
     if(keys)
         id = keys->get("name");

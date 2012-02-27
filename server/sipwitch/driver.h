@@ -46,10 +46,32 @@ public:
     const char *realm;
     const char *uri;
     char uuid[38];
+    bool active;
 
     registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
 
+    void authenticate(const char *realm);
+
+    void activate(void);
+
+    void release(void);
+
     void shutdown(void);
+};
+
+class driver : public Driver
+{
+public:
+    driver();
+
+    int start(void);
+
+    void stop(void);
+
+    void automatic(void);
+
+    static registry *locate(int rid);
+
 };
 
 class __LOCAL thread : public DetachedThread
@@ -57,6 +79,7 @@ class __LOCAL thread : public DetachedThread
 private:
     unsigned instance;
     eXosip_event_t *sevent;
+    registry *reg;
 
     void run(void);
 

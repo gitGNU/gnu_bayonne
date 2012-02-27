@@ -18,19 +18,6 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-class driver : public Driver
-{
-public:
-    driver();
-
-    int start(void);
-
-    void stop(void);
-
-    void automatic(void);
-
-};
-
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
@@ -159,6 +146,18 @@ void driver::automatic(void)
     eXosip_lock();
     eXosip_automatic_action();
     eXosip_unlock();
+}
+
+registry *driver::locate(int rid)
+{
+    linked_pointer<registry>  rp = Group::begin();
+
+    while(is(rp)) {
+        if(rp->rid == rid)
+            return *rp;
+        rp.next();
+    }
+    return NULL;
 }
 
 static SERVICE_MAIN(main, argc, argv)

@@ -41,10 +41,8 @@ Registry(keyset)
     domain = keys->get("domain");
     method = keys->get("method");
     realm = keys->get("realm");
+    active = false;
     rid = -1;
-
-    if(!realm || !*realm)
-        realm = domain;
 
     if(!domain || !*domain)
         domain = "localdomain";
@@ -99,7 +97,6 @@ Registry(keyset)
 
     getInterface(server, iface, sizeof(iface));
     Random::uuid(uuid);
-    target = uuid;
 
     if(strchr(iface, ':'))
         snprintf(buffer, sizeof(buffer), "%s:%s@[%s]:%u", schema, uuid, iface, myport);
@@ -152,7 +149,37 @@ Registry(keyset)
     eXosip_unlock();
 }
 
-void registry::shutdown()
+void registry::authenticate(const char *sip_realm)
+{
+
+    if(secret && userid && sip_realm) {
+        shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
+        eXosip_lock();
+        eXosip_add_authentication_info(userid, userid, secret, NULL, sip_realm);
+        eXosip_automatic_action();
+        eXosip_unlock();
+    }
+}
+
+void registry::activate(void)
+{
+    if(rid == -1 || active)
+        return;
+
+    shell::debug(3, "registry id %d activated", rid);
+    active = true;
+}
+
+void registry::release(void)
+{
+    if(rid == -1 || !active)
+        return;
+
+    shell::debug(3, "registry id %d released", rid);
+    active = false;
+}
+
+void registry::shutdown(void)
 {
     osip_message_t *msg = NULL;
 

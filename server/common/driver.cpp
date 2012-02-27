@@ -243,18 +243,6 @@ Group *Driver::getSpan(const char *id)
     return NULL;
 }
 
-Group *Driver::getTarget(const char *id)
-{
-    linked_pointer<Group> gp = Group::groups;
-
-    while(is(gp)) {
-        if(gp->target && eq(gp->target, id))
-            return *gp;
-        gp.next();
-    }
-    return NULL;
-}
-
 Group *Driver::getGroup(const char *id)
 {
     linked_pointer<Group> gp = Group::groups;

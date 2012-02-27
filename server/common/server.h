@@ -361,7 +361,7 @@ protected:
 
     Mutex lock;
     keydata *keys;
-    const char *id, *target, *script;
+    const char *id, *script;
 
     volatile unsigned tsUsed;
 
@@ -397,9 +397,12 @@ public:
     virtual void snapshot(FILE *fp);
 
     virtual void shutdown(void);
+
+    inline static Group *begin(void)
+        {return groups;};
 };
 
-class Registry : protected Group
+class Registry : public Group
 {
 protected:
     const char *schema;
@@ -465,8 +468,6 @@ public:
         {instance->automatic();};
 
     static Group *getGroup(const char *id);
-
-    static Group *getTarget(const char *id);
 
     static Group *getSpan(unsigned id);
 
