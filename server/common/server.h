@@ -511,6 +511,7 @@ protected:
     Group *incoming;        // incoming group to answer as...
     Group *span;            // span entity associated with timeslot
     unsigned tsid;
+    bool inUse;
 
     Timeslot(Group *group = NULL);
 
@@ -518,6 +519,8 @@ public:
     virtual unsigned long getIdle(void);        // idle time
 
     virtual bool post(Event *event);
+
+    virtual void startup(void);
 
     virtual void shutdown(void);
 
@@ -527,6 +530,8 @@ public:
         {new Message(this, event);};
 
     static Timeslot *request(void);
+
+    static bool request(Timeslot *ts);
 
     static void release(Timeslot *ts);
 
@@ -538,13 +543,15 @@ class RTPTimeslot : public Timeslot, public JoinableThread
 protected:
     socket_t rtp, rtcp;
     timeout_t rtp_slice;
-    int rtp_family;
+    int rtp_family, rtp_priority;
     unsigned rtp_port;
     const char *rtp_address;
 
     RTPTimeslot(const char *address, unsigned short port, int family);
 
     void run(void);
+
+    void startup(void);
 
     void shutdown(void);
 };

@@ -26,6 +26,7 @@ Timeslot(NULL), JoinableThread()
     rtp_family = family;
     rtp_port = port;
     rtp_slice = 0;
+    rtp_priority = 1;
 }
 
 void RTPTimeslot::run(void)
@@ -58,10 +59,25 @@ void RTPTimeslot::run(void)
     }
 }
 
+void RTPTimeslot::startup(void)
+{
+    if(inUse)
+        return;
+
+    shell::debug(4, "starting timeslot %d", tsid);
+    start(rtp_priority);
+    Timeslot::startup();
+}
+
 void RTPTimeslot::shutdown(void)
 {
+    if(!inUse)
+        return;
+
+    shell::debug(4, "stopping timeslot %d", tsid);
     lock();
     join();
     unlock();
+    Timeslot::shutdown();
 }
 

@@ -28,6 +28,7 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
 
     incoming = span = group = NULL;
     tsid = tscount++;
+    inUse = false;
 
     if(grp && group->is_span()) {
         span = grp;
@@ -61,16 +62,41 @@ bool Timeslot::send(Event *msg)
     return rtn;
 }
 
+void Timeslot::startup(void)
+{
+    inUse = true;
+}
+
 void Timeslot::shutdown(void)
 {
+    inUse = false;
 }
 
 void Timeslot::release(Timeslot *ts)
 {
     locking.acquire();
-    ts->enlist(&list);
-    ++tscount;
+    if(ts->inUse) {
+        ts->shutdown();
+        ts->enlist(&list);
+        ++tscount;
+    }
     locking.release();
+}
+
+bool Timeslot::request(Timeslot *ts)
+{
+    bool result = true;
+
+    locking.acquire();
+    if(!ts->inUse) {
+        ts->delist(&list);
+        ts->startup();
+        --tscount;
+    }
+    else
+        result = false;
+    locking.release();
+    return result;
 }
 
 Timeslot *Timeslot::request(void)
@@ -81,6 +107,7 @@ Timeslot *Timeslot::request(void)
     ts = (Timeslot *)list.begin();
     if(ts) {
         ts->delist(&list);
+        ts->startup();
         --tscount;
     }
     locking.release();
