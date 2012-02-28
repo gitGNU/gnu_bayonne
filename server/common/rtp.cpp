@@ -58,6 +58,23 @@ typedef struct {
     uint32_t timestamp;
     uint32_t sources[1];
 } rtp_header_t;
+
+typedef struct {
+#if __BYTE_ORDER == __BIG_ENDIAN
+    unsigned char event:8;
+    unsigned char ending:1;
+    unsigned char reserved:1;
+    unsigned char volume:6;
+    uint16_t duration;
+#else
+    unsigned char event:8;
+    unsigned char volume:6;
+    unsigned char ending:1;
+    unsigned char reserved:1;
+    uint16_t duration;
+#endif
+} rfc2833_t;
+
 #pragma pack()
 
 void *rtp_data(rtp_header_t *header)
@@ -113,6 +130,7 @@ void RTPTimeslot::run(void)
     char buf[16];
     unsigned silence = 0;
     rtp_header_t *sending = (rtp_header_t*)rtp_sending;
+    rtp_header_t *rfc2833 = (rtp_header_t*)rtp_rfc2833;
     rtp_header_t *index[3] = {NULL, NULL, NULL};
     rtp_header_t *receive;
     unsigned rtp_count = 0, rtp_index = 0;
@@ -131,10 +149,12 @@ void RTPTimeslot::run(void)
     Random::fill((uint8_t *)&sending->sources[0], 4);
 
     sending->timestamp = 0;
-    sending->cc = 0;
-    sending->marker = 0;
-    sending->padding = 0;
-    sending->version = 2;
+    sending->cc = rfc2833->cc = 0;
+    sending->marker = rfc2833->marker = 0;
+    sending->padding = rfc2833->padding = 0;
+    sending->version = rfc2833->version = 2;
+
+    rfc2833->sources[0] = sending->sources[0];
 
     syncup.set(rtp_slice);
     for(;;) {
@@ -233,6 +253,40 @@ void RTPTimeslot::run(void)
             sending->timestamp = htonl(ntohl(sending->timestamp) + rtp_samples);
         }
     }
+}
+
+void RTPTimeslot::create2833(unsigned event)
+{
+    rtp_header_t *sending = (rtp_header_t*)rtp_sending;
+    rtp_header_t *rfc2833 = (rtp_header_t*)rtp_rfc2833;
+    rfc2833_t *data = (rfc2833_t *)rtp_rfc2833 + 12;
+
+    rfc2833->timestamp = sending->timestamp;
+    data->duration = 0;
+    data->ending = 0;
+    data->reserved = 0;
+    data->event = event;
+    send2833(false);
+}
+
+void RTPTimeslot::send2833(bool end)
+{
+    rtp_header_t *sending = (rtp_header_t*)rtp_sending;
+    rtp_header_t *rfc2833 = (rtp_header_t*)rtp_rfc2833;
+    rfc2833_t *data = (rfc2833_t *)rtp_rfc2833 + 12;
+    uint16_t sequence = ntohs(sending->sequence);
+    uint16_t duration = ntohs(data->duration);
+
+    rfc2833->sequence = htons(sequence++);
+    sending->sequence = htons(sequence);
+
+    if(!data->ending) {
+        duration += rtp_samples;
+        data->duration = htons(duration);
+    }
+
+    data->ending = end;
+    ::sendto(rtp, rfc2833, 16, 0, (struct sockaddr *)&rtp_contact, rtp_addrlen);
 }
 
 void RTPTimeslot::startup(void)

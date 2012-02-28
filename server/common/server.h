@@ -526,6 +526,7 @@ protected:
     struct sockaddr_storage rtp_contact;
     socklen_t rtp_addrlen;
     char rtp_sending[12 + 480];         // sending header, recast internally
+    char rtp_rfc2833[12 + 24];          // for sending rfc2833 packets...
     char rtp_receive[RTP_BUFFER_SIZE][480 + 72];
     socket_t rtp, rtcp;
     timeout_t rtp_slice;
@@ -537,6 +538,10 @@ protected:
     RTPTimeslot(const char *address, unsigned short port, int family);
 
     void send(void *address, size_t len);
+
+    void create2833(unsigned event);    // create 2833 event...
+
+    void send2833(bool end = false);    // send 2833 event...
 
     void run(void);
 
