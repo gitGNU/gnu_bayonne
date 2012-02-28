@@ -18,9 +18,12 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
+#define HASH_KEY_SIZE   97
+
 static Mutex locking;
 static unsigned tscount = 0;
 static OrderedIndex list;
+static OrderedIndex hash[HASH_KEY_SIZE];
 
 Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
 {
@@ -90,24 +93,41 @@ void Timeslot::shutdown(void)
     inUse = false;
 }
 
+Timeslot *Timeslot::get(long cid)
+{
+    Timeslot *ts;
+    locking.acquire();
+    ts = (Timeslot *)hash[cid % HASH_KEY_SIZE].begin();
+    while(ts != NULL) {
+        if(ts->callid == cid)
+            break;
+        ts = (Timeslot *)ts->next;
+    }
+    locking.release();
+    return ts;
+}
+
 void Timeslot::release(Timeslot *ts)
 {
     locking.acquire();
     if(ts->inUse) {
         ts->shutdown();
+        ts->delist(&hash[ts->callid % HASH_KEY_SIZE]);
         ts->enlist(&list);
         ++tscount;
     }
     locking.release();
 }
 
-bool Timeslot::request(Timeslot *ts)
+bool Timeslot::request(Timeslot *ts, long cid)
 {
     bool result = true;
 
     locking.acquire();
     if(!ts->inUse) {
+        ts->callid = cid;
         ts->delist(&list);
+        ts->enlist(&hash[cid % HASH_KEY_SIZE]);
         ts->startup();
         --tscount;
     }
@@ -117,14 +137,16 @@ bool Timeslot::request(Timeslot *ts)
     return result;
 }
 
-Timeslot *Timeslot::request(void)
+Timeslot *Timeslot::request(long cid)
 {
     Timeslot *ts;
 
     locking.acquire();
     ts = (Timeslot *)list.begin();
     if(ts) {
+        ts->callid = cid;
         ts->delist(&list);
+        ts->enlist(&hash[cid % HASH_KEY_SIZE]);
         ts->startup();
         --tscount;
     }

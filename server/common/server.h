@@ -482,6 +482,7 @@ protected:
     bool inUse;
     handler_t handler;
     const char *state;
+    long callid;
 
     Timeslot(Group *group = NULL);
 
@@ -506,11 +507,13 @@ public:
     inline void notify(Event *event)
         {new Message(this, event);};
 
-    static Timeslot *request(void);
+    static Timeslot *request(long cid);
 
-    static bool request(Timeslot *ts);
+    static bool request(Timeslot *ts, long cid);
 
     static void release(Timeslot *ts);
+
+    static Timeslot *get(long cid);
 
     static unsigned available(void);
 };
