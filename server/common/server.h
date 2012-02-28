@@ -523,7 +523,9 @@ public:
 class RTPTimeslot : public Timeslot, public JoinableThread
 {
 protected:
-    char rtp_sending[12];           // sending header, recast internally
+    struct sockaddr_storage rtp_contact;
+    socklen_t rtp_addrlen;
+    char rtp_sending[12 + 480];         // sending header, recast internally
     char rtp_receive[RTP_BUFFER_SIZE][480 + 72];
     socket_t rtp, rtcp;
     timeout_t rtp_slice;
@@ -533,6 +535,8 @@ protected:
     const char *rtp_address;
 
     RTPTimeslot(const char *address, unsigned short port, int family);
+
+    void send(void *address, size_t len);
 
     void run(void);
 

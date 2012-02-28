@@ -158,7 +158,7 @@ AC_ARG_WITH(pkg-config,
 if test "$UCOMMON_MODEL" = "CC" ; then
     LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
-AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h termios.h ioctl.h sys/ioctl.h sys/inotify.h)
+AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h termios.h ioctl.h sys/ioctl.h sys/inotify.h sys/poll.h sys/uio.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
 AC_CHECK_HEADER(gsm/gsm.h, [
@@ -323,8 +323,6 @@ AC_SUBST(BAYONNE_FLAGS)
 AC_SUBST(BAYONNE_LIBS)
 AC_SUBST(EXOSIP2_LIBS)
 AC_SUBST(EXOSIP2_FLAGS)
-AC_SUBST(OPENH323_LIBS)
-AC_SUBST(OPENH323_FLAGS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)

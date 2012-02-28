@@ -17,6 +17,10 @@
 #include <ucommon/secure.h>
 #include <sys/poll.h>
 
+#ifdef  HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
 #ifdef  HAVE_ENDIAN_H
 #include <endian.h>
 #endif
@@ -74,10 +78,38 @@ Timeslot(NULL), JoinableThread()
     rtp_samples = 160;
 }
 
+void RTPTimeslot::send(void *address, size_t len)
+{
+    rtp_header_t *sending = (rtp_header_t*)rtp_sending;
+    uint16_t sequence = ntohs(sending->sequence);
+    ssize_t result;
+#ifdef  HAVE_SYS_UIO_H
+    struct msghdr msg;
+    struct iovec iov[2];
+    iov[0].iov_base = sending;
+    iov[0].iov_len = 12;
+    iov[1].iov_base = address;
+    iov[1].iov_len = len;
+
+    msg.msg_name = (void*)&rtp_contact;
+    msg.msg_namelen = rtp_addrlen;
+    msg.msg_iov = &iov[0];
+    msg.msg_iovlen = 2;
+    msg.msg_control = NULL;
+    msg.msg_controllen = 0;
+    msg.msg_flags = 0;
+    result = ::sendmsg(rtp, &msg, 0);
+#else
+    memcpy(rtp_sending + 12, address, len);
+    result = ::write(rtp, rtp_sending, len + 12);
+#endif
+    if(result >= 12)
+        sending->sequence = htons(++sequence);
+}
+
 void RTPTimeslot::run(void)
 {
     Timer syncup;
-    struct pollfd pfd[2];
     char buf[16];
     unsigned silence = 0;
     rtp_header_t *sending = (rtp_header_t*)rtp_sending;
@@ -88,6 +120,7 @@ void RTPTimeslot::run(void)
     socklen_t olen;
     ssize_t len;
     unsigned pos, last;
+    bool rtp_in, rtcp_in;
 
     snprintf(buf, sizeof(buf), "%u", rtp_port);
     rtp = Socket::create(rtp_address, buf, rtp_family, SOCK_DGRAM);
@@ -111,14 +144,36 @@ void RTPTimeslot::run(void)
             return;
         }
 
+#ifdef  HAVE_SYS_POLL_H
+        struct pollfd pfd[2];
         pfd[0].fd = rtp;
         pfd[1].fd = rtcp;
         pfd[0].events = pfd[1].events = POLLIN | POLLRDNORM;
         pfd[0].revents = pfd[1].revents = 0;
         poll(pfd, 2, *syncup);
+        rtp_in = pfd[0].revents & POLLRDNORM;
+        rtcp_in = pfd[1].revents & POLLRDNORM;
+#else
+        fd_set inp;
+        struct timeval timeout;
+        int maxfd = rtp + 1;
+        if(maxfd <= rtcp)
+            maxfd = rtcp + 1;
+        FD_ZERO(&inp);
+        FD_SET(rtp, &inp);
+        FD_SET(rtcp, &inp);
+        timeout.tv_sec = 0;
+        timeout.tv_usec = *syncup * 1000l;
+        select(maxfd, &inp, NULL, NULL, &timeout);
+        rtp_in = rtcp_in = false;
+        if(FD_ISSET(rtp, &inp))
+            rtp_in = true;
+        if(FD_ISSET(rtcp, &inp))
+            rtcp_in = true;
+#endif
 
         // see if input...
-        if(pfd[0].revents & POLLRDNORM) {
+        if(rtp_in) {
             receive = (rtp_header_t *)&rtp_receive[rtp_index];
             olen = sizeof(struct sockaddr_storage);
             len = recvfrom(rtp, (void *)receive,
@@ -154,11 +209,13 @@ void RTPTimeslot::run(void)
             ++rtp_count;
             if(++rtp_index >= RTP_BUFFER_SIZE)
                 rtp_index = 0;
+            memcpy(&rtp_contact, &origin, olen);
+            rtp_addrlen = olen;
             silence = 0;
         }
 
         // see if rtcp...
-        if(pfd[1].revents & POLLRDNORM) {
+        if(rtcp_in) {
 
         }
 

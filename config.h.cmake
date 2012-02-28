@@ -29,6 +29,8 @@
 #cmakedefine HAVE_STDINT_H 1
 #cmakedefine HAVE_TERMIOS_H 1
 #cmakedefine HAVE_SYS_IOCTL_H 1
+#cmakedefine HAVE_SYS_POLL_H 1
+#cmakedefine HAVE_SYS_UIO_H 1
 #cmakedefine HAVE_IOCTL_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1
