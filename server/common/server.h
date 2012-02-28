@@ -23,6 +23,8 @@
 #define DEBUG2  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 1)))
 #define DEBUG3  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 2)))
 
+#define RTP_BUFFER_SIZE 3
+
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
@@ -521,8 +523,11 @@ public:
 class RTPTimeslot : public Timeslot, public JoinableThread
 {
 protected:
+    char rtp_sending[12];           // sending header, recast internally
+    char rtp_receive[RTP_BUFFER_SIZE][480 + 72];
     socket_t rtp, rtcp;
     timeout_t rtp_slice;
+    long rtp_samples;
     int rtp_family, rtp_priority;
     unsigned rtp_port;
     const char *rtp_address;
