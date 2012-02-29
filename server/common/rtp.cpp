@@ -215,7 +215,7 @@ void RTPTimeslot::run(void)
 
             // check where in existing list we are...
             while(pos < rtp_count) {
-                if(ntohs(receive->sequence) < ntohs(index[pos]->sequence))
+                if(ntohl(receive->timestamp) < ntohl(index[pos]->timestamp))
                     break;
                 ++pos;
             }
