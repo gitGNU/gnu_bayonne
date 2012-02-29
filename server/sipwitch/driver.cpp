@@ -151,6 +151,7 @@ int driver::start(void)
     while(timeslots--) {
         timeslot *ts = new timeslot(iface, rtp, family);
         tsIndex[tsCount++] = (Timeslot *)ts;
+        rtp += 2;
     }
 
     return tsCount;
