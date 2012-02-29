@@ -534,6 +534,7 @@ protected:
     int rtp_family, rtp_priority;
     unsigned rtp_port;
     const char *rtp_address;
+    uint32_t prior_rfc2833;             // last dtmf timestamp....
 
     RTPTimeslot(const char *address, unsigned short port, int family);
 

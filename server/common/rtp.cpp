@@ -155,6 +155,7 @@ void RTPTimeslot::run(void)
     sending->version = rfc2833->version = 2;
 
     rfc2833->sources[0] = sending->sources[0];
+    prior_rfc2833 = 1;  // impossible value, guarantees no initial match
 
     syncup.set(rtp_slice);
     for(;;) {
