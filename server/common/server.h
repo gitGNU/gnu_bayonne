@@ -186,6 +186,16 @@ typedef enum {
 } dspmode_t;
 
 /**
+ * Timeslot call mode.  This specifies the line state of the timeslot.
+ */
+typedef enum {
+    TS_UNCONNECTED = 0, // no call activity set yet
+    TS_RINGING,         // ringing (incoming or outgoing)...
+    TS_CONNECTED,       // timeslot is connected
+    TS_HANGUP           // timeslot is disconnecting...
+} tsmode_t;
+
+/**
  * This is a special "data" block that is embedded in each channel.  The
  * content of this data block depends on which state the driver timeslot is
  * currently processing (stepped) into.  Hence, different driver states each
@@ -477,11 +487,12 @@ protected:
 
     typedef bool (Timeslot::*handler_t)(Event *event);
 
-    Group *group;           // active group of current call
-    Group *incoming;        // incoming group to answer as...
-    Group *span;            // span entity associated with timeslot
+    Group *group;               // active group of current call
+    Group *incoming;            // incoming group to answer as...
+    Group *span;                // span entity associated with timeslot
     unsigned tsid;
     bool inUse;
+    tsmode_t tsmode;
     handler_t handler;
     const char *state;
     long callid;

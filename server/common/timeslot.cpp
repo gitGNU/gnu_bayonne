@@ -34,6 +34,7 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
     inUse = false;
 
     handler = &Timeslot::idleHandler;
+    tsmode = TS_UNCONNECTED;
     state = "initial";
     server::status[tsid] = '.';
 
@@ -92,6 +93,7 @@ void Timeslot::shutdown(void)
 {
     setHandler(&Timeslot::idleHandler, "idle", '-');
     inUse = false;
+    tsmode = TS_UNCONNECTED;
 }
 
 Timeslot *Timeslot::get(long cid)
