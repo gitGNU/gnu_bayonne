@@ -454,16 +454,16 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     if(is(restart))
         args.restart();
 
+    status = new char[MAX_TIMESLOTS + 1];
+    memset(status, '?', MAX_TIMESLOTS);
+
     // create threads, etc...
     signals::start();
     notify::start();
 
     unsigned tsc = Driver::startup();
-    if(tsc) {
-        status = (char *)Driver::alloc(tsc + 1);
-        memset(status, '?', tsc);
+    if(tsc)
         status[tsc] = 0;
-    }
     dispatch(tsc);
     Driver::shutdown();
 

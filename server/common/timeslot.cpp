@@ -36,6 +36,7 @@ Timeslot::Timeslot(Group *grp) : OrderedObject(&list), Script::interp(), Mutex()
     handler = &Timeslot::idleHandler;
     tsmode = TS_UNCONNECTED;
     state = "initial";
+    server::status[tsid] = '.';
 
     if(grp && grp->is_span()) {
         span = grp;
