@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with GNU Bayonne.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <config.h>
+#include "../config.h"
 #include <ucommon/ucommon.h>
 #include <ucommon/export.h>
 #include <bayonne.h>

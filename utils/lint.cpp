@@ -13,9 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <ucommon/ucommon.h>
+#include "../config.h"
 #include <bayonne.h>
-#include <config.h>
 
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
