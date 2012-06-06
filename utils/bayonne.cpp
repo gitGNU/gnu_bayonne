@@ -13,7 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "bayonne.h"
+#include "../config.h"
+#include <bayonne.h>
 #ifdef _MSWINDOWS_
 #include <windows.h>
 #include <io.h>
@@ -22,7 +23,6 @@
 #include <signal.h>
 #include <fcntl.h>
 #endif
-#include <config.h>
 
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;

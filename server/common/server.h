@@ -13,11 +13,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <config.h>
+#include "../../config.h"
 #include <bayonne.h>
 
 #define MAX_DIGITS      48
 #define MAX_NAME_LEN    64
+#define MAX_TIMESLOTS   960
 
 #define DEBUG1  shell::DEBUG0
 #define DEBUG2  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 1)))
