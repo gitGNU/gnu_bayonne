@@ -504,9 +504,9 @@ check:
     return dev;
 }
 
-stringpager *Serial::list(void)
+stringlist_t *Serial::list(void)
 {
-    stringpager *list = new stringpager;
+    stringlist_t *list = new stringlist_t;
     char filename[64];
     fsys_t dir;
 

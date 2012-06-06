@@ -2422,7 +2422,7 @@ public:
 
     static Serial *create(const char *name);
 
-    static stringpager *list(void);
+    static stringlist_t *list(void);
 };
 
 /**

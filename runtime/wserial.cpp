@@ -444,12 +444,12 @@ Serial *Serial::create(const char *name)
     return dev;
 }
 
-stringpager *Serial::list(void)
+stringlist_t *Serial::list(void)
 {
     DWORD index = 0;
     TCHAR keyname[4096];
     DWORD size = sizeof(keyname);
-    stringpager *list = new stringpager;
+    stringlist_t *list = new stringlist_t;
     HKEY reg;
     FILETIME fTime;
 
