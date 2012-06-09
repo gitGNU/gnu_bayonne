@@ -39,7 +39,7 @@ Serial *Serial::create(const char *name)
     return NULL;
 }
 
-stringpager *Serial::list(void)
+stringlist_t *Serial::list(void)
 {
     return NULL;
 }
