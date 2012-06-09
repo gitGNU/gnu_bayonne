@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(bayonne)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckFunctionExists)
+INCLUDE(CheckLibraryExists)
 
 set (VERSION 2.99+3.0apionly2)
 
