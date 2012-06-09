@@ -238,6 +238,7 @@ if(HAVE_EXOSIP2 AND WIN32 AND NOT CYGWIN)
 endif()
 
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 file(GLOB runtime_src runtime/*.cpp)
 file(GLOB runtime_inc inc/bayonne.h)
