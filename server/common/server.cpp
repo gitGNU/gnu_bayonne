@@ -48,13 +48,13 @@ static shell::stringopt voice('V', "--voice", _TEXT("specify voice library"), "n
 static shell::flagopt version(0, "--version", _TEXT("show version information"));
 
 #ifdef  HAVE_PWD_H
-static shell::stringopt group('g', "--group", _TEXT("use specified group permissions"), "groupid", "nobody");
+static shell::stringopt group('g', "--group", _TEXT("use specified group permissions"), "groupid", NULL);
 #endif
 static shell::stringopt loglevel('l', "--logging", _TEXT("set log level"), "level", "err");
 static shell::counteropt priority('p', "--priority", _TEXT("set priority level"), "level");
 static shell::flagopt restart('r', "--restartable", _TEXT("set to restartable process"));
 #ifdef  HAVE_PWD_H
-static shell::stringopt user('u', "--user", _TEXT("user to run as"), "userid", "nobody");
+static shell::stringopt user('u', "--user", _TEXT("user to run as"), "userid", NULL);
 #endif
 static shell::flagopt verbose('v', NULL, _TEXT("set verbosity, can be used multiple times"), false);
 static shell::numericopt debuglevel('x', "--debug", _TEXT("set debug level directly"), "level", 0);
@@ -379,7 +379,7 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     // if root user, then see if we change permissions...
 
     if(!getuid()) {
-        if(is(user)) {
+        if(*user) {
             if(atoi(*user))
                 pwd = getpwuid(atoi(*user));
             else
@@ -390,7 +390,7 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
         }
     }
 
-    if(is(group)) {
+    if(*group) {
         if(atoi(*group))
             grp = getgrgid(atoi(*group));
         else
