@@ -227,14 +227,6 @@ if test x"$has_eXosip2" = "xyes" ; then
         EXOSIP2_LIBS="$EXOSIP2_LIBS -liphlpapi -ldnsapi"
         ;;
     esac
-
-    PKG_CHECK_MODULES(ORTP, ortp >= 0.16.0, [
-        EXOSIP2_LIBS="$EXOSIP2_LIBS $ORTP_LIBS"
-        EXOSIP2_FLAGS="$EXOSIP2_FLAGS $ORTP_CFLAGS"
-        BUILD_SUBDIRS="$BUILD_SUBDIRS sipwitch"
-    ],[
-        has_eXosip2="no"
-    ])
 fi
 
 AC_LANG_CPLUSPLUS
@@ -329,7 +321,6 @@ AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
 AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
 bayonne.pc bayonne-config
-server/Makefile server/common/Makefile
-server/sipwitch/Makefile
+server/Makefile sipwitch/Makefile
 )
 

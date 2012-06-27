@@ -1,4 +1,4 @@
-# Copyright (C) 2011 David Sugar, Tycho Softworks.
+# Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -9,8 +9,12 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-EXTRA_DIST = CMakeLists.txt
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
+EXTRA_DIST =
 
-SUBDIRS = common @BUILD_SUBDIRS@
-DIST_SUBDIRS = common sipwitch
+noinst_LIBRARIES = libserver.a
+noinst_HEADERS = server.h
+
+libserver_a_SOURCES = server.cpp driver.cpp timeslot.cpp message.cpp \
+	scheduler.cpp signals.cpp group.cpp rtp.cpp
 
