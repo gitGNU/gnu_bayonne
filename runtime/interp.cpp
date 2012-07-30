@@ -27,11 +27,7 @@
 #include <regex.h>
 #endif
 
-#ifdef __MINGW32__
-#define NUM_FORMAT "%lld"
-#else
 #define NUM_FORMAT "%ld"
-#endif
 
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
@@ -223,7 +219,7 @@ const char *Script::interp::getFormat(Script::symbol *sym, const char *id, char 
     }
     else if((eq(id, "inc:", 4) || eq(id, "++:", 3)) && sym->size) {
         val = atol(cp);
-        snprintf(sym->data, sym->size + 1, NUM_FORMAT, ++val);
+        snprintf(sym->data, sym->size + 1, NUM_FORMAT, (long)++val);
         return sym->data;
     }
     else if(eq(id, "count:", 6))
@@ -254,18 +250,18 @@ offset:
     }
     else if((eq(id, "dec:", 4) || eq(id, "--:", 3)) && sym->size) {
         val = atoi(cp);
-        snprintf(sym->data, sym->size + 1, NUM_FORMAT, --val);
+        snprintf(sym->data, sym->size + 1, NUM_FORMAT, (long)--val);
         return sym->data;
     }
     else if(eq(id, "size:", 5))
         snprintf(tp, Script::sizing + 1, "%d", sym->size);
     else if(eq(id, "val:", 4) || eq(id, "int:", 4)) {
         val = atol(cp);
-        snprintf(tp, Script::sizing + 1, NUM_FORMAT, val);
+        snprintf(tp, Script::sizing + 1, NUM_FORMAT, (long)val);
     }
     else if(eq(id, "num:", 4)) {
         val = atol(cp);
-        snprintf(tp, Script::sizing + 1, NUM_FORMAT, val);
+        snprintf(tp, Script::sizing + 1, NUM_FORMAT, (long)val);
         if(Script::decimals)
             String::add(tp, Script::sizing + 1, ".");
         pos = strlen(tp);
@@ -1227,11 +1223,11 @@ bool Script::interp::getExpression(unsigned index)
     dec2[0] = 0;
     if(d1) {
         dv = atol(++d1);
-        snprintf(dec1, sizeof(dec1), NUM_FORMAT, dv);
+        snprintf(dec1, sizeof(dec1), NUM_FORMAT, (long)dv);
     }
     if(d2) {
         dv = atol(++d2);
-        snprintf(dec2, sizeof(dec2), NUM_FORMAT, dv);
+        snprintf(dec2, sizeof(dec2), NUM_FORMAT, (long)dv);
     }
 
     unsigned c1 = strlen(dec1);

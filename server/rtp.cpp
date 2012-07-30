@@ -15,7 +15,10 @@
 
 #include "server.h"
 #include <ucommon/secure.h>
+
+#ifdef  HAVE_SYS_POLL_H
 #include <sys/poll.h>
+#endif
 
 #ifdef  HAVE_SYS_UIO_H
 #include <sys/uio.h>
@@ -178,7 +181,7 @@ void RTPTimeslot::run(void)
         fd_set inp;
         struct timeval timeout;
         int maxfd = rtp + 1;
-        if(maxfd <= rtcp)
+        if((SOCKET)maxfd <= rtcp)
             maxfd = rtcp + 1;
         FD_ZERO(&inp);
         FD_SET(rtp, &inp);
@@ -197,7 +200,7 @@ void RTPTimeslot::run(void)
         if(rtp_in) {
             receive = (rtp_header_t *)&rtp_receive[rtp_index];
             olen = sizeof(struct sockaddr_storage);
-            len = recvfrom(rtp, (void *)receive,
+            len = recvfrom(rtp, (char *)receive,
                 480 + 72, 0, (struct sockaddr *)&origin, &olen);
             // if error or some kind of keep-alive, we ignore...
             if(len < 12)
@@ -287,7 +290,7 @@ void RTPTimeslot::send2833(bool end)
     }
 
     data->ending = end;
-    ::sendto(rtp, rfc2833, 16, 0, (struct sockaddr *)&rtp_contact, rtp_addrlen);
+    ::sendto(rtp, (const char *)rfc2833, 16, 0, (struct sockaddr *)&rtp_contact, rtp_addrlen);
 }
 
 void RTPTimeslot::startup(void)

@@ -20,7 +20,7 @@ using namespace UCOMMON_NAMESPACE;
 
 #define HASH_KEY_SIZE   97
 
-static Mutex locking;
+static Mutex mlocker;
 static unsigned tscount = 0;
 static OrderedIndex list;
 static OrderedIndex hash[HASH_KEY_SIZE];
@@ -100,34 +100,34 @@ void Timeslot::shutdown(void)
 Timeslot *Timeslot::get(long cid)
 {
     Timeslot *ts;
-    locking.acquire();
+    mlocker.acquire();
     ts = (Timeslot *)hash[cid % HASH_KEY_SIZE].begin();
     while(ts != NULL) {
         if(ts->callid == cid)
             break;
         ts = (Timeslot *)ts->next;
     }
-    locking.release();
+    mlocker.release();
     return ts;
 }
 
 void Timeslot::release(Timeslot *ts)
 {
-    locking.acquire();
+    mlocker.acquire();
     if(ts->inUse) {
         ts->shutdown();
         ts->delist(&hash[ts->callid % HASH_KEY_SIZE]);
         ts->enlist(&list);
         ++tscount;
     }
-    locking.release();
+    mlocker.release();
 }
 
 bool Timeslot::request(Timeslot *ts, long cid)
 {
     bool result = true;
 
-    locking.acquire();
+    mlocker.acquire();
     if(!ts->inUse) {
         ts->callid = cid;
         ts->delist(&list);
@@ -137,7 +137,7 @@ bool Timeslot::request(Timeslot *ts, long cid)
     }
     else
         result = false;
-    locking.release();
+    mlocker.release();
     return result;
 }
 
@@ -145,7 +145,7 @@ Timeslot *Timeslot::request(long cid)
 {
     Timeslot *ts;
 
-    locking.acquire();
+    mlocker.acquire();
     ts = (Timeslot *)list.begin();
     if(ts) {
         ts->callid = cid;
@@ -154,7 +154,7 @@ Timeslot *Timeslot::request(long cid)
         ts->startup();
         --tscount;
     }
-    locking.release();
+    mlocker.release();
     return ts;
 }
 
@@ -162,8 +162,8 @@ unsigned Timeslot::available(void)
 {
     unsigned count;
 
-    locking.acquire();
+    mlocker.acquire();
     count = tscount;
-    locking.release();
+    mlocker.release();
     return count;
 }
