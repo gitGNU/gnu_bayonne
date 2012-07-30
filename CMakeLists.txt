@@ -231,8 +231,8 @@ if(HAVE_EXOSIP2 AND WIN32 AND NOT CYGWIN)
     set(EXOSIP2_LIBS ${EXOSIP2_LIBS} Iphlpapi dnsapi)
 endif()
 
-configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-configure_file(config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+configure_file(bayonne-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/bayonne-config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 file(GLOB runtime_src runtime/*.cpp)
 file(GLOB runtime_inc inc/bayonne.h)
