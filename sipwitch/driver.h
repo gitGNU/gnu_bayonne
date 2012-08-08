@@ -17,8 +17,9 @@
 #include <ucommon/secure.h>
 
 #pragma GCC diagnostic ignored "-Wvariadic-macros"
+#undef  HAVE_CONFIG_H
+
 #include <eXosip2/eXosip.h>
-#include <ortp/ortp.h>
 
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"
