@@ -21,7 +21,11 @@
 
 #include <eXosip2/eXosip.h>
 
-#ifdef  EXOSIP_OPT_BASE_OPTION
+#if defined(EXOSIP_OPT_BASE_OPTION) && !defined(EXOSIP_OPT_DONT_SEND_101)
+#define EXOSIP_API4
+#endif
+
+#ifdef  EXOSIP_API4
 #define EXOSIP_CONTEXT  driver::context
 #define OPTION_CONTEXT  driver::context,
 #define EXOSIP_LOCK     eXosip_lock(driver::context);
@@ -84,7 +88,7 @@ public:
 
     void automatic(void);
 
-#ifdef  EXOSIP_OPT_BASE_OPTION
+#ifdef  EXOSIP_API4
     static eXosip_t *context;
 #endif
 
