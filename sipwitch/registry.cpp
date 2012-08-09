@@ -62,9 +62,9 @@ Registry(keyset)
     }
 
     if(secret && userid && realm) {
-        eXosip_lock();
-        eXosip_add_authentication_info(userid, userid, secret, NULL, realm);
-        eXosip_unlock();
+        EXOSIP_LOCK
+        eXosip_add_authentication_info(OPTION_CONTEXT userid, userid, secret, NULL, realm);
+        EXOSIP_UNLOCK
     }
 
     unsigned port = 0;
@@ -104,8 +104,8 @@ Registry(keyset)
         snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
-    eXosip_lock();
-    rid = eXosip_register_build_initial_register(uri, server, contact, expires, &msg);
+    EXOSIP_LOCK
+    rid = eXosip_register_build_initial_register(OPTION_CONTEXT uri, server, contact, expires, &msg);
     if(msg) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
@@ -138,7 +138,7 @@ Registry(keyset)
             osip_message_set_header(msg, AUTHORIZATION, buffer);
         }
 
-        eXosip_register_send_register(rid, msg);
+        eXosip_register_send_register(OPTION_CONTEXT rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
     else {
@@ -146,7 +146,7 @@ Registry(keyset)
         rid = -1;
     }
 
-    eXosip_unlock();
+    EXOSIP_UNLOCK
 }
 
 void registry::authenticate(const char *sip_realm)
@@ -154,10 +154,10 @@ void registry::authenticate(const char *sip_realm)
 
     if(secret && userid && sip_realm) {
         shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
-        eXosip_lock();
-        eXosip_add_authentication_info(userid, userid, secret, NULL, sip_realm);
-        eXosip_automatic_action();
-        eXosip_unlock();
+        EXOSIP_LOCK
+        eXosip_add_authentication_info(OPTION_CONTEXT userid, userid, secret, NULL, sip_realm);
+        eXosip_automatic_action(EXOSIP_CONTEXT);
+        EXOSIP_UNLOCK
     }
 }
 
@@ -186,11 +186,11 @@ void registry::shutdown(void)
     if(rid == -1)
         return;
 
-    eXosip_lock();
-    eXosip_register_build_register(rid, 0, &msg);
+    EXOSIP_LOCK
+    eXosip_register_build_register(OPTION_CONTEXT rid, 0, &msg);
     if(msg) {
         shell::debug(3, "released registry id %d from %s", rid, server);
-        eXosip_register_send_register(rid, msg);
+        eXosip_register_send_register(OPTION_CONTEXT rid, msg);
     }
-    eXosip_unlock();
+    EXOSIP_UNLOCK
 }

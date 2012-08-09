@@ -21,6 +21,19 @@
 
 #include <eXosip2/eXosip.h>
 
+#ifdef  EXOSIP_OPT_BASE_OPTION
+#define EXOSIP_CONTEXT  driver::context
+#define OPTION_CONTEXT  driver::context,
+#define EXOSIP_LOCK     eXosip_lock(driver::context);
+#define EXOSIP_UNLOCK   eXosip_unlock(driver::context);
+#else
+#define EXOSIP_CONTEXT
+#define OPTION_CONTEXT
+#define EXOSIP_LOCK     eXosip_lock();
+#define EXOSIP_UNLOCK   eXosip_unlock();
+#endif
+
+
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"
 #endif
@@ -70,6 +83,10 @@ public:
     void stop(void);
 
     void automatic(void);
+
+#ifdef  EXOSIP_OPT_BASE_OPTION
+    static eXosip_t *context;
+#endif
 
     static registry *locate(int rid);
 

@@ -52,7 +52,7 @@ void thread::run(void)
 
     for(;;) {
         if(!shutdown_flag)
-            sevent = eXosip_event_wait(1, 0);
+            sevent = eXosip_event_wait(OPTION_CONTEXT 1, 0);
 
         if(shutdown_flag) {
             shell::log(DEBUG1, "stopping event thread %d", instance);
@@ -98,9 +98,9 @@ void thread::run(void)
                 reg->release();
             break;
         default:
-            eXosip_lock();
-            eXosip_default_action(sevent);
-            eXosip_unlock();
+            EXOSIP_LOCK
+            eXosip_default_action(OPTION_CONTEXT sevent);
+            EXOSIP_UNLOCK
         }
 
         eXosip_event_free(sevent);
@@ -113,7 +113,7 @@ void thread::shutdown(void)
     shutdown_flag = true;
     while(active_count)
         Thread::sleep(50);
-    eXosip_quit();
+    eXosip_quit(EXOSIP_CONTEXT);
     while(shutdown_count < startup_count)
         Thread::sleep(50);
 }

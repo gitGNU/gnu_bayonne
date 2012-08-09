@@ -18,9 +18,17 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
+#ifdef  EXOSIP_OPT_BASE_OPTION
+eXosip_t *driver::context = NULL;
+#endif
+
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
+
+#ifdef  EXOSIP_OPT_BASE_OPTION
+    context = eXosip_malloc();
+#endif
 }
 
 int driver::start(void)
@@ -87,7 +95,7 @@ int driver::start(void)
 
     const char *addr = iface;
 
-    eXosip_init();
+    eXosip_init(EXOSIP_CONTEXT);
 #ifdef  AF_INET6
     if(family == AF_INET6) {
         eXosip_enable_ipv6(1);
@@ -99,15 +107,15 @@ int driver::start(void)
         addr = "*";
 
     Socket::family(family);
-    if(eXosip_listen_addr(protocol, iface, port, family, tlsmode))
+    if(eXosip_listen_addr(OPTION_CONTEXT protocol, iface, port, family, tlsmode))
         shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
     else
         shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
-    eXosip_set_user_agent(agent);
+    eXosip_set_user_agent(OPTION_CONTEXT agent);
 
-#ifdef  EXOSIP2_OPTION_SEND_101
+#if defined(EXOSIP2_OPTION_SEND_101) && !defined(EXOSIP_OPT_BASE_OPTION)
     eXosip_set_option(EXOSIP_OPT_DONT_SEND_101, &send101);
 #endif
 
@@ -159,7 +167,7 @@ int driver::start(void)
 
 void driver::stop(void)
 {
-    eXosip_quit();
+    eXosip_quit(EXOSIP_CONTEXT);
     thread::shutdown();
 
     unsigned index = 0;
@@ -171,9 +179,9 @@ void driver::stop(void)
 
 void driver::automatic(void)
 {
-    eXosip_lock();
-    eXosip_automatic_action();
-    eXosip_unlock();
+    EXOSIP_LOCK
+    eXosip_automatic_action(EXOSIP_CONTEXT);
+    EXOSIP_UNLOCK
 }
 
 registry *driver::locate(int rid)
