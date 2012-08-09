@@ -18,7 +18,7 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-#ifdef  EXOSIP_OPT_BASE_OPTION
+#ifdef  EXOSIP_API4
 eXosip_t *driver::context = NULL;
 #endif
 
@@ -26,7 +26,7 @@ driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
 
-#ifdef  EXOSIP_OPT_BASE_OPTION
+#ifdef  EXOSIP_API4
     context = eXosip_malloc();
 #endif
 }
