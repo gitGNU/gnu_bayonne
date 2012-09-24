@@ -69,6 +69,7 @@ bool Env::init(shell_t *args)
     set("reply", "/tmp/.bayonne.");
     set("controls", DEFAULT_VARPATH "/run/bayonne");
     set("control", DEFAULT_VARPATH "/run/bayonne/control");
+    set("pidfile", DEFAULT_VARPATH "/run/bayonne/pidfile");
     set("reply", "/tmp/.bayonne.");
     set("snapshot", DEFAULT_VARPATH "/run/bayonne/snapshot");
     set("boards", DEFAULT_VARPATH "/run/bayonne/boards");
@@ -120,6 +121,7 @@ bool Env::init(shell_t *args)
         set("scripts", home_prefix);
         set("controls", rundir);
         set("control", _STR(str(rundir) + "/control"));
+        set("pidfile", _STR(str(rundir) + "/pidfile"));
         set("snapshot", _STR(str(rundir) + "/snapshot"));
         set("boards", _STR(str(rundir) + "/boards"));
         set("spans", _STR(str(rundir) + "/spans"));

@@ -457,6 +457,16 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     status = new char[MAX_TIMESLOTS + 1];
     memset(status, '?', MAX_TIMESLOTS);
 
+    const char *pidfile = args.getsym("pidfile");
+    if(pidfile) {
+        ::remove(pidfile);
+        FILE *fp = fopen(pidfile, "w");
+        if(fp) {
+            fprintf(fp, "    %ld\n", (long)getpid());
+            fclose(fp);
+        }
+    }
+
     // create threads, etc...
     signals::start();
     notify::start();
@@ -465,6 +475,10 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     if(tsc)
         status[tsc] = 0;
     dispatch(tsc);
+
+    if(pidfile)
+        ::remove(pidfile);
+
     Driver::shutdown();
 
     notify::stop();
