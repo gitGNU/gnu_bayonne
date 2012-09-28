@@ -17,6 +17,13 @@ INCLUDE(CheckLibraryExists)
 
 set (VERSION 2.99.1)
 
+set(RC_VERSION ${VERSION})
+STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
+set(RC_VERSION "${RC_VERSION},0")
+
+set(SOVERSION ${VERSION})
+STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
+
 # when we override default install prefix, assume full path is used...
 
 set(INSTALL_INCLUDEDIR include)
