@@ -15,7 +15,7 @@ INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckLibraryExists)
 
-set (VERSION 2.99+3.0apionly2)
+set (VERSION 2.99.1)
 
 # when we override default install prefix, assume full path is used...
 

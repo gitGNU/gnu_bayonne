@@ -1,3 +1,6 @@
+* 2.99.1
+- internal checkpoint release, mostly for production build testing
+
 * 2.99+3.0apionly1 to 2.99+3.0apionly2
 - support for more audio related paths like system sounds
 - pathinfo_t to hold audio session context for path calculations
