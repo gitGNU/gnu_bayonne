@@ -33,9 +33,7 @@ static shell::flagopt althelp('?', NULL, NULL);
 static shell::flagopt background('b', "--background", _TEXT("run as daemon"));
 static shell::flagopt altback('d', NULL, NULL);
 static shell::numericopt concurrency('c', "--concurrency", _TEXT("process concurrency"), "level");
-#ifdef  DEBUG
 static shell::flagopt dump('C', "--dump", _TEXT("dump configuration"));
-#endif
 static shell::flagopt foreground('f', "--foreground", _TEXT("run in foreground"));
 static shell::stringopt lang('L', "--lang", _TEXT("specify language"), "language", "C");
 static shell::stringopt phrasebook('B', "--phrasebook", _TEXT("specify phrasebook directory"), "path", NULL);
@@ -85,7 +83,6 @@ static void corefiles(void)
 }
 #endif
 
-#ifdef  DEBUG
 static void dumpconfig(void)
 {
 #ifdef _MSWINDOWS_
@@ -101,7 +98,6 @@ static void dumpconfig(void)
     printf("voices = %s\n", Env::get("voices"));
     exit(0);
 }
-#endif
 
 static void usage(void)
 {
@@ -331,10 +327,8 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     if(is(prefix))
         Env::set("prefix", *prefix);
 
-#ifdef  DEBUG
     if(is(dump))
         dumpconfig();
-#endif
 
     if(*concurrency < 0)
         shell::errexit(1, "bayonne: concurrency: %ld: %s\n",
