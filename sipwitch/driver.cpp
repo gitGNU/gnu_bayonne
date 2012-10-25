@@ -106,7 +106,11 @@ int driver::start(void)
     if(!addr)
         addr = "*";
 
+#if UCOMMON_ABI > 5
+    Socket::query(family);
+#else
     Socket::family(family);
+#endif
     if(eXosip_listen_addr(OPTION_CONTEXT protocol, iface, port, family, tlsmode))
         shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
     else
