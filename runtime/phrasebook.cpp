@@ -100,10 +100,10 @@ Phrasebook(false)
 
 bool _en_US::id(const char *lang)
 {
-    if(case_eq(lang, "en_US"))
+    if(eq_case(lang, "en_US"))
         return true;
 
-    if(case_eq(lang, "en_US.", 6))
+    if(eq_case(lang, "en_US.", 6))
         return true;
 
     return false;
@@ -151,13 +151,13 @@ void _en_US::date(const char *text, rule_t *state)
 
 bool _default::id(const char *lang)
 {
-    if(case_eq(lang, "en_", 3))
+    if(eq_case(lang, "en_", 3))
         return true;
 
-    if(case_eq(lang, "C"))
+    if(eq_case(lang, "C"))
         return true;
 
-    if(case_eq(lang, "en"))
+    if(eq_case(lang, "en"))
         return true;
 
     return false;

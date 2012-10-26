@@ -49,7 +49,7 @@ static unsigned months(const char *text)
 
     unsigned index = 0;
     while(index < 12) {
-        if(case_eq(text, table[index++], 3))
+        if(eq_case(text, table[index++], 3))
             return index;
     }
     return 0;
@@ -61,7 +61,7 @@ static unsigned days(const char *text)
 
     unsigned index = 0;
     while(index < 7) {
-        if(case_eq(text, table[index++], 2))
+        if(eq_case(text, table[index++], 2))
             return index;
     }
     return 0;

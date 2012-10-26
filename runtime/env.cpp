@@ -154,7 +154,7 @@ const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t siz
     const char *ext = strrchr(path, '/');
 
     // file: and tool: can be used anywhere, but for toolmode only...
-    if(case_eq(path, "file:", 5) || case_eq(path, "tool:")) {
+    if(eq(path, "file:", 5) || eq(path, "tool:")) {
         if(!tool_flag)
             return NULL;
 
@@ -163,7 +163,7 @@ const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t siz
     }
 
     // out: can be used to override for writing absolute path in tool mode...
-    if(case_eq(path, "out:", 4)) {
+    if(eq(path, "out:", 4)) {
         if(!tool_flag || !writeflag)
             return NULL;
 
@@ -214,14 +214,14 @@ const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t siz
         ext = env("extension");
 
     // tmp: to access bayonne temporary files...
-    if(case_eq(path, "tmp:", 4) || case_eq(path, "temp:", 5)) {
+    if(eq(path, "tmp:", 4) || eq(path, "temp:", 5)) {
         snprintf(buffer, size, "%s/%s%s",
             env("temp"), strchr(path, ':') + 1, ext);
         return buffer;
     }
 
     // we cannot write to system sounds directory...
-    if(case_eq(path, "sound:", 6) || case_eq(path, "sounds:", 7)) {
+    if(eq(path, "sound:", 6) || eq(path, "sounds:", 7)) {
         if(writeflag)
             return NULL;
 
@@ -231,7 +231,7 @@ const char *Env::path(pathinfo_t& pi, const char *path, char *buffer, size_t siz
 
 
     // lib: optional way to always specify use library
-    else if(case_eq(path, "lib:", 4))
+    else if(eq(path, "lib:", 4))
         path += 4;
     else if(strchr(path, ':'))
         return NULL;

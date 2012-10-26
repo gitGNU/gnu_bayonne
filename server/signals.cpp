@@ -297,7 +297,7 @@ void notify::run(void)
 
                 // only if .bcs files updated do we care...
                 const char *ext = strrchr(event->name, '.');
-                if(ext && case_eq(ext, ".bcs")) {
+                if(ext && eq_case(ext, ".bcs")) {
                     shell::log(DEBUG2, "%s updated", event->name);
                     ++updates;
                 }

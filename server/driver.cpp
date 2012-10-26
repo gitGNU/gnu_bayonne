@@ -164,10 +164,11 @@ void Driver::compile(void)
 int Driver::startup(void)
 {
     keydata *pri = instance->keyserver.get("threads");
-    const char *cp;
+    const char *cp = NULL;
 
     if(pri)
         cp = pri->get("message");
+
     if(!cp)
         cp = "-1";
 
@@ -288,11 +289,11 @@ Timeslot *Driver::request(Group *group)
     if(!cp)
         cp = "longest";
 
-    if(case_eq(cp, "first"))
+    if(eq(cp, "first"))
         mode = FIRST;
-    else if(case_eq(cp, "last"))
+    else if(eq(cp, "last"))
         mode = LAST;
-    else if(case_eq(cp, "idle") || case_eq(cp, "longest"))
+    else if(eq(cp, "idle") || eq(cp, "longest"))
         mode = IDLE;
 
     switch(mode) {

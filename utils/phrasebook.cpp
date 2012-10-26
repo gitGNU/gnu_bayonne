@@ -173,9 +173,9 @@ PROGRAM_MAIN(argc, argv)
         shell::errexit(3, "*** phrasebook: %s: %s\n",
             *lang, _TEXT("language not found"));
 
-    if(case_eq(cmd, "display"))
+    if(eq(cmd, "display"))
         display(argv);
-    else if(case_eq(cmd, "paths")) {
+    else if(eq(cmd, "paths")) {
         showpath = true;
         display(argv);
     }

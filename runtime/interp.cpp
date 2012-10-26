@@ -815,7 +815,7 @@ Script::event *Script::interp::scriptMethod(const char *name)
     linked_pointer<Script::event> mp = stack[frame].scr->methods;
 
     while(is(mp)) {
-        if(case_eq(mp->name, name))
+        if(eq_case(mp->name, name))
             return *mp;
         mp.next();
     }
@@ -845,11 +845,11 @@ bool Script::interp::scriptEvent(const char *name)
     while(ignore && pos < ignore->argc) {
 
         // if entire group is ignored, drop all events of group
-        if(group && case_eq(group, ignore->argv[pos]))
+        if(group && eq_case(group, ignore->argv[pos]))
             return false;
 
         // if our event is ignored, then exit out
-        if(case_eq(name, ignore->argv[pos++]))
+        if(eq_case(name, ignore->argv[pos++]))
             return false;
     }
 
@@ -858,10 +858,10 @@ bool Script::interp::scriptEvent(const char *name)
         egrp = NULL;
 
         while(is(ep)) {
-            if(case_eq(ep->name, name))
+            if(eq_case(ep->name, name))
                 break;
 
-            if(group && case_eq(ep->name, group))
+            if(group && eq_case(ep->name, group))
                 egrp = *ep;
 
             ep.next();
@@ -883,7 +883,7 @@ bool Script::interp::scriptEvent(const char *name)
         }
 
         // non-inherited test...
-        if(case_eq(name, "timeout"))
+        if(eq_case(name, "timeout"))
             return false;
 
         while(stackp > stack[stackp].base && stack[stackp].line->loop)
@@ -1350,10 +1350,10 @@ bool Script::interp::getExpression(unsigned index)
     }
 
     if(eq(op, "!$") || eq(op, "isnot"))
-        return !case_eq(v2, v1);
+        return !eq_case(v2, v1);
 
     if(eq(op, "$") || eq(op, "is"))
-        return case_eq(v2, v1);
+        return eq_case(v2, v1);
 
 #ifdef  HAVE_REGEX_H
     if(eq(op, "~") || eq(op, "!~")) {
