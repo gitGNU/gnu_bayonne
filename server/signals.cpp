@@ -229,7 +229,7 @@ notify::~notify()
 void notify::start(void)
 {
     dirpath = Env::get("scripts");
-    if(fsys::isdir(dirpath))
+    if(fsys::is_dir(dirpath))
         thread.background();
     else
         shell::log(shell::ERR, "notify failed; %s missing", dirpath);

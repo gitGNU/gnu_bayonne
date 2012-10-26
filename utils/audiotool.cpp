@@ -312,7 +312,7 @@ static void chart(char **argv)
 
     while(*argv) {
         const char *out = Env::path(rules, *argv, pathbuf, sizeof(pathbuf));
-        if(!out || !fsys::isfile(out)) {
+        if(!out || !fsys::is_file(out)) {
             printf("%s: %s\n",
                 fname(*(argv++)), _TEXT("invalid"));
             continue;
@@ -429,7 +429,7 @@ static void info(char **argv)
 
     while(*argv) {
         const char *out = Env::path(rules, *argv, pathbuf, sizeof(pathbuf));
-        if(!out || !fsys::isfile(out)) {
+        if(!out || !fsys::is_file(out)) {
             printf("audiotool: %s: %s\n",
                 fname(*(argv++)), _TEXT("invalid"));
             continue;
@@ -531,7 +531,7 @@ static void strip(char **argv)
 
     while(*argv) {
         const char *out = Env::path(rules, *argv, source, sizeof(source));
-        if(!out || !fsys::isfile(out)) {
+        if(!out || !fsys::is_file(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("invalid"));
             continue;
@@ -666,7 +666,7 @@ static void trim(char **argv)
 
     while(*argv) {
         const char *out = Env::path(rules, *argv, source, sizeof(source));
-        if(!out || !fsys::isfile(out)) {
+        if(!out || !fsys::is_file(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("invalid"));
             continue;

@@ -111,7 +111,7 @@ bool Env::init(shell_t *args)
         home_prefix = strdup(str(pwd->pw_dir) + "/.bayonne");
 
     // tool only uses ~/.bayonne if also actually exists...
-    if(home_prefix && !fsys::isdir(home_prefix))
+    if(home_prefix && !fsys::is_dir(home_prefix))
         home_prefix = NULL;
 
     if(home_prefix) {

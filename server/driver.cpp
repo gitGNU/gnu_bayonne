@@ -51,7 +51,7 @@ Driver::Driver(const char *id, const char *registry)
             home = strdup(str(home) + str("/.bayonnerc"));
     }
 
-    if(home && fsys::isfile(home)) {
+    if(home && fsys::is_file(home)) {
         setenv("BAYONNERC", home, 1);
         keyserver.load(home);
         keydriver.load(home);

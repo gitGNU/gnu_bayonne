@@ -81,7 +81,7 @@ PROGRAM_MAIN(argc, argv)
 
     ext = strrchr(fn, '.');
 
-    if(!fsys::isfile(fn)) {
+    if(!fsys::is_file(fn)) {
         fprintf(stderr, "*** baylint: %s: not found\n", fn);
         exit(-1);
     }

@@ -244,27 +244,27 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
         if(!cp)
             cp = userpath(paths->get("voices"));
 
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("voices", cp);
 
         cp = userpath(paths->get("scripts"));
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("scripts", cp);
 
         cp = userpath(paths->get("prompts"));
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("prompts", cp);
 
         cp = userpath(paths->get("definitions"));
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("definitions", cp);
 
         cp = userpath(paths->get("configs"));
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("configs", cp);
 
         cp = userpath(paths->get("libexec"));
-        if(cp && *cp && fsys::isdir(cp))
+        if(cp && *cp && fsys::is_dir(cp))
             Env::set("libexec", cp);
     }
 
