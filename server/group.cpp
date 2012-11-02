@@ -203,12 +203,12 @@ void Registry::getInterface(const char *uri, char *buffer, size_t size)
     }
     resolver.set(buffer, 6000);
     address = resolver.getAddr();
-    if(address == NULL || Socket::getinterface((struct sockaddr *)&iface, address) != 0) {
+    if(address == NULL || Socket::network((struct sockaddr *)&iface, address) != 0) {
         String::set(buffer, sizeof(buffer), "localhost");
         return;
     }
     resolver.clear();
-    Socket::getaddress((struct sockaddr *)&iface, buffer, size);
+    Socket::query((struct sockaddr *)&iface, buffer, size);
 }
 
 
