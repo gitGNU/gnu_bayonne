@@ -83,7 +83,7 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
 {
     linked_pointer<Scheduler> sp = image->scheduler;
     DateTime now;
-    unsigned current = (unsigned)(now.getHour() * 60 + now.getMinute());
+    unsigned current = (unsigned)(now.hour() * 60 + now.minute());
     const char *selected_group = NULL;
     const char *selected_event = NULL;
     const char *selected_script = NULL;
@@ -105,7 +105,7 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
             goto next;
 
         // if uses days, and not selected day, we skip...
-        if(sp->dow[0] && !sp->dow[now.getDayOfWeek() + 1])
+        if(sp->dow[0] && !sp->dow[now.dow() + 1])
             goto next;
 
         // if we already have a month selection, skip
@@ -113,11 +113,11 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
             goto next;
 
         // if wrong month, skip...
-        if(sp->month && sp->month != now.getMonth())
+        if(sp->month && sp->month != now.month())
             goto next;
 
         // if specific date and not matched, skip...
-        if(sp->month && sp->day != now.getDay())
+        if(sp->month && sp->day != now.day())
             goto next;
 
         // if we already have a year selection, skip
@@ -125,7 +125,7 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
             goto next;
 
         // if year, match
-        if(sp->year && sp->year != (unsigned)now.getYear())
+        if(sp->year && sp->year != (unsigned)now.year())
             goto next;
 
         // see if event already selected

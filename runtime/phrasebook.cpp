@@ -114,23 +114,23 @@ void _en_US::time(const char *text, rule_t *state)
     const char *ap = "a";
 
     Time now((char *)text);
-    if(now[Time::hour] >= 12) {
+    if(now.hour() >= 12) {
         ap = "p";
-        unsigned hour = now[Time::hour];
+        unsigned hour = now.hour();
         if(hour % 12)
-            _lownumber(now[Time::hour] % 12, state);
+            _lownumber(now.hour() % 12, state);
         else
             _lownumber(12, state);
     }
-    else if(now[Time::hour])
-        _lownumber(now[Time::hour], state);
+    else if(now.hour())
+        _lownumber(now.hour(), state);
     else
         _lownumber(12, state);
 
-    if(now[Time::minute]) {
-        if(now[Time::minute] < 10)
+    if(now.minute()) {
+        if(now.minute() < 10)
             _add("o", state);
-        _lownumber(now[Time::minute], state);
+        _lownumber(now.minute(), state);
     }
 
     _add(ap, state);
@@ -142,10 +142,10 @@ void _en_US::date(const char *text, rule_t *state)
     static const char *_month[] = {"", "january", "febuary", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"};
 
     Date now((char *)text);
-    _add(_month[now[Date::month]], state);
+    _add(_month[now.month()], state);
 
     char buf[8];
-    snprintf(buf, sizeof(buf), "%d", now[Date::day]);
+    snprintf(buf, sizeof(buf), "%d", now.day());
     order(buf, state);
 }
 
@@ -413,7 +413,7 @@ void Phrasebook::weekday(const char *text, rule_t *state)
     static const char *_dow[] = {"sunday", "monday", "tuesday", "wednasday", "thursday", "friday", "saturday"};
 
     Date now((char *)text);
-    _add(_dow[now[Date::dow]], state);
+    _add(_dow[now.dow()], state);
 }
 
 void Phrasebook::fulldate(const char *text, rule_t *state)
@@ -428,15 +428,15 @@ void Phrasebook::date(const char *text, rule_t *state)
 
     Date now((char *)text);
     char buf[8];
-    snprintf(buf, sizeof(buf), "%d", now[Date::day]);
+    snprintf(buf, sizeof(buf), "%d", now.day());
     order(buf, state);
-    _add(_month[now[Date::month]], state);
+    _add(_month[now.month()], state);
 }
 
 void Phrasebook::year(const char *text, rule_t *state)
 {
     Date now((char *)text);
-    unsigned year = now[Date::year];
+    unsigned year = now.year();
     unsigned hi = year / 100;
     unsigned lo = year % 100;
 
@@ -464,13 +464,13 @@ void Phrasebook::year(const char *text, rule_t *state)
 void Phrasebook::time(const char *text, rule_t *state)
 {
     Time now((char *)text);
-    _lownumber(now[Time::hour], state);
-    if(now[Time::minute] < 1)
+    _lownumber(now.hour(), state);
+    if(now.minute() < 1)
         _add("o", state);
-    if(now[Time::minute] < 10)
+    if(now.minute() < 10)
         _add("o", state);
-    if(now[Time::minute])
-        _lownumber(now[Time::minute], state);
+    if(now.minute())
+        _lownumber(now.minute(), state);
 }
 
 void Phrasebook::init(rule_t *state, size_t size)
