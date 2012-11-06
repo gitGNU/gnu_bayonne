@@ -725,7 +725,7 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
         if(is(fs))
             break;
 
-        fsys::fileinfo(name, &ino);
+        fsys::info(name, &ino);
         eof = ino.st_size;
 
         if(mode == modeReadAny || mode == modeReadOne)
@@ -880,7 +880,7 @@ done:
 
     if(mode == modeFeed) {
         fsys::fileinfo_t ino;
-        fsys::fileinfo(name, &ino);
+        fsys::info(name, &ino);
         iolimit = ino.st_size;
     }
 }
@@ -1156,7 +1156,7 @@ int AudioFile::setPosition(unsigned long samples)
     if(!is(fs))
         return EBADF;
 
-    fs.fileinfo(&ino);
+    fs.info(&ino);
 
     if(samples == (unsigned long)~0l)
         return seek(ino.st_size);
