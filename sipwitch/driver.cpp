@@ -40,8 +40,6 @@ int driver::start(void)
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
     int tlsmode = 0;
-    int socktype = SOCK_DGRAM;
-    int send101 = 1;
     size_t stack = 0;
     unsigned priority = 0;
 
@@ -79,17 +77,16 @@ int driver::start(void)
     if(keys)
         transport = keys->get("transport");
     if(transport && eq(transport, "tcp")) {
-        socktype = SOCK_STREAM;
         protocol = IPPROTO_TCP;
     }
     else if(transport && eq(transport, "tls")) {
-        socktype = SOCK_STREAM;
         protocol = IPPROTO_TCP;
         tlsmode = 1;
     }
 
     if(keys)
         agent = keys->get("agent");
+
     if(!agent)
         agent = "bayonne-" VERSION "/exosip2";
 
@@ -118,10 +115,6 @@ int driver::start(void)
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
     eXosip_set_user_agent(OPTION_CONTEXT agent);
-
-#if defined(EXOSIP2_OPTION_SEND_101) && !defined(EXOSIP_OPT_BASE_OPTION)
-    eXosip_set_option(EXOSIP_OPT_DONT_SEND_101, &send101);
-#endif
 
     if(keys)
         cp = keys->get("threads");
