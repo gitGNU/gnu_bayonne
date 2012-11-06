@@ -318,7 +318,7 @@ void Control::log(const char *fmt, ...)
 
     va_start(args, fmt);
 
-    fsys::create(log, env("logfile"), fsys::ACCESS_APPEND, 0660);
+    fsys::open(log, env("logfile"), fsys::ACCESS_APPEND, 0660);
 
     vsnprintf(buf, sizeof(buf) - 1, fmt, args);
     len = strlen(buf);
