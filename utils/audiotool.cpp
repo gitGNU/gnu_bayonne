@@ -941,7 +941,7 @@ static void build(char **argv)
     AudioBuild input;
     AudioStream output;
     Audio::info_t info, make;
-    const char *target;
+    const char *target = NULL;
     const char *encoding = *encopt;
     Audio::rate_t rate = (Audio::rate_t)(*rateopt);
     char pathbuf[256];
@@ -965,7 +965,7 @@ static void build(char **argv)
         }
     }
 
-    if(!*argv) {
+    if(!target) {
         shell::errexit(4, "*** audiotool: -build: %s\n",
             _TEXT("no files specified"));
     }
@@ -1016,7 +1016,7 @@ static void append(char **argv)
     AudioBuild input;
     AudioStream output;
     Audio::Info info, make;
-    const char *target;
+    const char *target = NULL;
     char *option;
     char *offset = NULL;
     char pathbuf[256];
@@ -1064,7 +1064,7 @@ skip:
         }
     }
 
-    if(!*argv) {
+    if(!target) {
         shell::errexit(4, "*** audiotool: -append: %s\n",
             _TEXT("no files specified"));
     }

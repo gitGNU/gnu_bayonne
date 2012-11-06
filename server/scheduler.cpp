@@ -256,6 +256,8 @@ void Scheduler::load(Script *image, const char *path)
         if(month && day) {
             entry->day = day;
             entry->month = month;
+            if(year)
+                entry->year = year;
         }
         if(fdow && ldow) {
             entry->dow[0] = true;
