@@ -317,7 +317,7 @@ static void chart(char **argv)
                 fname(*(argv++)), _TEXT("invalid"));
             continue;
         }
-        if(fsys::access(out, R_OK)) {
+        if(!fsys::is_readable(out)) {
             printf("%s: %s\n",
                 fname(*(argv++)), _TEXT("inaccessable"));
             continue;
@@ -434,7 +434,7 @@ static void info(char **argv)
                 fname(*(argv++)), _TEXT("invalid"));
             continue;
         }
-        if(fsys::access(out, R_OK)) {
+        if(!fsys::is_readable(out)) {
             printf("audiotool: %s: %s\n",
                 fname(*(argv++)), _TEXT("inaccessable"));
             continue;
@@ -536,7 +536,7 @@ static void strip(char **argv)
                 *(argv++), _TEXT("invalid"));
             continue;
         }
-        if(fsys::access(out, R_OK)) {
+        if(!fsys::is_readable(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("inaccessable"));
             continue;
@@ -671,7 +671,7 @@ static void trim(char **argv)
                 *(argv++), _TEXT("invalid"));
             continue;
         }
-        if(fsys::access(out, R_OK)) {
+        if(!fsys::is_readable(out)) {
             printf("%s: %s\n",
                 *(argv++), _TEXT("inaccessable"));
             continue;
