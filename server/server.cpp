@@ -416,7 +416,7 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     signals::setup();
     fsys::createDir(rundir, 0770);
     fsys::createDir(vardir, 0770);
-    if(fsys::changeDir(vardir))
+    if(fsys::prefix(vardir))
         shell::errexit(3, "*** bayonne: %s: %s\n",
             vardir, _TEXT("data directory unavailable"));
 
