@@ -101,7 +101,7 @@ Script *Driver::load(void)
     Script *img = NULL;
 
     String::set(dirpath, sizeof(dirpath), env("scripts"));
-    fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
+    fsys::open(dir, dirpath, fsys::DIRECTORY);
 
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot load scripts from %s", dirpath);
@@ -138,7 +138,7 @@ void Driver::compile(void)
     fsys_t dir;
 
     String::set(dirpath, sizeof(dirpath), env("definitions"));
-    fsys::open(dir, dirpath, fsys::ACCESS_DIRECTORY);
+    fsys::open(dir, dirpath, fsys::DIRECTORY);
 
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot compile definitions from %s", dirpath);

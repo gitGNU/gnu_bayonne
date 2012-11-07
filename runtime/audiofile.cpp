@@ -222,7 +222,7 @@ void AudioFile::create(const char *name, info_t& myinfo, timeout_t framing)
         ext = ".none";
 
     mode = modeWrite;
-    fs.open(name, fsys::GROUP_PRIVATE, fsys::ACCESS_STREAM);
+    fs.open(name, fsys::GROUP_PRIVATE, fsys::STREAM);
     if(!is(fs))
         return;
 
@@ -711,13 +711,13 @@ void AudioFile::open(const char *name, mode_t m, timeout_t framing)
 
     switch(mode) {
     case modeWrite:
-        fm = fsys::ACCESS_REWRITE;
+        fm = fsys::REWRITE;
         break;
     case modeAppend:
-        fm = fsys::ACCESS_APPEND;
+        fm = fsys::APPEND;
         break;
     default:
-        fm = fsys::ACCESS_STREAM;
+        fm = fsys::STREAM;
     }
 
     for(;;) {

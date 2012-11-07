@@ -95,7 +95,7 @@ PROGRAM_MAIN(argc, argv)
     Script::assign(keywords);
 
     String::set(buffer, sizeof(buffer), Env::env("definitions"));
-    fsys::open(dir, buffer, fsys::ACCESS_DIRECTORY);
+    fsys::open(dir, buffer, fsys::DIRECTORY);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot compile definitions from %s", buffer);
@@ -117,7 +117,7 @@ PROGRAM_MAIN(argc, argv)
     }
 
     String::set(buffer, sizeof(buffer), Env::env("modules"));
-    fsys::open(dir, buffer, fsys::ACCESS_DIRECTORY);
+    fsys::open(dir, buffer, fsys::DIRECTORY);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot use module definitions from %s", buffer);
