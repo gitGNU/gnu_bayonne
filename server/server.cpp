@@ -414,8 +414,8 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     const char *rundir = Env::get("controls");
 
     signals::setup();
-    fsys::create(rundir, fsys::DIR_GROUP_PRIVATE);
-    fsys::create(vardir, fsys::DIR_GROUP_PRIVATE);
+    fsys::create(rundir, fsys::GROUP_PRIVATE);
+    fsys::create(vardir, fsys::GROUP_PRIVATE);
     if(fsys::prefix(vardir))
         shell::errexit(3, "*** bayonne: %s: %s\n",
             vardir, _TEXT("data directory unavailable"));
