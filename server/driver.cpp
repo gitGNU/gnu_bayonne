@@ -97,11 +97,11 @@ Script *Driver::load(void)
 {
     char dirpath[256];
     size_t len;
-    fsys_t dir;
+    dirsys_t dir;
     Script *img = NULL;
 
     String::set(dirpath, sizeof(dirpath), env("scripts"));
-    fsys::open(dir, dirpath, fsys::DIRECTORY);
+    dir::open(dir, dirpath);
 
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot load scripts from %s", dirpath);
@@ -112,7 +112,7 @@ Script *Driver::load(void)
     len = strlen(dirpath);
     dirpath[len++] = '/';
 
-    while(is(dir) && fsys::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
+    while(is(dir) && dir::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
         char *ep = strrchr(dirpath + len, '.');
         if(!ep)
             continue;
@@ -121,7 +121,7 @@ Script *Driver::load(void)
         shell::log(shell::INFO, "loading %s", dirpath + len);
         img = Script::compile(img, dirpath, definitions);
     }
-    fsys::close(dir);
+    dir::close(dir);
 
     if(!img)
         return NULL;
@@ -135,10 +135,10 @@ void Driver::compile(void)
 {
     char dirpath[256];
     size_t len;
-    fsys_t dir;
+    dirsys_t dir;
 
     String::set(dirpath, sizeof(dirpath), env("definitions"));
-    fsys::open(dir, dirpath, fsys::DIRECTORY);
+    dir::open(dir, dirpath);
 
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot compile definitions from %s", dirpath);
@@ -149,7 +149,7 @@ void Driver::compile(void)
     len = strlen(dirpath);
     dirpath[len++] = '/';
 
-    while(is(dir) && fsys::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
+    while(is(dir) && dir::read(dir, dirpath + len, sizeof(dirpath) - len) > 0) {
         char *ep = strrchr(dirpath + len, '.');
         if(!ep)
             continue;
@@ -158,7 +158,7 @@ void Driver::compile(void)
         shell::log(shell::INFO, "compiling %s", dirpath + len);
         definitions = Script::compile(definitions, dirpath, NULL);
     }
-    fsys::close(dir);
+    dir::close(dir);
 }
 
 int Driver::startup(void)

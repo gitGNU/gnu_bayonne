@@ -58,7 +58,7 @@ PROGRAM_MAIN(argc, argv)
     char buffer[256];
     const char *ext;
     size_t len;
-    fsys_t dir;
+    dirsys_t dir;
 
     shell::bind("baylint");
     shell args(argc, argv);
@@ -95,7 +95,7 @@ PROGRAM_MAIN(argc, argv)
     Script::assign(keywords);
 
     String::set(buffer, sizeof(buffer), Env::env("definitions"));
-    fsys::open(dir, buffer, fsys::DIRECTORY);
+    dir::open(dir, buffer);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot compile definitions from %s", buffer);
@@ -104,7 +104,7 @@ PROGRAM_MAIN(argc, argv)
         len = strlen(buffer);
         buffer[len++] = '/';
 
-        while(is(dir) && fsys::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+        while(is(dir) && dir::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
             char *ep = strrchr(buffer + len, '.');
             if(!ep)
                 continue;
@@ -113,11 +113,11 @@ PROGRAM_MAIN(argc, argv)
             shell::log(shell::INFO, "compiling %s", buffer + len);
             lib = Script::compile(lib, buffer, NULL);
         }
-        fsys::close(dir);
+        dir::close(dir);
     }
 
     String::set(buffer, sizeof(buffer), Env::env("modules"));
-    fsys::open(dir, buffer, fsys::DIRECTORY);
+    dir::open(dir, buffer);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot use module definitions from %s", buffer);
@@ -126,7 +126,7 @@ PROGRAM_MAIN(argc, argv)
         len = strlen(buffer);
         buffer[len++] = '/';
 
-        while(is(dir) && fsys::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+        while(is(dir) && dir::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
             char *ep = strrchr(buffer + len, '.');
             if(!ep)
                 continue;
@@ -135,7 +135,7 @@ PROGRAM_MAIN(argc, argv)
             shell::log(shell::INFO, "module %s", buffer + len);
             lib = Script::compile(lib, buffer, NULL);
         }
-        fsys::close(dir);
+        dir::close(dir);
     }
 
     if(lib)
