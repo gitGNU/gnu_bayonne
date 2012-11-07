@@ -57,7 +57,7 @@ size_t Control::create(void)
 {
     String::set(fifopath, sizeof(fifopath), env("control"));
     remove(fifopath);
-    if(mkfifo(fifopath, 0660)) {
+    if(mkfifo(fifopath, fsys::FILE_GROUP_PRIVATE)) {
         fifopath[0] = 0;
         return 0;
     }
@@ -318,7 +318,7 @@ void Control::log(const char *fmt, ...)
 
     va_start(args, fmt);
 
-    fsys::open(log, env("logfile"), 0660, fsys::ACCESS_APPEND);
+    fsys::open(log, env("logfile"), fsys::FILE_GROUP_PRIVATE, fsys::ACCESS_APPEND);
 
     vsnprintf(buf, sizeof(buf) - 1, fmt, args);
     len = strlen(buf);
