@@ -222,7 +222,7 @@ void AudioFile::create(const char *name, info_t& myinfo, timeout_t framing)
         ext = ".none";
 
     mode = modeWrite;
-    fs.open(name, fsys::ACCESS_STREAM, 0660);
+    fs.open(name, 0660, fsys::ACCESS_STREAM);
     if(!is(fs))
         return;
 
