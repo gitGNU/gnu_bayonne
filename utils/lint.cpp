@@ -95,7 +95,7 @@ PROGRAM_MAIN(argc, argv)
     Script::assign(keywords);
 
     String::set(buffer, sizeof(buffer), Env::env("definitions"));
-    dir::open(dir, buffer);
+    dir.open(buffer);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot compile definitions from %s", buffer);
@@ -104,7 +104,7 @@ PROGRAM_MAIN(argc, argv)
         len = strlen(buffer);
         buffer[len++] = '/';
 
-        while(is(dir) && dir::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+        while(is(dir) && dir.read(buffer + len, sizeof(buffer) - len) > 0) {
             char *ep = strrchr(buffer + len, '.');
             if(!ep)
                 continue;
@@ -113,11 +113,10 @@ PROGRAM_MAIN(argc, argv)
             shell::log(shell::INFO, "compiling %s", buffer + len);
             lib = Script::compile(lib, buffer, NULL);
         }
-        dir::close(dir);
     }
 
     String::set(buffer, sizeof(buffer), Env::env("modules"));
-    dir::open(dir, buffer);
+    dir.open(buffer);
 
     if(!is(dir))
         shell::log(shell::ERR, "cannot use module definitions from %s", buffer);
@@ -126,7 +125,7 @@ PROGRAM_MAIN(argc, argv)
         len = strlen(buffer);
         buffer[len++] = '/';
 
-        while(is(dir) && dir::read(dir, buffer + len, sizeof(buffer) - len) > 0) {
+        while(is(dir) && dir.read(buffer + len, sizeof(buffer) - len) > 0) {
             char *ep = strrchr(buffer + len, '.');
             if(!ep)
                 continue;
@@ -135,8 +134,9 @@ PROGRAM_MAIN(argc, argv)
             shell::log(shell::INFO, "module %s", buffer + len);
             lib = Script::compile(lib, buffer, NULL);
         }
-        dir::close(dir);
     }
+
+    dir.close();
 
     if(lib)
         ep = lib->getListing();

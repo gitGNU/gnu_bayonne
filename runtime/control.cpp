@@ -318,7 +318,7 @@ void Control::log(const char *fmt, ...)
 
     va_start(args, fmt);
 
-    fsys::open(log, env("logfile"), fsys::GROUP_PRIVATE, fsys::APPEND);
+    log.open(env("logfile"), fsys::GROUP_PRIVATE, fsys::APPEND);
 
     vsnprintf(buf, sizeof(buf) - 1, fmt, args);
     len = strlen(buf);
@@ -326,8 +326,8 @@ void Control::log(const char *fmt, ...)
         buf[len++] = '\n';
 
     if(is(log)) {
-        fsys::write(log, buf, strlen(buf));
-        fsys::close(log);
+        log.write(buf, strlen(buf));
+        log.close();
     }
     cp = strchr(buf, '\n');
     if(cp)

@@ -558,7 +558,7 @@ initial:
             }
         }
 
-        String::trim(buffer, " \t\r\n");
+        buffer.trim(" \t\r\n");
 
         // if empty line or comment, continue...
         if(isend(*buffer))
