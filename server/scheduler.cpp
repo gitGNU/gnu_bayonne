@@ -162,7 +162,7 @@ void Scheduler::load(Script *image, const char *path)
     assert(image != NULL && path != NULL && *path != 0);
 
     stringbuf<512> buffer;
-    charfile sf(path, "r");
+    file_t sf(path, "r");
     char *group, *event, *token, *script;
     char *tokens;
     Scheduler *entry;

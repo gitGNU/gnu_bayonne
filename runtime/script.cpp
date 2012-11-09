@@ -432,7 +432,7 @@ Script *Script::compile(Script *merge, const char *fn, Script *cfg)
     stringbuf<512> buffer;
     char localname[128];
     Script *img;
-    charfile cf(fn, "r");
+    file_t cf(fn, "r");
     header *scr = NULL;
     const char *name = "_init_";
     Script::event *current;

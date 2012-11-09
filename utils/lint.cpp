@@ -58,7 +58,7 @@ PROGRAM_MAIN(argc, argv)
     char buffer[256];
     const char *ext;
     size_t len;
-    dirsys_t dir;
+    dir_t dir;
 
     shell::bind("baylint");
     shell args(argc, argv);

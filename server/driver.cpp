@@ -97,7 +97,7 @@ Script *Driver::load(void)
 {
     char dirpath[256];
     size_t len;
-    dirsys_t dir;
+    dir_t dir;
     Script *img = NULL;
 
     String::set(dirpath, sizeof(dirpath), env("scripts"));
@@ -135,7 +135,7 @@ void Driver::compile(void)
 {
     char dirpath[256];
     size_t len;
-    dirsys_t dir;
+    dir_t dir;
 
     String::set(dirpath, sizeof(dirpath), env("definitions"));
     dir::open(dir, dirpath);
