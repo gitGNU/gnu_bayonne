@@ -176,7 +176,7 @@ void Scheduler::load(Script *image, const char *path)
 
     shell::debug(2, "loading schedule from %s", path);
 
-    while(sf.readline(buffer)) {
+    while(sf.getline(buffer)) {
         year = day = month = fdow = ldow = 0;
         hours = false;
         start = 0;

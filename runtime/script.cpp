@@ -522,7 +522,7 @@ initial:
     if(!img->first)
         img->first = scr;
 
-    while(when || label || define || cf.readline(buffer)) {
+    while(when || label || define || cf.getline(buffer)) {
         if(define) {
             indented = true;
             goto parse;
