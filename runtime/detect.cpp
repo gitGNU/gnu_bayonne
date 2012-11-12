@@ -96,7 +96,7 @@ DTMFDetect::DTMFDetect()
     static float fax_freq = 1100.0;
 
     state = (dtmf_detect_state_t *)malloc(sizeof(dtmf_detect_state_t));
-    memset(state, 0, sizeof(state));
+    memset(state, 0, sizeof(dtmf_detect_state_t));
 
     for(i = 0; i < 4; i++)
     {

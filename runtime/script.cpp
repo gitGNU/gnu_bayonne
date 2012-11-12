@@ -497,13 +497,15 @@ initial:
     }
     else {
         scr = (header *)img->alloc(sizeof(header));
-        memset(scr, 0, sizeof(header));
         scr->name = img->dup(name);
         scr->file = img->dup(img->filename);
         scr->events = NULL;
         scr->first = NULL;
         scr->resmask = 0;
         scr->scoped = NULL;
+        scr->methods = NULL;
+        scr->link(NULL);
+
         ep = (char *)strrchr(scr->file, '.');
         if(ep)
             *ep = 0;
@@ -616,7 +618,7 @@ initial:
                 prior = current;
 
             last = NULL;
-            memset(current, 0, sizeof(event));
+
             if(*token == '^')
                 current->enlist(&scr->events);
             else

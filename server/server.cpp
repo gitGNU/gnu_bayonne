@@ -271,7 +271,7 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     paths = Driver::getSystem();
     if(paths) {
         cp = paths->get("concurrency");
-        if(cp && *cp && !is(concurrency));
+        if(cp && *cp && !is(concurrency))
             concurrency.set(atol(cp));
 
         cp = paths->get("priority");
