@@ -181,7 +181,7 @@ public:
          * @param scr header to link with.
          */
         inline void link(header *scr)
-            {next = scr;};
+            {Next = scr;};
     };
 
     /**

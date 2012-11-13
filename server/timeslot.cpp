@@ -105,7 +105,7 @@ Timeslot *Timeslot::get(long cid)
     while(ts != NULL) {
         if(ts->callid == cid)
             break;
-        ts = (Timeslot *)ts->next;
+        ts = (Timeslot *)ts->Next;
     }
     mlocker.release();
     return ts;
