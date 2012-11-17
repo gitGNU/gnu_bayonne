@@ -19,6 +19,10 @@
 #pragma GCC diagnostic ignored "-Wvariadic-macros"
 #undef  HAVE_CONFIG_H
 
+#ifdef  WIN32
+#undef  alloca
+#endif
+
 #include <eXosip2/eXosip.h>
 
 #if defined(EXOSIP_OPT_BASE_OPTION) && !defined(EXOSIP_OPT_DONT_SEND_101)

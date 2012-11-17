@@ -23,6 +23,7 @@ static unsigned active_count = 0;
 static unsigned startup_count = 0;
 static unsigned shutdown_count = 0;
 
+#if 0
 static char *remove_quotes(char *c)
 {
     assert(c != NULL);
@@ -40,6 +41,7 @@ static char *remove_quotes(char *c)
     *(--d) = 0;
     return o;
 }
+#endif
 
 thread::thread(size_t size) : DetachedThread(size)
 {
