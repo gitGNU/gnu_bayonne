@@ -71,7 +71,7 @@ void writeTones(char **argv, bool append)
     Tonegen *tone;
     AudioStream output;
     Audio::info_t info, make;
-    const char *target;
+    const char *target = NULL;
     unsigned maxframes;
     Audio::linear_t buffer;
     char *filename = (char *)"tones.conf";
@@ -82,7 +82,7 @@ void writeTones(char **argv, bool append)
     if(*argv)
         target = *(argv++);
 
-    if(!*argv) {
+    if(!target) {
         shell::errexit(3, "*** tonetool: %s\n",
             _TEXT("no tone spec to use"));
     }
