@@ -15,7 +15,7 @@ INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckFunctionExists)
 INCLUDE(CheckLibraryExists)
 
-set (VERSION 2.99.1)
+set (VERSION 2.99.2)
 
 set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
