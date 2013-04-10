@@ -88,7 +88,7 @@ const char *Scheduler::select(Script *image, const char *group, const char *even
     const char *selected_event = NULL;
     const char *selected_script = NULL;
     unsigned selected_year = 0, selected_month = 0;
-    bool selected_dow[8];
+    bool selected_dow[8] = {false, false, false, false, false, false, false, false};
 
     while(is(sp)) {
         // if outside of time range, we skip...
@@ -163,7 +163,7 @@ void Scheduler::load(Script *image, const char *path)
 
     stringbuf<512> buffer;
     file_t sf(path, "r");
-    char *group, *event, *token, *script;
+    char *group, *event = NULL, *token, *script;
     char *tokens;
     Scheduler *entry;
     unsigned year, day, month, fdow, ldow, start, end;
@@ -183,7 +183,7 @@ void Scheduler::load(Script *image, const char *path)
         end = (24 * 60) - 1;
         script = tokens = NULL;
         group = String::token(buffer.c_mem(), &tokens, " \t", "{}\'\'\"\"");
-        if(!group || !event)
+        if(!group)
             continue;
 
         if(*group == '#')
