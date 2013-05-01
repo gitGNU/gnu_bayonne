@@ -11,8 +11,20 @@ config.log
 config.status
 configure.lineno
 libtool
+bayonne-config.h
 test/bayonneScript
+sipwitch/bayonne-sipwitch
+utils/audiotool
+utils/baylint
+utils/bayonne
+utils/phrasebook
+utils/tonetool
 stamp*
+*.obj
+*.lib
+*.exe
+*.mll
+*.dll
 *.m4
 *.a
 *.o
@@ -26,5 +38,6 @@ stamp*
 *.libs
 *.pc
 *.spec
+*.cbp
 *~
 

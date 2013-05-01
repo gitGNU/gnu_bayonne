@@ -396,14 +396,17 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
 
     if(grp) {
         umask(007);
-        setgid(grp->gr_gid);
+        if(setgid(grp->gr_gid))
+            shell::error("%d: %s", grp->gr_gid, _TEXT("cannot set group id"));
     }
 
     int uid = 0;
     if(pwd) {
         umask(007);
-        if(!grp)
-            setgid(pwd->pw_gid);
+        if(!grp) {
+            if(setgid(pwd->pw_gid))
+                shell::error("%d: %s", pwd->pw_gid, _TEXT("cannot set users group"));
+        }
         uid = pwd->pw_uid;
     }
 
@@ -442,7 +445,8 @@ void server::start(int argc, char **argv, shell::mainproc_t svc)
     // drop root privilege
 #ifdef  HAVE_PWD_H
     if(uid)
-        setuid(uid);
+        if(setuid(uid))
+            shell::error("%d: %s", uid, _TEXT("cannot drop root"));
 #endif
 
     if(is(restart))
