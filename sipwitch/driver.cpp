@@ -92,6 +92,9 @@ int driver::start(void)
 
     const char *addr = iface;
 
+    ortp_init();
+    ortp_scheduler_init();
+
     eXosip_init(EXOSIP_CONTEXT);
 #ifdef  AF_INET6
     if(family == AF_INET6) {
@@ -165,6 +168,7 @@ int driver::start(void)
 void driver::stop(void)
 {
     eXosip_quit(EXOSIP_CONTEXT);
+    ortp_exit();
     thread::shutdown();
 
     unsigned index = 0;

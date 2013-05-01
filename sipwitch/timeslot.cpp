@@ -21,4 +21,14 @@ using namespace BAYONNE_NAMESPACE;
 timeslot::timeslot(const char *addr, unsigned short port, int family) :
 Timeslot()
 {
+	session = NULL;
+}
+
+void timeslot::shutdown(void)
+{
+	if(session) {
+		rtp_session_destroy(session);
+		session = NULL;
+	}
+	Timeslot::shutdown();
 }

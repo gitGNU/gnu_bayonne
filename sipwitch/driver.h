@@ -24,6 +24,7 @@
 #endif
 
 #include <eXosip2/eXosip.h>
+#include <ortp/ortp.h>
 
 #if defined(EXOSIP_OPT_BASE_OPTION) && !defined(EXOSIP_OPT_DONT_SEND_101)
 #define EXOSIP_API4
@@ -117,6 +118,11 @@ public:
 
 class __LOCAL timeslot : public Timeslot
 {
+private:
+    RtpSession *session;
+
+    virtual void shutdown(void);
+
 public:
     timeslot(const char *addr, unsigned short port, int family);
 };
