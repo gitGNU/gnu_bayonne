@@ -22,6 +22,8 @@ using namespace BAYONNE_NAMESPACE;
 eXosip_t *driver::context = NULL;
 #endif
 
+static  SessionSet *rset, *tset;
+
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
@@ -94,6 +96,12 @@ int driver::start(void)
 
     ortp_init();
     ortp_scheduler_init();
+
+    ortp_set_log_level_mask(ORTP_WARNING|ORTP_ERROR);
+    ortp_set_log_file(stdout);
+
+    rset = session_set_new();
+    tset = session_set_new();
 
     eXosip_init(EXOSIP_CONTEXT);
 #ifdef  AF_INET6
@@ -168,7 +176,6 @@ int driver::start(void)
 void driver::stop(void)
 {
     eXosip_quit(EXOSIP_CONTEXT);
-    ortp_exit();
     thread::shutdown();
 
     unsigned index = 0;
@@ -176,6 +183,10 @@ void driver::stop(void)
         Timeslot *ts = tsIndex[index++];
         ts->shutdown();
     }
+
+    session_set_destroy(rset);
+    session_set_destroy(tset);
+    ortp_exit();
 }
 
 void driver::automatic(void)
