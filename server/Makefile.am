@@ -16,5 +16,5 @@ noinst_LIBRARIES = libserver.a
 noinst_HEADERS = server.h
 
 libserver_a_SOURCES = server.cpp driver.cpp timeslot.cpp message.cpp \
-	scheduler.cpp signals.cpp group.cpp rtp.cpp
+	scheduler.cpp signals.cpp group.cpp
 

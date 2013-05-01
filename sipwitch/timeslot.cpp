@@ -19,6 +19,6 @@ using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
 timeslot::timeslot(const char *addr, unsigned short port, int family) :
-RTPTimeslot(addr, port, family)
+Timeslot()
 {
 }

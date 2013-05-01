@@ -24,8 +24,6 @@
 #define DEBUG2  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 1)))
 #define DEBUG3  (shell::loglevel_t(((unsigned)shell::DEBUG0 + 2)))
 
-#define RTP_BUFFER_SIZE 3
-
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
@@ -530,37 +528,6 @@ public:
     static Timeslot *get(long cid);
 
     static unsigned available(void);
-};
-
-class RTPTimeslot : public Timeslot, public JoinableThread
-{
-protected:
-    struct sockaddr_storage rtp_contact;
-    socklen_t rtp_addrlen;
-    char rtp_sending[12 + 480];         // sending header, recast internally
-    char rtp_rfc2833[12 + 24];          // for sending rfc2833 packets...
-    char rtp_receive[RTP_BUFFER_SIZE][480 + 72];
-    socket_t rtp, rtcp;
-    timeout_t rtp_slice;
-    long rtp_samples;
-    int rtp_family, rtp_priority;
-    unsigned rtp_port;
-    const char *rtp_address;
-    uint32_t prior_rfc2833;             // last dtmf timestamp....
-
-    RTPTimeslot(const char *address, unsigned short port, int family);
-
-    void send(void *address, size_t len);
-
-    void create2833(unsigned event);    // create 2833 event...
-
-    void send2833(bool end = false);    // send 2833 event...
-
-    void run(void);
-
-    void startup(void);
-
-    void shutdown(void);
 };
 
 class Scheduler : public LinkedObject

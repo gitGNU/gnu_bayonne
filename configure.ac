@@ -216,6 +216,16 @@ PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
     ])
 ])
 
+PKG_CHECK_MODULES(ORTP, ortp >= 0.20.0,
+    [has_ortp="yes"], [has_ortp="no"])
+
+if test x"$has_ortp" = "xyes" ; then
+    ORTP_FLAGS="$ORTP_CFLAGS"
+    ORTP_LIBS="$ORTP_LIBS"
+    if test x"$has_eXosip2" = "xyes" ; then
+        BUILD_SUBDIRS="$BUILD_SUBDIRS sipwitch" ; fi
+fi
+
 if test x"$has_eXosip2" = "xyes" ; then
     PKG_CHECK_MODULES(LIBOSIP2, libosip2 >= 3.0.0)
     AC_DEFINE(OSIP2_LIST_PTR, [&], [define pointer mode])
@@ -315,6 +325,8 @@ AC_SUBST(BAYONNE_FLAGS)
 AC_SUBST(BAYONNE_LIBS)
 AC_SUBST(EXOSIP2_LIBS)
 AC_SUBST(EXOSIP2_FLAGS)
+AC_SUBST(ORTP_LIBS)
+AC_SUBST(ORTP_FLAGS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)

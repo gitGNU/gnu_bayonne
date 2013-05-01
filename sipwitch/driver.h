@@ -115,7 +115,7 @@ public:
     static void shutdown();
 };
 
-class __LOCAL timeslot : public RTPTimeslot
+class __LOCAL timeslot : public Timeslot
 {
 public:
     timeslot(const char *addr, unsigned short port, int family);
