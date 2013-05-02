@@ -139,7 +139,7 @@ int driver::start(void)
     if(!threads)
         ++threads;
     while(threads--) {
-        thread *t = new thread(stack * 1024l);
+        thread *t = new thread(context, stack * 1024l);
         t->start(priority);
     }
 

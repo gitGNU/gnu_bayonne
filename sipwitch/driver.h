@@ -35,13 +35,14 @@
 #define OPTION_CONTEXT  driver::context,
 #define EXOSIP_LOCK     eXosip_lock(driver::context);
 #define EXOSIP_UNLOCK   eXosip_unlock(driver::context);
+typedef eXosip_t        *eXosip_context_t;
 #else
 #define EXOSIP_CONTEXT
 #define OPTION_CONTEXT
 #define EXOSIP_LOCK     eXosip_lock();
 #define EXOSIP_UNLOCK   eXosip_unlock();
+typedef char            *eXosip_context_t;
 #endif
-
 
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"
@@ -86,13 +87,14 @@ class __LOCAL thread : public DetachedThread
 {
 private:
     unsigned instance;
-    eXosip_event_t *sevent;
-    registry *reg;
+    eXosip_context_t    context;
+    eXosip_event_t      *sevent;
+    registry    *reg;
 
     void run(void);
 
 public:
-    thread(size_t size);
+    thread(eXosip_context_t source, size_t size);
 
     static void shutdown();
 };
@@ -126,7 +128,6 @@ public:
     static void release(timeslot *ts);
 };
 
-
 class driver : public Driver
 {
 public:
@@ -139,7 +140,9 @@ public:
     void automatic(void);
 
 #ifdef  EXOSIP_API4
-    static eXosip_t *context;
+    static eXosip_context_t context;
+#else
+    static eXosip_context_t context;
 #endif
 
     static registry *locate(int rid);
