@@ -19,7 +19,7 @@ using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
 #ifdef  EXOSIP_API4
-eXosip_t *driver::context = NULL;
+osip_context_t driver::context = NULL;
 #endif
 
 driver::driver() : Driver("sip", "registry")

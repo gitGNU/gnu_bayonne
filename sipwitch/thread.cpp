@@ -43,7 +43,7 @@ static char *remove_quotes(char *c)
 }
 #endif
 
-thread::thread(eXosip_context_t source, size_t size) : DetachedThread(size)
+thread::thread(osip_context_t source, size_t size) : DetachedThread(size)
 {
     context = source;
 }
