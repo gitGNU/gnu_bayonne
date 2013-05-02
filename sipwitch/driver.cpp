@@ -41,7 +41,7 @@ int driver::start(void)
     int family = AF_INET;
     int tlsmode = 0;
     size_t stack = 0;
-    unsigned priority = 0;
+    unsigned priority = 0, mpri = 1;
 
     if(keys)
         cp = keys->get("port");
@@ -62,6 +62,11 @@ int driver::start(void)
         cp = keys->get("priority");
     if(cp)
         priority = atoi(cp);
+
+    if(keys)
+        cp = keys->get("media");
+    if(cp)
+        mpri = atoi(cp);
 
     if(keys)
         iface = keys->get("interface");
@@ -126,6 +131,10 @@ int driver::start(void)
         cp = keys->get("threads");
     if(cp)
         threads = atoi(cp);
+
+    // create only one media thread for now...
+    media *m = new media(stack * 1024l);
+    m->start(mpri);
 
     if(!threads)
         ++threads;

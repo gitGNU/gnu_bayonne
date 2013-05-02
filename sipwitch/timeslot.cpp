@@ -26,9 +26,6 @@ Timeslot()
 
 void timeslot::shutdown(void)
 {
-	if(session) {
-		rtp_session_destroy(session);
-		session = NULL;
-	}
+	media::release(this);
 	Timeslot::shutdown();
 }

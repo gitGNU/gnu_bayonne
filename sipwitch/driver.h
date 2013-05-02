@@ -82,41 +82,6 @@ public:
     void shutdown(void);
 };
 
-class driver : public Driver
-{
-public:
-    driver();
-
-    int start(void);
-
-    void stop(void);
-
-    void automatic(void);
-
-#ifdef  EXOSIP_API4
-    static eXosip_t *context;
-#endif
-
-    static registry *locate(int rid);
-
-};
-
-class __LOCAL media : public DetachedThread
-{
-private:
-    SessionSet *waiting;
-    unsigned sessions;
-    unsigned instance;
-    int events;
-
-    void run(void);
-
-public:
-    media(size_t size);
-
-    static void shutdown();
-};
-
 class __LOCAL thread : public DetachedThread
 {
 private:
@@ -135,12 +100,50 @@ public:
 class __LOCAL timeslot : public Timeslot
 {
 private:
-    RtpSession *session;
-
     virtual void shutdown(void);
 
 public:
+    RtpSession *session;
+
     timeslot(const char *addr, unsigned short port, int family);
+};
+
+class __LOCAL media : public DetachedThread
+{
+private:
+    SessionSet *waiting, *pending;
+    unsigned sessions;
+    int events;
+    Mutex lock;
+
+    void run(void);
+
+public:
+    media(size_t size);
+
+    static void shutdown();
+    static void attach(timeslot *ts, const char *host, unsigned port);
+    static void release(timeslot *ts);
+};
+
+
+class driver : public Driver
+{
+public:
+    driver();
+
+    int start(void);
+
+    void stop(void);
+
+    void automatic(void);
+
+#ifdef  EXOSIP_API4
+    static eXosip_t *context;
+#endif
+
+    static registry *locate(int rid);
+
 };
 
 END_NAMESPACE
