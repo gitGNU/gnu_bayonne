@@ -31,21 +31,21 @@
 #endif
 
 #ifdef  EXOSIP_API4
-typedef eXosip_t    *osip_context_t;
-inline  void osip_lock(osip_context_t ctx) {eXosip_lock(ctx);}
-inline  void osip_release(osip_context_t ctx) {eXosip_unlock(ctx);}
+typedef eXosip_t    *sip_context_t;
+inline  void sip_lock(sip_context_t ctx) {eXosip_lock(ctx);}
+inline  void sip_release(sip_context_t ctx) {eXosip_unlock(ctx);}
 #else
-typedef void        *osip_context_t;
-inline  void osip_lock(osip_context_t ctx) {eXosip_lock();}
-inline  void osip_release(osip_context_t ctx) {eXosip_unlock();}
+typedef void        *sip_context_t;
+inline  void sip_lock(sip_context_t ctx) {eXosip_lock();}
+inline  void sip_release(sip_context_t ctx) {eXosip_unlock();}
 #endif
-typedef eXosip_event_t  *osip_event_t;
+typedef eXosip_event_t  *sip_event_t;
 
 #ifdef  EXOSIP_API4
-#define EXOSIP_CONTEXT  driver::context
-#define OPTION_CONTEXT  driver::context,
-#define EXOSIP_LOCK     eXosip_lock(driver::context);
-#define EXOSIP_UNLOCK   eXosip_unlock(driver::context);
+#define EXOSIP_CONTEXT  driver::out_context
+#define OPTION_CONTEXT  driver::out_context,
+#define EXOSIP_LOCK     eXosip_lock(driver::out_context);
+#define EXOSIP_UNLOCK   eXosip_unlock(driver::out_context);
 #else
 #define EXOSIP_CONTEXT
 #define OPTION_CONTEXT
@@ -96,14 +96,14 @@ class __LOCAL thread : public DetachedThread
 {
 private:
     unsigned instance;
-    osip_context_t    context;
-    osip_event_t      sevent;
+    sip_context_t    context;
+    sip_event_t      sevent;
     registry    *reg;
 
     void run(void);
 
 public:
-    thread(osip_context_t source, size_t size);
+    thread(sip_context_t source, size_t size);
 
     static void shutdown();
 };
@@ -148,11 +148,9 @@ public:
 
     void automatic(void);
 
-#ifdef  EXOSIP_API4
-    static osip_context_t context;
-#else
-    static osip_context_t context;
-#endif
+    static sip_context_t out_context;   // default output context
+    static sip_context_t udp_context;
+    static sip_context_t tcp_context;
 
     static registry *locate(int rid);
 

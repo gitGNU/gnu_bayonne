@@ -18,22 +18,26 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-osip_context_t driver::context = NULL;
+sip_context_t driver::tcp_context = NULL;
+sip_context_t driver::udp_context = NULL;
+sip_context_t driver::out_context = NULL;
 
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
 
 #ifdef  EXOSIP_API4
-    context = eXosip_malloc();
+    udp_context = eXosip_malloc();
+    tcp_context = eXosip_malloc();
 #endif
+    out_context = udp_context;
 }
 
 int driver::start(void)
 {
     linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
-    unsigned port = 5060, expires = 300, threads = 0, timeslots = 16;
+    unsigned port = 5060, expires = 300, timeslots = 16;
     unsigned rtp = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
@@ -43,31 +47,47 @@ int driver::start(void)
 
     if(keys)
         cp = keys->get("port");
+    else
+        cp = NULL;
+
     if(cp)
         port = atoi(cp);
 
     if(keys)
         cp = keys->get("expires");
+    else
+        cp = NULL;
+
     if(cp)
         expires = atoi(cp);
 
     if(keys)
         cp = keys->get("stack");
+    else
+        cp = NULL;
+
     if(cp)
         stack = atoi(cp);
 
     if(keys)
         cp = keys->get("priority");
+    else
+        cp = NULL;
+
     if(cp)
         priority = atoi(cp);
 
     if(keys)
         cp = keys->get("media");
+    else
+        cp = NULL;
+
     if(cp)
         mpri = atoi(cp);
 
     if(keys)
         iface = keys->get("interface");
+
     if(iface) {
 #ifdef  AF_INET6
         if(strchr(iface, ':'))
@@ -81,11 +101,15 @@ int driver::start(void)
         transport = keys->get("transport");
     if(transport && eq(transport, "tcp")) {
         protocol = IPPROTO_TCP;
+        out_context = tcp_context;
     }
+/*
     else if(transport && eq(transport, "tls")) {
         protocol = IPPROTO_TCP;
+        out_context = tls_context;
         tlsmode = 1;
     }
+*/
 
     if(keys)
         agent = keys->get("agent");
@@ -101,7 +125,13 @@ int driver::start(void)
     ortp_set_log_level_mask(ORTP_WARNING|ORTP_ERROR);
     ortp_set_log_file(stdout);
 
-    eXosip_init(EXOSIP_CONTEXT);
+#ifdef  EXOSIP_API4
+    eXosip_init(tcp_context);
+    eXosip_init(udp_context);
+#else
+    eXosip_init();
+#endif
+
 #ifdef  AF_INET6
     if(family == AF_INET6) {
         eXosip_enable_ipv6(1);
@@ -125,21 +155,21 @@ int driver::start(void)
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
     eXosip_set_user_agent(OPTION_CONTEXT agent);
 
-    if(keys)
-        cp = keys->get("threads");
-    if(cp)
-        threads = atoi(cp);
-
     // create only one media thread for now...
     media *m = new media(stack * 1024l);
     m->start(mpri);
 
-    if(!threads)
-        ++threads;
-    while(threads--) {
-        thread *t = new thread(context, stack * 1024l);
-        t->start(priority);
-    }
+    thread *t;
+
+#ifdef  EXOSIP_API4
+    t = new thread(udp_context, stack * 1024l);
+    t->start(priority);
+    t = new thread(tcp_context, stack * 1024l);
+    t->start(priority);
+#else
+    t = new thread(out_context, stack * 1024l);
+    t->start(priority);
+#endif
 
     if(is(kp)) {
         new registry(*kp, port, expires);
