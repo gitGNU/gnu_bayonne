@@ -15,5 +15,6 @@ LDADD = ../server/libserver.a ../runtime/libbayonne.la @ORTP_LIBS@ @EXOSIP2_LIBS
 sbin_PROGRAMS = bayonne-sipwitch
 noinst_HEADERS = driver.h
 
-bayonne_sipwitch_SOURCES = driver.cpp registry.cpp thread.cpp timeslot.cpp
+bayonne_sipwitch_SOURCES = driver.cpp registry.cpp timeslot.cpp \
+	thread.cpp media.cpp
 

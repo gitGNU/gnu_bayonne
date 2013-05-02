@@ -101,6 +101,22 @@ public:
 
 };
 
+class __LOCAL media : public DetachedThread
+{
+private:
+    SessionSet *waiting;
+    unsigned sessions;
+    unsigned instance;
+    int events;
+
+    void run(void);
+
+public:
+    media(size_t size);
+
+    static void shutdown();
+};
+
 class __LOCAL thread : public DetachedThread
 {
 private:
