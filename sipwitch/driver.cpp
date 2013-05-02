@@ -18,9 +18,7 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-#ifdef  EXOSIP_API4
 osip_context_t driver::context = NULL;
-#endif
 
 driver::driver() : Driver("sip", "registry")
 {
