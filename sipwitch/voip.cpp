@@ -421,8 +421,8 @@ void sip_send_dialog(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
     if(!msg)
         return;
 
-    eXosip_call_send_request(ctx, did, msg);
-    eXosip_unlock(ctx);
+    eXosip_call_send_request(did, msg);
+    eXosip_unlock();
 }
 
 void sip_default_action(sip_context_t ctx, sip_event_t ev)
