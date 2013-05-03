@@ -38,8 +38,9 @@ inline  void sip_release(sip_context_t ctx) {eXosip_unlock();}
 #endif
 
 typedef eXosip_event_t  *sip_event_t;
-typedef int sip_reg_t;
-typedef	int	sip_tran_t;
+typedef int sip_reg_t;		// registration id
+typedef	int	sip_tran_t;		// transaction id
+typedef	int sip_dlg_t;		// dialog id
 typedef	unsigned long sip_timeout_t;
 
 bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route = NULL);
