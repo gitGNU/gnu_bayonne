@@ -150,7 +150,7 @@ int driver::start(void)
         shell::log(shell::NOTIFY, "listening port %u for tcp", port);
 
 #else
-    if(!sip_listen(protocol, iface, port, family))
+    if(!sip_listen(out_context, protocol, iface, port, family))
         shell::log(shell::FAIL, "cannot listen port %u", port);
     else
         shell::log(shell::NOTIFY, "listening port %u", port);

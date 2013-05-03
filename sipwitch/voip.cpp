@@ -185,7 +185,7 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, i
     if(family == AF_INET6 && !addr)
         addr = "::0";
 
-    if(!ipv6 && family = AF_INET6) {
+    if(!ipv6 && family == AF_INET6) {
         eXosip_enable_ipv6(1);
         ipv6 = true;
     }
