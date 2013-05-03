@@ -22,7 +22,7 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_lock(ctx);
     eXosip_add_authentication_info(ctx, user, user, secret, NULL, realm);
     if(automatic)
-	eXosip_automatic_action(ctx);
+        eXosip_automatic_action(ctx);
     eXosip_unlock(ctx);
 }
 
@@ -32,14 +32,14 @@ sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char
     eXosip_lock(ctx);
     sip_reg_t rid = eXosip_register_build_initial_register(ctx, uri, s, c, exp, msg);
     if(!msg)
-	eXosip_unlock(ctx);
+        eXosip_unlock(ctx);
     return rid;
 }
 
 void sip_send_registration(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
 {
     if(!msg)
-	return;
+	    return;
     eXosip_register_send_register(c, r, msg);
     eXosip_unlock(c);
 }
@@ -51,8 +51,8 @@ bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
     eXosip_lock(ctx);
     eXosip_register_build_register(ctx, rid, 0, &msg);
     if(msg) {
-	eXosip_register_send_register(ctx, rid, msg);
-	rtn = true;
+        eXosip_register_send_register(ctx, rid, msg);
+        rtn = true;
     }
     eXosip_unlock(ctx);
     return rtn;
@@ -65,11 +65,51 @@ void sip_default_action(sip_context_t ctx, sip_event_t ev)
     eXosip_unlock(ctx);
 }
 
+void sip_automatic_action(sip_context_t ctx)
+{
+    eXosip_lock(ctx);
+    eXosip_automatic_action(ctx);
+    eXosip_unlock(ctx);
+}
+
 sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
 {
     unsigned s = timeout / 1000l;
     unsigned ms = timeout % 1000l;
     return eXosip_event_wait(ctx, s, ms);
+}
+
+bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, int family, bool tls)
+{
+    int tlsmode = 0;
+    static bool ipv6 = false;
+
+    if(!ctx)
+        return false;
+
+#ifdef  AF_INET6
+    if(family == AF_INET6 && !addr)
+        addr = "::0";
+
+    if(!ipv6 && family == AF_INET6) {
+        eXosip_enable_ipv6(1);
+        ipv6 = true;
+    }
+#endif
+    if(!addr)
+        addr = "*";
+
+    // port always even...
+    port = port & 0xfffe;
+    if(tls) {
+        tlsmode = 1;
+        ++port;	// tls always next odd port...
+    }
+
+    if(eXosip_listen_addr(ctx, proto, addr, port, family, tlsmode))
+        return false;
+
+    return true;
 }
 
 #else
@@ -79,7 +119,7 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_lock();
     eXosip_add_authentication_info(user, user, secret, NULL, realm);
     if(automatic)
-	eXosip_automatic_action();
+        eXosip_automatic_action();
     eXosip_unlock();
 }
 
@@ -89,14 +129,14 @@ sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char
     eXosip_lock();
     sip_reg_t rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
     if(!msg)
-	eXosip_unlock();
+        eXosip_unlock();
     return rid;
 }
 
 void sip_send_registration(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
 {
     if(!msg)
-	return;
+        return;
     eXosip_register_send_register(r, msg);
     eXosip_unlock();
 }
@@ -108,8 +148,8 @@ bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
     eXosip_lock();
     eXosip_register_build_register(rid, 0, &msg);
     if(msg) {
-	eXosip_register_send_register(rid, msg);
-	rtn = true;
+        eXosip_register_send_register(rid, msg);
+        rtn = true;
     }
     eXosip_unlock();
     return rtn;
@@ -122,6 +162,13 @@ void sip_default_action(sip_context_t ctx, sip_event_t ev)
     eXosip_unlock();
 }
 
+void sip_automatic_action(sip_context_t ctx)
+{
+    eXosip_lock();
+    eXosip_automatic_action();
+    eXosip_unlock();
+}
+
 sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
 {
     unsigned s = timeout / 1000l;
@@ -129,12 +176,42 @@ sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
     return eXosip_event_wait(s, ms);
 }
 
+bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, int family, bool tls)
+{
+    int tlsmode = 0;
+    static bool ipv6 = false;
+
+#ifdef  AF_INET6
+    if(family == AF_INET6 && !addr)
+        addr = "::0";
+
+    if(!ipv6 && family = AF_INET6) {
+        eXosip_enable_ipv6(1);
+        ipv6 = true;
+    }
+#endif
+    if(!addr)
+        addr = "*";
+
+    // port always even...
+    port = port & 0xfffe;
+    if(tls) {
+        tlsmode = 1;
+        ++port;	// tls always next odd port...
+    }
+
+    if(eXosip_listen_addr(proto, addr, port, family, tlsmode))
+        return false;
+
+    return true;
+}
+
 #endif
 
 void sip_release_event(sip_event_t ev)
 {
     if(ev)
-	eXosip_event_free(ev);
+        eXosip_event_free(ev);
 }
 
 

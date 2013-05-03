@@ -48,9 +48,12 @@ bool sip_release_registration(sip_context_t ctx, sip_reg_t rid);
 void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic = false);
 
 void sip_default_action(sip_context_t ctx, sip_event_t ev);
+void sip_automatic_action(sip_context_t ctx);
 
 sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout);
 void sip_release_event(sip_event_t ev);
+
+bool sip_listen(sip_context_t ctx, int proto = IPPROTO_UDP, const char *iface = NULL, unsigned port = 5060, int family = AF_INET, bool tls = false);
 
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"

@@ -41,7 +41,6 @@ int driver::start(void)
     unsigned rtp = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
-    int tlsmode = 0;
     size_t stack = 0;
     unsigned priority = 0, mpri = 1;
 
@@ -117,7 +116,7 @@ int driver::start(void)
     if(!agent)
         agent = "bayonne-" VERSION "/exosip2";
 
-    const char *addr = iface;
+    port = port & 0xfffe;
 
     ortp_init();
     ortp_scheduler_init();
@@ -132,16 +131,6 @@ int driver::start(void)
     eXosip_init();
 #endif
 
-#ifdef  AF_INET6
-    if(family == AF_INET6) {
-        eXosip_enable_ipv6(1);
-        if(!iface)
-            addr = "::0";
-    }
-#endif
-    if(!addr)
-        addr = "*";
-
 #if UCOMMON_ABI > 5
     Socket::query(family);
 #else
@@ -150,21 +139,21 @@ int driver::start(void)
 
 #ifdef  EXOSIP_API4
     shell::log(shell::DEBUG1, "default protocol %d", protocol);
-    if(eXosip_listen_addr(udp_context, IPPROTO_UDP, iface, port, family, 0))
-        shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
+    if(!sip_listen(udp_context, IPPROTO_UDP, iface, port, family))
+        shell::log(shell::FAIL, "cannot listen port %u for udp", port);
     else
-        shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+        shell::log(shell::NOTIFY, "listening port %u for udp", port);
 
-    if(eXosip_listen_addr(tcp_context, IPPROTO_TCP, iface, port, family, tlsmode))
-        shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
+    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, port, family))
+        shell::log(shell::FAIL, "cannot listen port %u for tcp", port);
     else
-        shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+        shell::log(shell::NOTIFY, "listening port %u for tcp", port);
 
 #else
-    if(eXosip_listen_addr(protocol, iface, port, family, tlsmode))
-        shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
+    if(!sip_listen(protocol, iface, port, family))
+        shell::log(shell::FAIL, "cannot listen port %u", port);
     else
-        shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+        shell::log(shell::NOTIFY, "listening port %u", port);
 #endif
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
@@ -238,13 +227,6 @@ void driver::stop(void)
     }
 
     media::shutdown();
-}
-
-void driver::automatic(void)
-{
-    EXOSIP_LOCK
-    eXosip_automatic_action(EXOSIP_CONTEXT);
-    EXOSIP_UNLOCK
 }
 
 registry *driver::locate(int rid)

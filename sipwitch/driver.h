@@ -117,8 +117,6 @@ public:
 
     void stop(void);
 
-    void automatic(void);
-
     static sip_context_t out_context;   // default output context
     static sip_context_t udp_context;
     static sip_context_t tcp_context;
