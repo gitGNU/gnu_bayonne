@@ -41,7 +41,7 @@ bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *met
     return true;
 }
 
-bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **msg)
+bool sip_create_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
 {
     *msg = NULL;
     eXosip_lock(ctx);
@@ -53,7 +53,7 @@ bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **
     return true;
 }
 
-void sip_send_answer(sip_context_t ctx, int tid, int status, osip_message *msg)
+void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
 {
     if(!msg)
         eXosip_lock(ctx);
@@ -175,7 +175,7 @@ bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *met
     return true;
 }
 
-bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **msg)
+bool sip_create_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
 {
     *msg = NULL;
     eXosip_lock();
@@ -187,7 +187,7 @@ bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **
     return true;
 }
 
-void sip_send_answer(sip_context_t ctx, int tid, int status, osip_message *msg)
+void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
 {
     if(!msg)
         eXosip_lock();

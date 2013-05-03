@@ -39,12 +39,13 @@ inline  void sip_release(sip_context_t ctx) {eXosip_unlock();}
 
 typedef eXosip_event_t  *sip_event_t;
 typedef int sip_reg_t;
+typedef	int	sip_tran_t;
 typedef	unsigned long sip_timeout_t;
 
 bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route = NULL);
-bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t *msg);
+bool sip_create_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg);
 void sip_send_request(sip_context_t ctx, osip_message_t *msg);
-void sip_send_answer(sip_context_t ctx, int tid, int status, osip_message_t *msg = NULL);
+void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
 
 sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg);
 void sip_send_registration(sip_context_t ctx, sip_reg_t rid, osip_message_t *msg);
