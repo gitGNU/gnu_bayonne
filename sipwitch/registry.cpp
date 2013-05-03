@@ -111,8 +111,7 @@ Registry(keyset)
         snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
-    rid = sip_create_registration(context, uri, server, contact, expires, &msg);
-    if(msg) {
+    if(-1 != (rid = make_registry_request(context, uri, server, contact, expires, &msg))) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
         osip_message_set_header(msg, "Allow-Events", "presence");
@@ -144,7 +143,7 @@ Registry(keyset)
             osip_message_set_header(msg, AUTHORIZATION, buffer);
         }
 
-        sip_send_registration(context, rid, msg);
+        send_registry_message(context, rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
     else {
@@ -185,6 +184,6 @@ void registry::shutdown(void)
     if(rid == -1)
         return;
 
-    if(sip_release_registration(context, rid))
+    if(sip_release_registry(context, rid))
         shell::debug(3, "released registry id %d from %s", rid, server);
 }
