@@ -38,7 +38,7 @@ inline  void sip_release(sip_context_t ctx) {eXosip_unlock();}
 #endif
 
 typedef eXosip_event_t  *sip_event_t;
-typedef unsigned sip_reg_t;
+typedef int sip_reg_t;
 typedef	unsigned long sip_timeout_t;
 
 sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg);

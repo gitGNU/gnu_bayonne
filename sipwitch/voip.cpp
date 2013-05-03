@@ -83,22 +83,22 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock();
 }
 
-int sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
+sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
 {
     *msg = NULL;
     eXosip_lock();
-    int rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
+    sip_reg_t rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
     if(!msg)
 	eXosip_unlock();
     return rid;
 }
 
-void sip_send_registration(sip_context_t c, unsigned r, osip_message_t *msg) 
+void sip_send_registration(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
 {
     if(!msg)
 	return;
-    eXosip_register_send_register(c, r, msg);
-    eXosip_unlock(msg);
+    eXosip_register_send_register(r, msg);
+    eXosip_unlock();
 }
 
 bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
