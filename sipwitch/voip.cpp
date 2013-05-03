@@ -29,6 +29,47 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock(ctx);
 }
 
+bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+{
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_message_build_request(ctx, msg, method, to, from, route);
+    if(!msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+    return true;
+}
+
+bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **msg)
+{
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_message_build_answer(ctx, tid, status, msg);
+    if(!msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+    return true;
+}
+
+void sip_send_answer(sip_context_t ctx, int tid, int status, osip_message *msg)
+{
+    if(!msg)
+        eXosip_lock(ctx);
+    eXosip_message_send_answer(ctx, tid, status, msg);
+    eXosip_unlock(ctx);
+}
+
+void sip_send_request(sip_context_t ctx, osip_message_t *msg)
+{
+    if(!msg)
+        return;
+
+    eXosip_message_send_request(ctx, msg);
+    eXosip_unlock(ctx);
+}
+
 sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
 {
     *msg = NULL;
@@ -119,6 +160,47 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_add_authentication_info(user, user, secret, NULL, realm);
     if(automatic)
         eXosip_automatic_action();
+    eXosip_unlock();
+}
+
+bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+{
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_message_build_request(msg, method, to, from, route);
+    if(!msg) {
+        eXosip_unlock();
+        return false;
+    }
+    return true;
+}
+
+bool sip_create_answer(sip_context_t ctx, int tid, int status, osip_message_t **msg)
+{
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_message_build_answer(tid, status, msg);
+    if(!msg) {
+        eXosip_unlock();
+        return false;
+    }
+    return true;
+}
+
+void sip_send_answer(sip_context_t ctx, int tid, int status, osip_message *msg)
+{
+    if(!msg)
+        eXosip_lock();
+    eXosip_message_send_answer(tid, status, msg);
+    eXosip_unlock();
+}
+
+void sip_send_request(sip_context_t ctx, osip_message_t *msg)
+{
+    if(!msg)
+        return;
+
+    eXosip_message_send_request(msg);
     eXosip_unlock();
 }
 
