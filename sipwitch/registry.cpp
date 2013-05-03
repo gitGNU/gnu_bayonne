@@ -30,6 +30,16 @@ Registry(keyset)
     if(!schema)
         schema = "sip";
 
+    context = driver::out_context;
+    if(eq_case(schema, "sipu") || eq_case("schema", "udp")) {
+        schema = "sip";
+        context = driver::udp_context;
+    }
+    else if(eq_case(schema, "sipt") || eq_case(schema, "tcp")) {
+        schema = "sip";
+        context = driver::tcp_context;
+    }
+
     if(cp)
         expires = atoi(cp);
     else
@@ -62,9 +72,9 @@ Registry(keyset)
     }
 
     if(secret && userid && realm) {
-        EXOSIP_LOCK
-        eXosip_add_authentication_info(OPTION_CONTEXT userid, userid, secret, NULL, realm);
-        EXOSIP_UNLOCK
+        sip_lock(context);
+        sip_add_authentication(context, userid, secret, realm);
+        sip_release(context);
     }
 
     unsigned port = 0;
@@ -104,8 +114,8 @@ Registry(keyset)
         snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
-    EXOSIP_LOCK
-    rid = eXosip_register_build_initial_register(OPTION_CONTEXT uri, server, contact, expires, &msg);
+    sip_lock(context);
+    rid = sip_create_registration(context, uri, server, contact, expires, &msg);
     if(msg) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
@@ -138,7 +148,7 @@ Registry(keyset)
             osip_message_set_header(msg, AUTHORIZATION, buffer);
         }
 
-        eXosip_register_send_register(OPTION_CONTEXT rid, msg);
+        sip_send_registration(context, rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
     else {
@@ -146,7 +156,7 @@ Registry(keyset)
         rid = -1;
     }
 
-    EXOSIP_UNLOCK
+    sip_release(context);
 }
 
 void registry::authenticate(const char *sip_realm)
