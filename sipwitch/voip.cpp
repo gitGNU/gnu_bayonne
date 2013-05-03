@@ -29,31 +29,37 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock(ctx);
 }
 
-bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+bool sip_create_message(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
 {
+    if(!msg)
+        return false;
+
     *msg = NULL;
     eXosip_lock(ctx);
     eXosip_message_build_request(ctx, msg, method, to, from, route);
-    if(!msg) {
+    if(!*msg) {
         eXosip_unlock(ctx);
         return false;
     }
     return true;
 }
 
-bool sip_create_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool sip_answer_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
 {
+    if(!msg)
+        return false;
+
     *msg = NULL;
     eXosip_lock(ctx);
     eXosip_message_build_answer(ctx, tid, status, msg);
-    if(!msg) {
+    if(!*msg) {
         eXosip_unlock(ctx);
         return false;
     }
     return true;
 }
 
-void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void sip_reply_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
 {
     if(!msg)
         eXosip_lock(ctx);
@@ -61,7 +67,30 @@ void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message
     eXosip_unlock(ctx);
 }
 
-void sip_send_request(sip_context_t ctx, osip_message_t *msg)
+bool sip_answer_invite(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_answer(ctx, tid, status, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+    return true;
+}
+
+void sip_reply_invite(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+{
+    if(!msg)
+        eXosip_lock(ctx);
+    eXosip_call_send_answer(ctx, tid, status, msg);
+    eXosip_unlock(ctx);
+}
+
+void sip_send_message(sip_context_t ctx, osip_message_t *msg)
 {
     if(!msg)
         return;
@@ -70,12 +99,76 @@ void sip_send_request(sip_context_t ctx, osip_message_t *msg)
     eXosip_unlock(ctx);
 }
 
+void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did)
+{
+    eXosip_lock(ctx);
+    eXosip_call_terminate(ctx, cid, did);
+    eXosip_unlock(ctx);
+}
+
+bool sip_create_dialog(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_request(ctx, did, method, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+
+    return true;
+}
+
+bool sip_create_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_notify(ctx, did, status, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+
+    return true;
+}
+
+bool sip_create_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_update(ctx, did, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+
+    return true;
+}
+
+void sip_send_dialog(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
+{
+    if(!msg)
+        return;
+
+    eXosip_call_send_request(ctx, did, msg);
+    eXosip_unlock(ctx);
+}
+
 sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
 {
     *msg = NULL;
     eXosip_lock(ctx);
     sip_reg_t rid = eXosip_register_build_initial_register(ctx, uri, s, c, exp, msg);
-    if(!msg)
+    if(!*msg)
         eXosip_unlock(ctx);
     return rid;
 }
@@ -163,31 +256,37 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock();
 }
 
-bool sip_create_request(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+bool sip_create_message(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
 {
+    if(!msg)
+        return false;
+
     *msg = NULL;
     eXosip_lock();
     eXosip_message_build_request(msg, method, to, from, route);
-    if(!msg) {
+    if(!*msg) {
         eXosip_unlock();
         return false;
     }
     return true;
 }
 
-bool sip_create_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool sip_answer_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
 {
+    if(!msg)
+        return false;
+
     *msg = NULL;
     eXosip_lock();
     eXosip_message_build_answer(tid, status, msg);
-    if(!msg) {
+    if(!*msg) {
         eXosip_unlock();
         return false;
     }
     return true;
 }
 
-void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void sip_reply_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
 {
     if(!msg)
         eXosip_lock();
@@ -195,7 +294,30 @@ void sip_send_answer(sip_context_t ctx, sip_tran_t tid, int status, osip_message
     eXosip_unlock();
 }
 
-void sip_send_request(sip_context_t ctx, osip_message_t *msg)
+bool sip_answer_invite(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_answer(tid, status, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+    return true;
+}
+
+void sip_reply_invite(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+{
+    if(!msg)
+        eXosip_lock();
+    eXosip_call_send_answer(tid, status, msg);
+    eXosip_unlock();
+}
+
+
+void sip_send_message(sip_context_t ctx, osip_message_t *msg)
 {
     if(!msg)
         return;
@@ -206,6 +328,9 @@ void sip_send_request(sip_context_t ctx, osip_message_t *msg)
 
 sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
 {
+    if(!msg)
+        return -1;
+
     *msg = NULL;
     eXosip_lock();
     sip_reg_t rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
@@ -234,6 +359,70 @@ bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
     }
     eXosip_unlock();
     return rtn;
+}
+
+void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did)
+{
+    eXosip_lock();
+    eXosip_call_terminate(cid, did);
+    eXosip_unlock();
+}
+
+bool sip_create_dialog(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_request(did, method, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+
+    return true;
+}
+
+bool sip_create_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_notify(did, status, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+
+    return true;
+}
+
+bool sip_create_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_update(did, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+
+    return true;
+}
+
+void sip_send_dialog(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
+{
+    if(!msg)
+        return;
+
+    eXosip_call_send_request(ctx, did, msg);
+    eXosip_unlock(ctx);
 }
 
 void sip_default_action(sip_context_t ctx, sip_event_t ev)

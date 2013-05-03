@@ -23,6 +23,10 @@ static unsigned startup_count = 0;
 static unsigned shutdown_count = 0;
 static media *instance;
 
+
+size_t media::buffer = 2048;
+unsigned media::jitter = RTP_DEFAULT_JITTER_TIME;
+
 media::media(size_t size) : DetachedThread(size)
 {
     waiting = session_set_new();
@@ -70,9 +74,14 @@ void media::attach(timeslot *ts, const char *host, unsigned port)
     
     rtp_session_set_remote_addr(s, host, port);
 
-    rtp_session_enable_adaptive_jitter_compensation(s, TRUE);
-    rtp_session_set_jitter_compensation(s, RTP_DEFAULT_JITTER_TIME);
-    rtp_session_set_recv_buf_size(s, 2000); // default is 64k...
+    if(jitter) {
+        rtp_session_enable_adaptive_jitter_compensation(s, TRUE);
+        rtp_session_set_jitter_compensation(s, jitter);
+    }
+    else
+        rtp_session_enable_adaptive_jitter_compensation(s, FALSE);
+
+    rtp_session_set_recv_buf_size(s, buffer); // default is 64k...
     rtp_session_set_connected_mode(s, TRUE);
 
     instance->lock.acquire();

@@ -79,6 +79,11 @@ public:
 class __LOCAL media : public DetachedThread
 {
 private:
+    friend class driver;
+
+    static unsigned jitter;
+    static size_t buffer;
+
     SessionSet *waiting, *pending;
     unsigned sessions;
     int events;

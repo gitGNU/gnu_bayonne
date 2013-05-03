@@ -38,7 +38,7 @@ int driver::start(void)
     linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
     unsigned port = 5060, expires = 300, timeslots = 16;
-    unsigned rtp = 0;
+    unsigned rtp_base = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
     size_t stack = 0;
@@ -51,6 +51,23 @@ int driver::start(void)
 
     if(cp)
         port = atoi(cp);
+
+    if(keys)
+        cp = keys->get("jitter");
+    else
+        cp = NULL;
+
+    if(cp)
+        media::jitter = atoi(cp);
+
+
+    if(keys)
+        cp = keys->get("buffer");
+    else
+        cp = NULL;
+
+    if(cp)
+        media::buffer = atoi(cp) * 1024l;
 
     if(keys)
         cp = keys->get("expires");
@@ -195,16 +212,16 @@ int driver::start(void)
     if(keys)
         cp = keys->get("rtp");
     if(cp)
-        rtp = atoi(cp);
+        rtp_base = atoi(cp);
 
-    if(!rtp)
-        rtp = ((port / 2) * 2) + 2;
+    if(!rtp_base)
+        rtp_base = ((port / 2) * 2) + 2;
 
     tsIndex = new Timeslot *[timeslots];
     while(timeslots--) {
-        timeslot *ts = new timeslot(iface, rtp, family);
+        timeslot *ts = new timeslot(iface, rtp_base, family);
         tsIndex[tsCount++] = (Timeslot *)ts;
-        rtp += 2;
+        rtp_base += 2;
     }
 
     return tsCount;
