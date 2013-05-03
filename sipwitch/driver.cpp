@@ -137,27 +137,28 @@ int driver::start(void)
     Socket::family(family);
 #endif
 
+    sip_setup(agent, family);
+
 #ifdef  EXOSIP_API4
     shell::log(shell::DEBUG1, "default protocol %d", protocol);
-    if(!sip_listen(udp_context, IPPROTO_UDP, iface, port, family))
+    if(!sip_listen(udp_context, IPPROTO_UDP, iface, port))
         shell::log(shell::FAIL, "cannot listen port %u for udp", port);
     else
         shell::log(shell::NOTIFY, "listening port %u for udp", port);
 
-    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, port, family))
+    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, port))
         shell::log(shell::FAIL, "cannot listen port %u for tcp", port);
     else
         shell::log(shell::NOTIFY, "listening port %u for tcp", port);
 
 #else
-    if(!sip_listen(out_context, protocol, iface, port, family))
+    if(!sip_listen(out_context, protocol, iface, port))
         shell::log(shell::FAIL, "cannot listen port %u", port);
     else
         shell::log(shell::NOTIFY, "listening port %u", port);
 #endif
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
-    eXosip_set_user_agent(OPTION_CONTEXT agent);
 
     // create only one media thread for now...
     media *m = new media(stack * 1024l);

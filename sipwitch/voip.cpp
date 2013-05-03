@@ -15,6 +15,9 @@
 
 #include "voip.h"
 
+static const char *agent = "eXosip";
+static int family = AF_INET;
+
 #ifdef	EXOSIP_API4
 
 void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
@@ -79,10 +82,9 @@ sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
     return eXosip_event_wait(ctx, s, ms);
 }
 
-bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, int family, bool tls)
+bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, bool tls)
 {
     int tlsmode = 0;
-    static bool ipv6 = false;
 
     if(!ctx)
         return false;
@@ -90,11 +92,6 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, i
 #ifdef  AF_INET6
     if(family == AF_INET6 && !addr)
         addr = "::0";
-
-    if(!ipv6 && family == AF_INET6) {
-        eXosip_enable_ipv6(1);
-        ipv6 = true;
-    }
 #endif
     if(!addr)
         addr = "*";
@@ -108,6 +105,8 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, i
 
     if(eXosip_listen_addr(ctx, proto, addr, port, family, tlsmode))
         return false;
+
+    eXosip_set_user_agent(ctx, agent);
 
     return true;
 }
@@ -176,19 +175,13 @@ sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
     return eXosip_event_wait(s, ms);
 }
 
-bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, int family, bool tls)
+bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, bool tls)
 {
     int tlsmode = 0;
-    static bool ipv6 = false;
 
 #ifdef  AF_INET6
     if(family == AF_INET6 && !addr)
         addr = "::0";
-
-    if(!ipv6 && family == AF_INET6) {
-        eXosip_enable_ipv6(1);
-        ipv6 = true;
-    }
 #endif
     if(!addr)
         addr = "*";
@@ -203,6 +196,7 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, i
     if(eXosip_listen_addr(proto, addr, port, family, tlsmode))
         return false;
 
+    eXosip_set_user_agent(agent);
     return true;
 }
 
@@ -214,4 +208,14 @@ void sip_release_event(sip_event_t ev)
         eXosip_event_free(ev);
 }
 
+void sip_setup(const char *a, int f)
+{
+    agent = a;
+    family = f;
+
+#ifdef  AF_INET6
+    if(family == AF_INET6)
+        eXosip_enable_ipv6(1);
+#endif
+}
 

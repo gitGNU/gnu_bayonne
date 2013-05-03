@@ -17,18 +17,6 @@
 #include <ucommon/secure.h>
 #include "voip.h"
 
-#ifdef  EXOSIP_API4
-#define EXOSIP_CONTEXT  driver::out_context
-#define OPTION_CONTEXT  driver::out_context,
-#define EXOSIP_LOCK     eXosip_lock(driver::out_context);
-#define EXOSIP_UNLOCK   eXosip_unlock(driver::out_context);
-#else
-#define EXOSIP_CONTEXT
-#define OPTION_CONTEXT
-#define EXOSIP_LOCK     eXosip_lock();
-#define EXOSIP_UNLOCK   eXosip_unlock();
-#endif
-
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
