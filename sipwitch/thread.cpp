@@ -116,7 +116,6 @@ void thread::shutdown(void)
     shutdown_flag = true;
     while(active_count)
         Thread::sleep(50);
-    eXosip_quit(EXOSIP_CONTEXT);
     while(shutdown_count < startup_count)
         Thread::sleep(50);
 }

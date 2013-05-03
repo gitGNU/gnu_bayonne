@@ -147,10 +147,25 @@ int driver::start(void)
 #else
     Socket::family(family);
 #endif
-    if(eXosip_listen_addr(OPTION_CONTEXT protocol, iface, port, family, tlsmode))
+
+#ifdef  EXOSIP_API4
+    shell::log(shell::DEBUG1, "default protocol %d", protocol);
+    if(eXosip_listen_addr(udp_context, IPPROTO_UDP, iface, port, family, 0))
         shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
     else
         shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+
+    if(eXosip_listen_addr(tcp_context, IPPROTO_TCP, iface, port, family, tlsmode))
+        shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
+    else
+        shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+
+#else
+    if(eXosip_listen_addr(protocol, iface, port, family, tlsmode))
+        shell::log(shell::FAIL, "driver cannot bind %s, port=%d", addr, port);
+    else
+        shell::log(shell::NOTIFY, "driver binding %s, port=%d", addr, port);
+#endif
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
     eXosip_set_user_agent(OPTION_CONTEXT agent);
@@ -207,7 +222,13 @@ int driver::start(void)
 
 void driver::stop(void)
 {
-    eXosip_quit(EXOSIP_CONTEXT);
+#ifdef  EXOSIP_API4
+    eXosip_quit(tcp_context);
+    eXosip_quit(udp_context);
+#else
+    eXosip_quit();
+#endif
+
     thread::shutdown();
 
     unsigned index = 0;
