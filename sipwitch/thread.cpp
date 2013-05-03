@@ -55,7 +55,7 @@ void thread::run(void)
 
     for(;;) {
         if(!shutdown_flag)
-            sevent = eXosip_event_wait(OPTION_CONTEXT 1, 0);
+            sevent = sip_get_event(context, 1000);
 
         if(shutdown_flag) {
             shell::log(DEBUG1, "stopping event thread %d", instance);
@@ -101,12 +101,10 @@ void thread::run(void)
                 reg->release();
             break;
         default:
-            EXOSIP_LOCK
-            eXosip_default_action(OPTION_CONTEXT sevent);
-            EXOSIP_UNLOCK
+            sip_default_action(context, sevent);
         }
 
-        eXosip_event_free(sevent);
+        sip_release_event(sevent);
         --active_count;
     }
 }

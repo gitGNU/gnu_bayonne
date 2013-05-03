@@ -1,0 +1,140 @@
+// Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "voip.h"
+
+#ifdef	EXOSIP_API4
+
+void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
+{
+    eXosip_lock(ctx);
+    eXosip_add_authentication_info(ctx, user, user, secret, NULL, realm);
+    if(automatic)
+	eXosip_automatic_action(ctx);
+    eXosip_unlock(ctx);
+}
+
+sip_reg_t sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
+{
+    *msg = NULL;
+    eXosip_lock(ctx);
+    sip_reg_t rid = eXosip_register_build_initial_register(ctx, uri, s, c, exp, msg);
+    if(!msg)
+	eXosip_unlock(ctx);
+    return rid;
+}
+
+void sip_send_registration(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
+{
+    if(!msg)
+	return;
+    eXosip_register_send_register(c, r, msg);
+    eXosip_unlock(c);
+}
+
+bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
+{
+    bool rtn = false;
+    osip_message_t *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_register_build_register(ctx, rid, 0, &msg);
+    if(msg) {
+	eXosip_register_send_register(ctx, rid, msg);
+	rtn = true;
+    }
+    eXosip_unlock(ctx);
+    return rtn;
+}
+
+void sip_default_action(sip_context_t ctx, sip_event_t ev)
+{
+    eXosip_lock(ctx);
+    eXosip_default_action(ctx, ev);
+    eXosip_unlock(ctx);
+}
+
+sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
+{
+    unsigned s = timeout / 1000l;
+    unsigned ms = timeout % 1000l;
+    return eXosip_event_wait(ctx, s, ms);
+}
+
+#else
+
+void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
+{
+    eXosip_lock();
+    eXosip_add_authentication_info(user, user, secret, NULL, realm);
+    if(automatic)
+	eXosip_automatic_action();
+    eXosip_unlock();
+}
+
+int sip_create_registration(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
+{
+    *msg = NULL;
+    eXosip_lock();
+    int rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
+    if(!msg)
+	eXosip_unlock();
+    return rid;
+}
+
+void sip_send_registration(sip_context_t c, unsigned r, osip_message_t *msg) 
+{
+    if(!msg)
+	return;
+    eXosip_register_send_register(c, r, msg);
+    eXosip_unlock(msg);
+}
+
+bool sip_release_registration(sip_context_t ctx, sip_reg_t rid)
+{
+    bool rtn = false;
+    osip_message_t *msg = NULL;
+    eXosip_lock();
+    eXosip_register_build_register(rid, 0, &msg);
+    if(msg) {
+	eXosip_register_send_register(rid, msg);
+	rtn = true;
+    }
+    eXosip_unlock();
+    return rtn;
+}
+
+void sip_default_action(sip_context_t ctx, sip_event_t ev)
+{
+    eXosip_lock();
+    eXosip_default_action(ev);
+    eXosip_unlock();
+}
+
+sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
+{
+    unsigned s = timeout / 1000l;
+    unsigned ms = timeout % 1000l;
+    return eXosip_event_wait(s, ms);
+}
+
+#endif
+
+void sip_release_event(sip_event_t ev)
+{
+    if(ev)
+	eXosip_event_free(ev);
+}
+
+

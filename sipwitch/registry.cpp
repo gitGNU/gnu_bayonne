@@ -71,11 +71,8 @@ Registry(keyset)
             shell::errexit(6, "*** bayonne: digest: unsupported computation");
     }
 
-    if(secret && userid && realm) {
-        sip_lock(context);
+    if(secret && userid && realm)
         sip_add_authentication(context, userid, secret, realm);
-        sip_release(context);
-    }
 
     unsigned port = 0;
     cp = keys->get("port");
@@ -114,7 +111,6 @@ Registry(keyset)
         snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
-    sip_lock(context);
     rid = sip_create_registration(context, uri, server, contact, expires, &msg);
     if(msg) {
         osip_message_set_supported(msg, "100rel");
@@ -155,8 +151,6 @@ Registry(keyset)
         shell::log(shell::ERR, "failed to register %s with %s", id, server);
         rid = -1;
     }
-
-    sip_release(context);
 }
 
 void registry::authenticate(const char *sip_realm)
@@ -164,10 +158,7 @@ void registry::authenticate(const char *sip_realm)
 
     if(secret && userid && sip_realm) {
         shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
-        EXOSIP_LOCK
-        eXosip_add_authentication_info(OPTION_CONTEXT userid, userid, secret, NULL, sip_realm);
-        eXosip_automatic_action(EXOSIP_CONTEXT);
-        EXOSIP_UNLOCK
+        sip_add_authentication(context, userid, secret, sip_realm, true);
     }
 }
 
@@ -191,16 +182,9 @@ void registry::release(void)
 
 void registry::shutdown(void)
 {
-    osip_message_t *msg = NULL;
-
     if(rid == -1)
         return;
 
-    EXOSIP_LOCK
-    eXosip_register_build_register(OPTION_CONTEXT rid, 0, &msg);
-    if(msg) {
+    if(sip_release_registration(context, rid))
         shell::debug(3, "released registry id %d from %s", rid, server);
-        eXosip_register_send_register(OPTION_CONTEXT rid, msg);
-    }
-    EXOSIP_UNLOCK
 }
