@@ -49,18 +49,27 @@ bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
 void send_request_message(sip_context_t ctx, osip_message_t *msg);
 void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
 
-bool make_answer_invite(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg);
-void send_answer_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
+bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg);
+void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
 
 void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did);
 
 bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg);
 bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg);
 bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
+bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_message_t **msg);
+bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
+bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
 void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg);
 
+bool make_ack_message(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
+void send_ack_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg);
+
+bool make_prack_message(sip_context_t ctx, sip_tran_t tid, osip_message_t **msg);
+bool send_prack_message(sip_context_t ctx, sip_tran_t tid, osip_message_t **msg);
+
 sip_reg_t make_registry_request(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg);
-void send_registry_message(sip_context_t ctx, sip_reg_t rid, osip_message_t *msg);
+void send_registry_request(sip_context_t ctx, sip_reg_t rid, osip_message_t *msg);
 bool sip_release_registry(sip_context_t ctx, sip_reg_t rid);
 
 void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic = false);

@@ -143,7 +143,7 @@ Registry(keyset)
             osip_message_set_header(msg, AUTHORIZATION, buffer);
         }
 
-        send_registry_message(context, rid, msg);
+        send_registry_request(context, rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
     else {
