@@ -49,6 +49,9 @@ bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
 void send_request_message(sip_context_t ctx, osip_message_t *msg);
 void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
 
+bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route);
+sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg);
+
 bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg);
 void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
 

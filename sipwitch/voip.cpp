@@ -211,6 +211,29 @@ void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
     eXosip_unlock(ctx);
 }
 
+bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route)
+{
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_initial_invite(ctx, msg, to, from, route, subject);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+
+    return true;
+}
+
+sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
+{
+    if(!msg)
+        return -1;
+
+    int rtn = eXosip_call_send_initial_invite(ctx, msg);
+    eXosip_unlock(ctx);
+    return rtn;
+}
+
 sip_reg_t make_registry_request(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
 {
     *msg = NULL;
@@ -340,6 +363,29 @@ void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
         eXosip_lock();
     eXosip_message_send_answer(tid, status, msg);
     eXosip_unlock();
+}
+
+bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route)
+{
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_initial_invite(msg, to, from, route, subject);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+
+    return true;
+}
+
+sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
+{
+    if(!msg)
+        return -1;
+
+    int rtn = eXosip_call_send_initial_invite(msg);
+    eXosip_unlock();
+    return rtn;
 }
 
 bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
