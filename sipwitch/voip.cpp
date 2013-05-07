@@ -18,9 +18,11 @@
 static const char *agent = "eXosip";
 static int family = AF_INET;
 
+namespace sip {
+
 #ifdef	EXOSIP_API4
 
-void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
+void add_authentication(context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
 {
     eXosip_lock(ctx);
     eXosip_add_authentication_info(ctx, user, user, secret, NULL, realm);
@@ -29,7 +31,7 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock(ctx);
 }
 
-bool make_request_message(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route)
 {
     if(!msg)
         return false;
@@ -44,7 +46,7 @@ bool make_request_message(sip_context_t ctx, osip_message_t **msg, const char *m
     return true;
 }
 
-bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool make_response_message(context_t ctx, tid_t tid, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -59,7 +61,7 @@ bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
     return true;
 }
 
-void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg)
 {
     if(!msg)
         eXosip_lock(ctx);
@@ -67,7 +69,7 @@ void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
     eXosip_unlock(ctx);
 }
 
-bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool make_answer_response(context_t ctx, tid_t tid, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -82,7 +84,7 @@ bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_me
     return true;
 }
 
-void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void send_answer_response(context_t ctx, tid_t tid, int status, msg_t msg)
 {
     if(!msg)
         eXosip_lock(ctx);
@@ -90,7 +92,7 @@ void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_me
     eXosip_unlock(ctx);
 }
 
-void send_request_message(sip_context_t ctx, osip_message_t *msg)
+void send_request_message(context_t ctx, msg_t msg)
 {
     if(!msg)
         return;
@@ -99,14 +101,14 @@ void send_request_message(sip_context_t ctx, osip_message_t *msg)
     eXosip_unlock(ctx);
 }
 
-void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did)
+void release_call(context_t ctx, call_t cid, did_t did)
 {
     eXosip_lock(ctx);
     eXosip_call_terminate(ctx, cid, did);
     eXosip_unlock(ctx);
 }
 
-bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg)
+bool make_dialog_request(context_t ctx, did_t did, const char *method, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -122,7 +124,7 @@ bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, o
     return true;
 }
 
-bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg)
+bool make_dialog_notify(context_t ctx, did_t did, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -138,7 +140,7 @@ bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_messa
     return true;
 }
 
-bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_update(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -154,7 +156,7 @@ bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_message_t **msg)
+bool make_dialog_refer(context_t ctx, did_t did, const char *to, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -170,7 +172,7 @@ bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_me
     return true;
 }
 
-bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_info(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -186,7 +188,7 @@ bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_options(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -202,7 +204,7 @@ bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
+void send_dialog_message(context_t ctx, did_t did, msg_t msg)
 {
     if(!msg)
         return;
@@ -211,7 +213,7 @@ void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
     eXosip_unlock(ctx);
 }
 
-bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route)
+bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route)
 {
     *msg = NULL;
     eXosip_lock(ctx);
@@ -224,7 +226,7 @@ bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to
     return true;
 }
 
-sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
+call_t send_invite_request(context_t ctx, msg_t msg)
 {
     if(!msg)
         return -1;
@@ -234,17 +236,17 @@ sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
     return rtn;
 }
 
-sip_reg_t make_registry_request(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
+reg_t make_registry_request(context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, msg_t *msg) 
 {
     *msg = NULL;
     eXosip_lock(ctx);
-    sip_reg_t rid = eXosip_register_build_initial_register(ctx, uri, s, c, exp, msg);
+    reg_t rid = eXosip_register_build_initial_register(ctx, uri, s, c, exp, msg);
     if(!*msg)
         eXosip_unlock(ctx);
     return rid;
 }
 
-void send_registry_request(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
+void send_registry_request(context_t c, reg_t r, msg_t msg) 
 {
     if(!msg)
 	    return;
@@ -252,10 +254,10 @@ void send_registry_request(sip_context_t c, sip_reg_t r, osip_message_t *msg)
     eXosip_unlock(c);
 }
 
-bool sip_release_registry(sip_context_t ctx, sip_reg_t rid)
+bool release_registry(context_t ctx, reg_t rid)
 {
     bool rtn = false;
-    osip_message_t *msg = NULL;
+    msg_t msg = NULL;
     eXosip_lock(ctx);
     eXosip_register_build_register(ctx, rid, 0, &msg);
     if(msg) {
@@ -266,28 +268,28 @@ bool sip_release_registry(sip_context_t ctx, sip_reg_t rid)
     return rtn;
 }
 
-void sip_default_action(sip_context_t ctx, sip_event_t ev)
+void default_action(context_t ctx, event_t ev)
 {
     eXosip_lock(ctx);
     eXosip_default_action(ctx, ev);
     eXosip_unlock(ctx);
 }
 
-void sip_automatic_action(sip_context_t ctx)
+void automatic_action(context_t ctx)
 {
     eXosip_lock(ctx);
     eXosip_automatic_action(ctx);
     eXosip_unlock(ctx);
 }
 
-sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
+event_t get_event(context_t ctx, timeout_t timeout)
 {
     unsigned s = timeout / 1000l;
     unsigned ms = timeout % 1000l;
     return eXosip_event_wait(ctx, s, ms);
 }
 
-bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, bool tls)
+bool listen(context_t ctx, int proto, const char *addr, unsigned port, bool tls)
 {
     int tlsmode = 0;
 
@@ -318,7 +320,7 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, b
 
 #else
 
-void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
+void add_authentication(context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
 {
     eXosip_lock();
     eXosip_add_authentication_info(user, user, secret, NULL, realm);
@@ -327,7 +329,7 @@ void sip_add_authentication(sip_context_t ctx, const char *user, const char *sec
     eXosip_unlock();
 }
 
-bool make_request_message(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route)
+bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route)
 {
     if(!msg)
         return false;
@@ -342,7 +344,7 @@ bool make_request_message(sip_context_t ctx, osip_message_t **msg, const char *m
     return true;
 }
 
-bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool make_response_message(context_t ctx, tid_t tid, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -357,7 +359,7 @@ bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
     return true;
 }
 
-void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg)
 {
     if(!msg)
         eXosip_lock();
@@ -365,7 +367,7 @@ void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_m
     eXosip_unlock();
 }
 
-bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route)
+bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route)
 {
     *msg = NULL;
     eXosip_lock();
@@ -378,7 +380,7 @@ bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to
     return true;
 }
 
-sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
+call_t send_invite_request(context_t ctx, msg_t msg)
 {
     if(!msg)
         return -1;
@@ -388,7 +390,7 @@ sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg)
     return rtn;
 }
 
-bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg)
+bool make_answer_response(context_t ctx, tid_t tid, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -402,7 +404,7 @@ bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_me
     return true;
 }
 
-void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message *msg)
+void send_answer_response(context_t ctx, tid_t tid, int status, msg_t msg)
 {
     if(!msg)
         eXosip_lock();
@@ -411,7 +413,7 @@ void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_me
 }
 
 
-void send_request_message(sip_context_t ctx, osip_message_t *msg)
+void send_request_message(context_t ctx, msg_t msg)
 {
     if(!msg)
         return;
@@ -420,20 +422,20 @@ void send_request_message(sip_context_t ctx, osip_message_t *msg)
     eXosip_unlock();
 }
 
-sip_reg_t make_registry_request(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg) 
+reg_t make_registry_request(context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, msg_t *msg) 
 {
     if(!msg)
         return -1;
 
     *msg = NULL;
     eXosip_lock();
-    sip_reg_t rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
+    reg_t rid = eXosip_register_build_initial_register(uri, s, c, exp, msg);
     if(!msg)
         eXosip_unlock();
     return rid;
 }
 
-void send_registry_request(sip_context_t c, sip_reg_t r, osip_message_t *msg) 
+void send_registry_request(context_t c, reg_t r, msg_t msg) 
 {
     if(!msg)
         return;
@@ -441,10 +443,10 @@ void send_registry_request(sip_context_t c, sip_reg_t r, osip_message_t *msg)
     eXosip_unlock();
 }
 
-bool sip_release_registry(sip_context_t ctx, sip_reg_t rid)
+bool release_registry(context_t ctx, reg_t rid)
 {
     bool rtn = false;
-    osip_message_t *msg = NULL;
+    msg_t msg = NULL;
     eXosip_lock();
     eXosip_register_build_register(rid, 0, &msg);
     if(msg) {
@@ -455,14 +457,14 @@ bool sip_release_registry(sip_context_t ctx, sip_reg_t rid)
     return rtn;
 }
 
-void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did)
+void release_call(context_t ctx, call_t cid, did_t did)
 {
     eXosip_lock();
     eXosip_call_terminate(cid, did);
     eXosip_unlock();
 }
 
-bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg)
+bool make_dialog_request(context_t ctx, did_t did, const char *method, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -478,7 +480,7 @@ bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, o
     return true;
 }
 
-bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg)
+bool make_dialog_notify(context_t ctx, did_t did, int status, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -494,7 +496,7 @@ bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_messa
     return true;
 }
 
-bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_update(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -510,7 +512,7 @@ bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_message_t **msg)
+bool make_dialog_refer(context_t ctx, did_t did, const char *to, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -526,7 +528,7 @@ bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_me
     return true;
 }
 
-bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_info(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -542,7 +544,7 @@ bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
+bool make_dialog_options(context_t ctx, did_t did, msg_t *msg)
 {
     if(!msg)
         return false;
@@ -558,7 +560,7 @@ bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg)
     return true;
 }
 
-void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
+void send_dialog_message(context_t ctx, did_t did, msg_t msg)
 {
     if(!msg)
         return;
@@ -567,28 +569,28 @@ void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg)
     eXosip_unlock();
 }
 
-void sip_default_action(sip_context_t ctx, sip_event_t ev)
+void default_action(context_t ctx, event_t ev)
 {
     eXosip_lock();
     eXosip_default_action(ev);
     eXosip_unlock();
 }
 
-void sip_automatic_action(sip_context_t ctx)
+void automatic_action(context_t ctx)
 {
     eXosip_lock();
     eXosip_automatic_action();
     eXosip_unlock();
 }
 
-sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout)
+event_t get_event(context_t ctx, timeout_t timeout)
 {
     unsigned s = timeout / 1000l;
     unsigned ms = timeout % 1000l;
     return eXosip_event_wait(s, ms);
 }
 
-bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, bool tls)
+bool listen(context_t ctx, int proto, const char *addr, unsigned port, bool tls)
 {
     int tlsmode = 0;
 
@@ -615,13 +617,13 @@ bool sip_listen(sip_context_t ctx, int proto, const char *addr, unsigned port, b
 
 #endif
 
-void sip_release_event(sip_event_t ev)
+void release_event(event_t ev)
 {
     if(ev)
         eXosip_event_free(ev);
 }
 
-void sip_setup(const char *a, int f)
+void setup(const char *a, int f)
 {
     agent = a;
     family = f;
@@ -632,3 +634,4 @@ void sip_setup(const char *a, int f)
 #endif
 }
 
+}   // end namespace

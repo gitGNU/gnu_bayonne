@@ -43,7 +43,7 @@ static char *remove_quotes(char *c)
 }
 #endif
 
-thread::thread(sip_context_t source, size_t size) : DetachedThread(size)
+thread::thread(sip::context_t source, size_t size) : DetachedThread(size)
 {
     context = source;
 }
@@ -55,7 +55,7 @@ void thread::run(void)
 
     for(;;) {
         if(!shutdown_flag)
-            sevent = sip_get_event(context, 1000);
+            sevent = sip::get_event(context, 1000);
 
         if(shutdown_flag) {
             shell::log(DEBUG1, "stopping event thread %d", instance);
@@ -101,10 +101,10 @@ void thread::run(void)
                 reg->release();
             break;
         default:
-            sip_default_action(context, sevent);
+            sip::default_action(context, sevent);
         }
 
-        sip_release_event(sevent);
+        sip::release_event(sevent);
         --active_count;
     }
 }

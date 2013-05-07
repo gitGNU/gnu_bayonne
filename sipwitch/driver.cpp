@@ -18,10 +18,10 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-sip_context_t driver::tcp_context = NULL;
-sip_context_t driver::udp_context = NULL;
-sip_context_t driver::tls_context = NULL;
-sip_context_t driver::out_context = NULL;
+sip::context_t driver::tcp_context = NULL;
+sip::context_t driver::udp_context = NULL;
+sip::context_t driver::tls_context = NULL;
+sip::context_t driver::out_context = NULL;
 
 driver::driver() : Driver("sip", "registry")
 {
@@ -169,22 +169,22 @@ int driver::start(void)
     Socket::family(family);
 #endif
 
-    sip_setup(agent, family);
+    sip::setup(agent, family);
 
 #ifdef  EXOSIP_API4
     shell::log(shell::DEBUG1, "default protocol %d", protocol);
-    if(!sip_listen(udp_context, IPPROTO_UDP, iface, sip_port))
+    if(!sip::listen(udp_context, IPPROTO_UDP, iface, sip_port))
         shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);
     else
         shell::log(shell::NOTIFY, "listening port %u for udp", sip_port);
 
-    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, sip_port))
+    if(!sip::listen(tcp_context, IPPROTO_TCP, iface, sip_port))
         shell::log(shell::FAIL, "cannot listen port %u for tcp", sip_port);
     else
         shell::log(shell::NOTIFY, "listening port %u for tcp", sip_port);
 
 #else
-    if(!sip_listen(out_context, protocol, iface, sip_port))
+    if(!sip::listen(out_context, protocol, iface, sip_port))
         shell::log(shell::FAIL, "cannot listen port %u", sip_port);
     else
         shell::log(shell::NOTIFY, "listening port %u", sip_port);
@@ -276,7 +276,7 @@ void driver::stop(void)
     media::shutdown();
 }
 
-registry *driver::locate(int rid)
+registry *driver::locate(sip::reg_t rid)
 {
     linked_pointer<registry>  rp = Group::begin();
 

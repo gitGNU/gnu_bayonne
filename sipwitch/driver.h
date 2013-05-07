@@ -23,7 +23,6 @@ using namespace UCOMMON_NAMESPACE;
 class __LOCAL registry : public Registry
 {
 public:
-    int rid;
     unsigned expires;
     const char *contact;
     const char *userid;
@@ -36,7 +35,9 @@ public:
     const char *uri;
     char uuid[38];
     bool active;
-    sip_context_t context;
+
+    sip::context_t context;
+    sip::reg_t rid;
 
     registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
 
@@ -45,22 +46,20 @@ public:
     void activate(void);
 
     void release(void);
-
-    void shutdown(void);
 };
 
 class __LOCAL thread : public DetachedThread
 {
 private:
     unsigned instance;
-    sip_context_t    context;
-    sip_event_t      sevent;
+    sip::context_t    context;
+    sip::event_t      sevent;
     registry    *reg;
 
     void run(void);
 
 public:
-    thread(sip_context_t source, size_t size);
+    thread(sip::context_t source, size_t size);
 
     static void shutdown();
 };
@@ -113,12 +112,12 @@ public:
 
     void stop(void);
 
-    static sip_context_t out_context;   // default output context
-    static sip_context_t udp_context;
-    static sip_context_t tcp_context;
-    static sip_context_t tls_context;
+    static sip::context_t out_context;   // default output context
+    static sip::context_t udp_context;
+    static sip::context_t tcp_context;
+    static sip::context_t tls_context;
 
-    static registry *locate(int rid);
+    static registry *locate(sip::reg_t rid);
 
 };
 

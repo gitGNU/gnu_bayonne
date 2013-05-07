@@ -25,7 +25,7 @@ Registry(keyset)
     const char *schema = keys->get("protocol");
     char buffer[1024];
     char iface[180];
-    osip_message_t *msg = NULL;
+    sip::msg_t msg = NULL;
 
     if(!schema)
         schema = keys->get("transport");
@@ -83,7 +83,7 @@ Registry(keyset)
     }
 
     if(secret && userid && realm)
-        sip_add_authentication(context, userid, secret, realm);
+        sip::add_authentication(context, userid, secret, realm);
 
     unsigned port = 0;
     cp = keys->get("port");
@@ -122,7 +122,7 @@ Registry(keyset)
         snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
     contact = Driver::dup(buffer);
 
-    if(-1 != (rid = make_registry_request(context, uri, server, contact, expires, &msg))) {
+    if(-1 != (rid = sip::make_registry_request(context, uri, server, contact, expires, &msg))) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
         osip_message_set_header(msg, "Allow-Events", "presence");
@@ -154,7 +154,7 @@ Registry(keyset)
             osip_message_set_header(msg, AUTHORIZATION, buffer);
         }
 
-        send_registry_request(context, rid, msg);
+        sip::send_registry_request(context, rid, msg);
         shell::debug(3, "registry id %d assigned to %s", rid, id);
     }
     else {
@@ -170,7 +170,7 @@ void registry::authenticate(const char *sip_realm)
 
     if(secret && userid && sip_realm) {
         shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
-        sip_add_authentication(context, userid, secret, sip_realm, true);
+        sip::add_authentication(context, userid, secret, sip_realm, true);
     }
 }
 
@@ -188,15 +188,9 @@ void registry::release(void)
     if(rid == -1 || !active)
         return;
 
-    shell::debug(3, "registry id %d released", rid);
+    if(sip::release_registry(context, rid))
+        shell::debug(3, "registry id %d released", rid);
     active = false;
+    rid = -1;
 }
 
-void registry::shutdown(void)
-{
-    if(rid == -1)
-        return;
-
-    if(sip_release_registry(context, rid))
-        shell::debug(3, "released registry id %d from %s", rid, server);
-}

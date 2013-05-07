@@ -27,64 +27,68 @@
 #define EXOSIP_API4
 #endif
 
+namespace sip {
 #ifdef  EXOSIP_API4
-typedef eXosip_t    *sip_context_t;
-inline  void sip_lock(sip_context_t ctx) {eXosip_lock(ctx);}
-inline  void sip_release(sip_context_t ctx) {eXosip_unlock(ctx);}
+typedef eXosip_t    *context_t;
+inline  void lock(context_t ctx) {eXosip_lock(ctx);}
+inline  void release(context_t ctx) {eXosip_unlock(ctx);}
 #else
-typedef void        *sip_context_t;
-inline  void sip_lock(sip_context_t ctx) {eXosip_lock();}
-inline  void sip_release(sip_context_t ctx) {eXosip_unlock();}
+typedef void        *context_t;
+inline  void lock(context_t ctx) {eXosip_lock();}
+inline  void release(context_t ctx) {eXosip_unlock();}
 #endif
 
-typedef eXosip_event_t  *sip_event_t;
-typedef int sip_reg_t;		// registration id
-typedef	int	sip_tran_t;		// transaction id
-typedef	int sip_dlg_t;		// dialog id
-typedef	int	sip_call_t;		// call id
-typedef	unsigned long sip_timeout_t;
+typedef eXosip_event_t  *event_t;
+typedef int reg_t;		// registration id
+typedef	int	tid_t;		// transaction id
+typedef	int did_t;		// dialog id
+typedef	int	call_t;		// call id
+typedef	osip_message_t	*msg_t;
+typedef	unsigned long timeout_t;
 
-bool make_request_message(sip_context_t ctx, osip_message_t **msg, const char *method, const char *to, const char *from, const char *route = NULL);
-bool make_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg);
-void send_request_message(sip_context_t ctx, osip_message_t *msg);
-void send_response_message(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
+bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route = NULL);
+bool make_response_message(context_t ctx, tid_t tid, int status, msg_t *msg);
+void send_request_message(context_t ctx, msg_t msg);
+void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg = NULL);
 
-bool make_invite_request(sip_context_t ctx, osip_message_t **msg, const char *to, const char *from, const char *subject, const char *route);
-sip_call_t send_invite_request(sip_context_t ctx, osip_message_t *msg);
+bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route);
+call_t send_invite_request(context_t ctx, msg_t msg);
 
-bool make_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t **msg);
-void send_answer_response(sip_context_t ctx, sip_tran_t tid, int status, osip_message_t *msg = NULL);
+bool make_answer_response(context_t ctx, tid_t tid, int status, msg_t *msg);
+void send_answer_response(context_t ctx, tid_t tid, int status, msg_t msg = NULL);
 
-void sip_release_call(sip_context_t ctx, sip_call_t cid, sip_dlg_t did);
+void release_call(context_t ctx, call_t cid, did_t did);
 
-bool make_dialog_request(sip_context_t ctx, sip_dlg_t did, const char *method, osip_message_t **msg);
-bool make_dialog_notify(sip_context_t ctx, sip_dlg_t did, int status, osip_message_t **msg);
-bool make_dialog_update(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
-bool make_dialog_refer(sip_context_t ctx, sip_dlg_t did, const char *to, osip_message_t **msg);
-bool make_dialog_info(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
-bool make_dialog_options(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
-void send_dialog_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg);
+bool make_dialog_request(context_t ctx, did_t did, const char *method, msg_t *msg);
+bool make_dialog_notify(context_t ctx, did_t did, int status, msg_t *msg);
+bool make_dialog_update(context_t ctx, did_t did, msg_t *msg);
+bool make_dialog_refer(context_t ctx, did_t did, const char *to, msg_t *msg);
+bool make_dialog_info(context_t ctx, did_t did, msg_t *msg);
+bool make_dialog_options(context_t ctx, did_t did, msg_t *msg);
+void send_dialog_message(context_t ctx, did_t did, msg_t msg);
 
-bool make_ack_message(sip_context_t ctx, sip_dlg_t did, osip_message_t **msg);
-void send_ack_message(sip_context_t ctx, sip_dlg_t did, osip_message_t *msg);
+bool make_ack_message(context_t ctx, did_t did, msg_t *msg);
+void send_ack_message(context_t ctx, did_t did, msg_t msg);
 
-bool make_prack_message(sip_context_t ctx, sip_tran_t tid, osip_message_t **msg);
-bool send_prack_message(sip_context_t ctx, sip_tran_t tid, osip_message_t **msg);
+bool make_prack_message(context_t ctx, tid_t tid, msg_t *msg);
+bool send_prack_message(context_t ctx, tid_t tid, msg_t msg);
 
-sip_reg_t make_registry_request(sip_context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, osip_message_t **msg);
-void send_registry_request(sip_context_t ctx, sip_reg_t rid, osip_message_t *msg);
-bool sip_release_registry(sip_context_t ctx, sip_reg_t rid);
+reg_t make_registry_request(context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, msg_t *msg);
+void send_registry_request(context_t ctx, reg_t rid, msg_t msg);
+bool release_registry(context_t ctx, reg_t rid);
 
-void sip_add_authentication(sip_context_t ctx, const char *user, const char *secret, const char *realm, bool automatic = false);
+void add_authentication(context_t ctx, const char *user, const char *secret, const char *realm, bool automatic = false);
 
-void sip_default_action(sip_context_t ctx, sip_event_t ev);
-void sip_automatic_action(sip_context_t ctx);
+void default_action(context_t ctx, event_t ev);
+void automatic_action(context_t ctx);
 
-sip_event_t sip_get_event(sip_context_t ctx, sip_timeout_t timeout);
-void sip_release_event(sip_event_t ev);
+event_t get_event(context_t ctx, timeout_t timeout);
+void release_event(event_t ev);
 
-void sip_setup(const char *agent, int family = AF_INET);
-bool sip_listen(sip_context_t ctx, int proto = IPPROTO_UDP, const char *iface = NULL, unsigned port = 5060, bool tls = false);
+void setup(const char *agent, int family = AF_INET);
+bool listen(context_t ctx, int proto = IPPROTO_UDP, const char *iface = NULL, unsigned port = 5060, bool tls = false);
+
+} // end namespace
 
 #ifndef SESSION_EXPIRES
 #define SESSION_EXPIRES "session-expires"
