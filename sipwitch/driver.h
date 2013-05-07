@@ -113,6 +113,7 @@ public:
     static sip_context_t out_context;   // default output context
     static sip_context_t udp_context;
     static sip_context_t tcp_context;
+    static sip_context_t tls_context;
 
     static registry *locate(int rid);
 

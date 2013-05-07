@@ -20,6 +20,7 @@ using namespace BAYONNE_NAMESPACE;
 
 sip_context_t driver::tcp_context = NULL;
 sip_context_t driver::udp_context = NULL;
+sip_context_t driver::tls_context = NULL;
 sip_context_t driver::out_context = NULL;
 
 driver::driver() : Driver("sip", "registry")
@@ -29,8 +30,12 @@ driver::driver() : Driver("sip", "registry")
 #ifdef  EXOSIP_API4
     udp_context = eXosip_malloc();
     tcp_context = eXosip_malloc();
-#endif
+    tls_context = NULL;
     out_context = udp_context;
+#else
+    out_context = udp_context = (void *)(-1);
+    tcp_context = tls_context = NULL;
+#endif
 }
 
 int driver::start(void)
@@ -115,8 +120,15 @@ int driver::start(void)
 
     if(keys)
         transport = keys->get("transport");
+    if(keys && !transport)
+        transport = keys->get("protocol");
+
     if(transport && eq(transport, "tcp")) {
         protocol = IPPROTO_TCP;
+#ifndef EXOSIP_API4
+        udp_context = NULL;
+        tcp_context = (void *)(-1);
+#endif
         out_context = tcp_context;
     }
 /*

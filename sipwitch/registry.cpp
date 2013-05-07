@@ -28,6 +28,9 @@ Registry(keyset)
     osip_message_t *msg = NULL;
 
     if(!schema)
+        schema = keys->get("transport");
+
+    if(!schema)
         schema = "sip";
 
     context = driver::out_context;
@@ -38,6 +41,10 @@ Registry(keyset)
     else if(eq_case(schema, "sipt") || eq_case(schema, "tcp")) {
         schema = "sip";
         context = driver::tcp_context;
+    }
+    else if(eq_case(schema, "sips") || eq_case(schema, "tls")) {
+        schema = "sips";
+        context = driver::tls_context;
     }
 
     if(cp)
@@ -53,6 +60,10 @@ Registry(keyset)
     realm = keys->get("realm");
     active = false;
     rid = -1;
+
+    // inactive contexts ignored...
+    if(!context)
+        return;
 
     if(!domain || !*domain)
         domain = "localdomain";
@@ -154,6 +165,8 @@ Registry(keyset)
 
 void registry::authenticate(const char *sip_realm)
 {
+    if(rid == -1)
+        return;
 
     if(secret && userid && sip_realm) {
         shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
