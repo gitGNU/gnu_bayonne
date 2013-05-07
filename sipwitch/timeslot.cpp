@@ -18,9 +18,10 @@
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-timeslot::timeslot(const char *addr, unsigned short port, int family) :
+timeslot::timeslot(unsigned port) :
 Timeslot()
 {
+	media_port = port;
 	session = NULL;
 }
 

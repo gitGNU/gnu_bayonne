@@ -23,9 +23,10 @@ static unsigned startup_count = 0;
 static unsigned shutdown_count = 0;
 static media *instance;
 
-
+bool media::symmetric = false;
 size_t media::buffer = 2048;
 unsigned media::jitter = RTP_DEFAULT_JITTER_TIME;
+const char *media::address = "0.0.0.0";
 
 media::media(size_t size) : DetachedThread(size)
 {
@@ -65,14 +66,23 @@ void media::shutdown(void)
         Thread::sleep(50);
 }
 
-void media::attach(timeslot *ts, const char *host, unsigned port)
+void media::attach(timeslot *ts, const char *connect, unsigned port)
 {
     if(ts->session)
         return;
 
     RtpSession *s = rtp_session_new(RTP_SESSION_SENDRECV);
     
-    rtp_session_set_remote_addr(s, host, port);
+    rtp_session_set_scheduling_mode(s, 1);
+    rtp_session_set_blocking_mode(s, 0);
+
+    rtp_session_set_local_addr(s, address, ts->media_port);
+    rtp_session_set_remote_addr(s, connect, port);
+
+    if(symmetric)
+        rtp_session_set_symmetric_rtp(s, TRUE);
+    else
+        rtp_session_set_symmetric_rtp(s, FALSE);
 
     if(jitter) {
         rtp_session_enable_adaptive_jitter_compensation(s, TRUE);

@@ -42,8 +42,8 @@ int driver::start(void)
 {
     linked_pointer<keydata> kp = keyserver.get("registry");
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
-    unsigned port = 5060, expires = 300, timeslots = 16;
-    unsigned rtp_base = 0;
+    unsigned sip_port = 5060, expires = 300, timeslots = 16;
+    unsigned rtp_port = 0;
     int protocol = IPPROTO_UDP;
     int family = AF_INET;
     size_t stack = 0;
@@ -55,7 +55,7 @@ int driver::start(void)
         cp = NULL;
 
     if(cp)
-        port = atoi(cp);
+        sip_port = atoi(cp);
 
     if(keys)
         cp = keys->get("jitter");
@@ -114,8 +114,11 @@ int driver::start(void)
         if(strchr(iface, ':'))
             family = AF_INET6;
 #endif
-        if(eq(iface, ":::") || eq(iface, "::0") || eq(iface, "*") || iface[0] == 0)
-            iface = NULL;
+        if(eq(iface, "::*")) 
+            iface = "::0";
+        else if(eq(iface, "*"))
+            iface = "0.0.0.0";
+        media::address = iface;
     }
 
     if(keys)
@@ -145,7 +148,7 @@ int driver::start(void)
     if(!agent)
         agent = "bayonne-" VERSION "/exosip2";
 
-    port = port & 0xfffe;
+    sip_port = sip_port & 0xfffe;
 
     ortp_init();
     ortp_scheduler_init();
@@ -170,21 +173,21 @@ int driver::start(void)
 
 #ifdef  EXOSIP_API4
     shell::log(shell::DEBUG1, "default protocol %d", protocol);
-    if(!sip_listen(udp_context, IPPROTO_UDP, iface, port))
-        shell::log(shell::FAIL, "cannot listen port %u for udp", port);
+    if(!sip_listen(udp_context, IPPROTO_UDP, iface, sip_port))
+        shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);
     else
-        shell::log(shell::NOTIFY, "listening port %u for udp", port);
+        shell::log(shell::NOTIFY, "listening port %u for udp", sip_port);
 
-    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, port))
-        shell::log(shell::FAIL, "cannot listen port %u for tcp", port);
+    if(!sip_listen(tcp_context, IPPROTO_TCP, iface, sip_port))
+        shell::log(shell::FAIL, "cannot listen port %u for tcp", sip_port);
     else
-        shell::log(shell::NOTIFY, "listening port %u for tcp", port);
+        shell::log(shell::NOTIFY, "listening port %u for tcp", sip_port);
 
 #else
-    if(!sip_listen(out_context, protocol, iface, port))
-        shell::log(shell::FAIL, "cannot listen port %u", port);
+    if(!sip_listen(out_context, protocol, iface, sip_port))
+        shell::log(shell::FAIL, "cannot listen port %u", sip_port);
     else
-        shell::log(shell::NOTIFY, "listening port %u", port);
+        shell::log(shell::NOTIFY, "listening port %u", sip_port);
 #endif
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
@@ -206,34 +209,48 @@ int driver::start(void)
 #endif
 
     if(is(kp)) {
-        new registry(*kp, port, expires);
+        new registry(*kp, sip_port, expires);
         return 0;
     }
 
     kp = keygroup.begin();
     while(is(kp)) {
-        new registry(*kp, port, expires);
+        new registry(*kp, sip_port, expires);
         kp.next();
     }
 
     if(keys)
         cp = keys->get("timeslots");
+    else
+        cp = NULL;
+
     if(cp)
         timeslots = atoi(cp);
 
     if(keys)
         cp = keys->get("rtp");
+    else
+        cp = NULL;
+
     if(cp)
-        rtp_base = atoi(cp);
+        rtp_port = atoi(cp);
 
-    if(!rtp_base)
-        rtp_base = ((port / 2) * 2) + 2;
+    if(!rtp_port)
+        rtp_port = ((sip_port / 2) * 2) + 2;
 
+    if(keys)
+        cp = keys->get("symmetric");
+    else
+        cp = NULL;
+
+    if(cp && (toupper(*cp) == 'Y' || toupper(*cp) == 'T' || atoi(cp) > 0))
+        media::symmetric = true;
+    
     tsIndex = new Timeslot *[timeslots];
     while(timeslots--) {
-        timeslot *ts = new timeslot(iface, rtp_base, family);
+        timeslot *ts = new timeslot(rtp_port);
         tsIndex[tsCount++] = (Timeslot *)ts;
-        rtp_base += 2;
+        rtp_port += 2;
     }
 
     return tsCount;

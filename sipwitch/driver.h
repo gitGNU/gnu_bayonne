@@ -72,8 +72,9 @@ private:
 
 public:
     RtpSession *session;
+    unsigned media_port;
 
-    timeslot(const char *addr, unsigned short port, int family);
+    timeslot(unsigned port);
 };
 
 class __LOCAL media : public DetachedThread
@@ -83,6 +84,8 @@ private:
 
     static unsigned jitter;
     static size_t buffer;
+    static const char *address;
+    static bool symmetric;
 
     SessionSet *waiting, *pending;
     unsigned sessions;
