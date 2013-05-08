@@ -387,7 +387,7 @@ void release(context_t ctx)
 
 #else
 
-static unsigned active = 0;
+static bool active = false;
 
 void add_authentication(context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
 {
@@ -731,9 +731,13 @@ bool listen(context_t ctx, int proto, const char *addr, unsigned port, bool tls)
 
 void create(context_t *ctx, const char *agent, int f)
 {
+    if(active) {
+        *ctx = NULL;
+        return;
+    }
     *ctx = (void *)-1;
     eXosip_init();
-    ++active;
+    active = true;
 
     if(agent)
         eXosip_set_user_agent(agent);
@@ -748,16 +752,11 @@ void create(context_t *ctx, const char *agent, int f)
 
 void release(context_t ctx)
 {
-    if(!ctx)
+    if(!ctx || !active)
         return;
 
-    if(active)
-        --active;
-    else
-        return;
-
-    if(!active)
-        eXosip_quit();
+    active = false;
+    eXosip_quit();
 }
 
 #endif

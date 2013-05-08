@@ -35,7 +35,7 @@ int driver::start(void)
     const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
     unsigned sip_port = 5060, expires = 300, timeslots = 16;
     unsigned rtp_port = 0;
-    int protocol = IPPROTO_UDP;
+    bool tcp = false;
     int family = AF_INET;
     size_t stack = 0;
     unsigned priority = 0, mpri = 1;
@@ -118,7 +118,7 @@ int driver::start(void)
         transport = keys->get("protocol");
 
     if(transport && eq(transport, "tcp"))
-        protocol = IPPROTO_TCP;
+        tcp = true;
 /*
     else if(transport && eq(transport, "tls")) {
         protocol = IPPROTO_TCP;
@@ -146,44 +146,37 @@ int driver::start(void)
 #else
     Socket::family(family);
 #endif
-
-#ifdef  EXOSIP_API4
-    sip::create(&udp_context, agent, family);
-    sip::create(&tcp_context, agent, family);
-#else
-    switch(protocol) {
-    case IPPROTO_UDP:
-        sip::create(&udp_context, agent, family);
-        break;
-    case IPPROTO_TCP:
+    if(tcp) {
         sip::create(&tcp_context, agent, family);
-        break;
-    }
-#endif
-
-    if(protocol == IPPROTO_TCP)
+        sip::create(&udp_context, agent, family);
         out_context = tcp_context;
-    else
+    }
+    else {
+        sip::create(&udp_context, agent, family);
+        sip::create(&tcp_context, agent, family);
         out_context = udp_context;
+    }
 
-#ifdef  EXOSIP_API4
-    shell::log(shell::DEBUG1, "default protocol %d", protocol);
-    if(!sip::listen(udp_context, IPPROTO_UDP, iface, sip_port))
-        shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);
-    else
-        shell::log(shell::NOTIFY, "listening port %u for udp", sip_port);
+    if(udp_context) {
+        if(!sip::listen(udp_context, IPPROTO_UDP, iface, sip_port))
+            shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for udp", sip_port);
+    }
 
-    if(!sip::listen(tcp_context, IPPROTO_TCP, iface, sip_port))
-        shell::log(shell::FAIL, "cannot listen port %u for tcp", sip_port);
-    else
-        shell::log(shell::NOTIFY, "listening port %u for tcp", sip_port);
+    if(tcp_context) {
+        if(!sip::listen(tcp_context, IPPROTO_TCP, iface, sip_port))
+            shell::log(shell::FAIL, "cannot listen port %u for tcp", sip_port);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for tcp", sip_port);
+    }
 
-#else
-    if(!sip::listen(out_context, protocol, iface, sip_port))
-        shell::log(shell::FAIL, "cannot listen port %u", sip_port);
-    else
-        shell::log(shell::NOTIFY, "listening port %u", sip_port);
-#endif
+    if(tls_context) {
+        if(!sip::listen(tls_context, IPPROTO_TCP, iface, sip_port))
+            shell::log(shell::FAIL, "cannot listen port %u for tls", sip_port + 1);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for tls", sip_port + 1);
+    }
 
     osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
 
