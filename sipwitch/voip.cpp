@@ -15,7 +15,6 @@
 
 #include "voip.h"
 
-static const char *agent = "eXosip";
 static int family = AF_INET;
 
 namespace sip {
@@ -359,12 +358,36 @@ bool listen(context_t ctx, int proto, const char *addr, unsigned port, bool tls)
     if(eXosip_listen_addr(ctx, proto, addr, port, family, tlsmode))
         return false;
 
-    eXosip_set_user_agent(ctx, agent);
-
     return true;
 }
 
+void create(context_t *ctx, const char *agent, int f)
+{
+    *ctx = eXosip_malloc();
+    eXosip_init(*ctx);
+
+    if(agent)
+        eXosip_set_user_agent(*ctx, agent);
+
+    family = f;
+
+#ifdef  AF_INET6
+    if(family == AF_INET6)
+        eXosip_enable_ipv6(1);
+#endif
+}
+
+void release(context_t ctx)
+{
+    if(!ctx)
+        return;
+
+    eXosip_quit(ctx);
+}
+
 #else
+
+static unsigned active = 0;
 
 void add_authentication(context_t ctx, const char *user, const char *secret, const char *realm, bool automatic) 
 {
@@ -703,8 +726,38 @@ bool listen(context_t ctx, int proto, const char *addr, unsigned port, bool tls)
     if(eXosip_listen_addr(proto, addr, port, family, tlsmode))
         return false;
 
-    eXosip_set_user_agent(agent);
     return true;
+}
+
+void create(context_t *ctx, const char *agent, int f)
+{
+    *ctx = (void *)-1;
+    eXosip_init();
+    ++active;
+
+    if(agent)
+        eXosip_set_user_agent(agent);
+
+    family = f;
+
+#ifdef  AF_INET6
+    if(family == AF_INET6)
+        eXosip_enable_ipv6(1);
+#endif
+}
+
+void release(context_t ctx)
+{
+    if(!ctx)
+        return;
+
+    if(active)
+        --active;
+    else
+        return;
+
+    if(!active)
+        eXosip_quit();
 }
 
 #endif
@@ -713,17 +766,6 @@ void release_event(event_t ev)
 {
     if(ev)
         eXosip_event_free(ev);
-}
-
-void setup(const char *a, int f)
-{
-    agent = a;
-    family = f;
-
-#ifdef  AF_INET6
-    if(family == AF_INET6)
-        eXosip_enable_ipv6(1);
-#endif
 }
 
 }   // end namespace

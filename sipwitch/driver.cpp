@@ -26,16 +26,7 @@ sip::context_t driver::out_context = NULL;
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
-
-#ifdef  EXOSIP_API4
-    udp_context = eXosip_malloc();
-    tcp_context = eXosip_malloc();
-    tls_context = NULL;
-    out_context = udp_context;
-#else
-    out_context = udp_context = (void *)(-1);
-    tcp_context = tls_context = NULL;
-#endif
+    udp_context = tcp_context = tls_context = out_context = NULL;
 }
 
 int driver::start(void)
@@ -126,14 +117,8 @@ int driver::start(void)
     if(keys && !transport)
         transport = keys->get("protocol");
 
-    if(transport && eq(transport, "tcp")) {
+    if(transport && eq(transport, "tcp"))
         protocol = IPPROTO_TCP;
-#ifndef EXOSIP_API4
-        udp_context = NULL;
-        tcp_context = (void *)(-1);
-#endif
-        out_context = tcp_context;
-    }
 /*
     else if(transport && eq(transport, "tls")) {
         protocol = IPPROTO_TCP;
@@ -156,20 +141,30 @@ int driver::start(void)
     ortp_set_log_level_mask(ORTP_WARNING|ORTP_ERROR);
     ortp_set_log_file(stdout);
 
-#ifdef  EXOSIP_API4
-    eXosip_init(tcp_context);
-    eXosip_init(udp_context);
-#else
-    eXosip_init();
-#endif
-
 #if UCOMMON_ABI > 5
     Socket::query(family);
 #else
     Socket::family(family);
 #endif
 
-    sip::setup(agent, family);
+#ifdef  EXOSIP_API4
+    sip::create(&udp_context, agent, family);
+    sip::create(&tcp_context, agent, family);
+#else
+    switch(protocol) {
+    case IPPROTO_UDP:
+        sip::create(&udp_context, agent, family);
+        break;
+    case IPPROTO_TCP:
+        sip::create(&tcp_context, agent, family);
+        break;
+    }
+#endif
+
+    if(protocol == IPPROTO_TCP)
+        out_context = tcp_context;
+    else
+        out_context = udp_context;
 
 #ifdef  EXOSIP_API4
     shell::log(shell::DEBUG1, "default protocol %d", protocol);
@@ -198,15 +193,20 @@ int driver::start(void)
 
     thread *t;
 
-#ifdef  EXOSIP_API4
-    t = new thread(udp_context, stack * 1024l);
-    t->start(priority);
-    t = new thread(tcp_context, stack * 1024l);
-    t->start(priority);
-#else
-    t = new thread(out_context, stack * 1024l);
-    t->start(priority);
-#endif
+    if(udp_context) {
+        t = new thread(udp_context, stack *1024l);
+        t->start(priority);
+    }
+
+    if(tcp_context) {
+        t = new thread(tcp_context, stack *1024l);
+        t->start(priority);
+    }
+
+    if(tls_context) {
+        t = new thread(tls_context, stack *1024l);
+        t->start(priority);
+    }
 
     if(is(kp)) {
         new registry(*kp, sip_port, expires);
@@ -258,12 +258,9 @@ int driver::start(void)
 
 void driver::stop(void)
 {
-#ifdef  EXOSIP_API4
-    eXosip_quit(tcp_context);
-    eXosip_quit(udp_context);
-#else
-    eXosip_quit();
-#endif
+    sip::release(tcp_context);
+    sip::release(udp_context);
+    sip::release(tls_context);
 
     thread::shutdown();
 

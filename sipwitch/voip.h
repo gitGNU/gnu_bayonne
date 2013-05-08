@@ -31,11 +31,11 @@ namespace sip {
 #ifdef  EXOSIP_API4
 typedef eXosip_t    *context_t;
 inline  void lock(context_t ctx) {eXosip_lock(ctx);}
-inline  void release(context_t ctx) {eXosip_unlock(ctx);}
+inline  void unlock(context_t ctx) {eXosip_unlock(ctx);}
 #else
 typedef void        *context_t;
 inline  void lock(context_t ctx) {eXosip_lock();}
-inline  void release(context_t ctx) {eXosip_unlock();}
+inline  void unlock(context_t ctx) {eXosip_unlock();}
 #endif
 
 typedef eXosip_event_t  *event_t;
@@ -85,8 +85,9 @@ void automatic_action(context_t ctx);
 event_t get_event(context_t ctx, timeout_t timeout);
 void release_event(event_t ev);
 
-void setup(const char *agent, int family = AF_INET);
 bool listen(context_t ctx, int proto = IPPROTO_UDP, const char *iface = NULL, unsigned port = 5060, bool tls = false);
+void create(context_t *ctx, const char *agent, int family = AF_INET);
+void release(context_t ctx);
 
 } // end namespace
 
