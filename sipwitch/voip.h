@@ -46,12 +46,12 @@ typedef	int	call_t;		// call id
 typedef	osip_message_t	*msg_t;
 typedef	unsigned long timeout_t;
 
-bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route = NULL);
+bool make_request_message(context_t ctx, const char *method, const char *to, const char *from, msg_t *msg, const char *route = NULL);
 bool make_response_message(context_t ctx, tid_t tid, int status, msg_t *msg);
 void send_request_message(context_t ctx, msg_t msg);
 void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg = NULL);
 
-bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route);
+bool make_invite_request(context_t ctx, const char *to, const char *from, const char *subject, msg_t *msg, const char *route = NULL);
 call_t send_invite_request(context_t ctx, msg_t msg);
 
 bool make_answer_response(context_t ctx, tid_t tid, int status, msg_t *msg);
@@ -68,10 +68,10 @@ bool make_dialog_options(context_t ctx, did_t did, msg_t *msg);
 void send_dialog_message(context_t ctx, did_t did, msg_t msg);
 
 bool make_ack_message(context_t ctx, did_t did, msg_t *msg);
-void send_ack_message(context_t ctx, did_t did, msg_t msg);
+void send_ack_message(context_t ctx, did_t did, msg_t msg = NULL);
 
 bool make_prack_message(context_t ctx, tid_t tid, msg_t *msg);
-bool send_prack_message(context_t ctx, tid_t tid, msg_t msg);
+void send_prack_message(context_t ctx, tid_t tid, msg_t msg);
 
 reg_t make_registry_request(context_t ctx, const char *uri, const char *s, const char *c, unsigned exp, msg_t *msg);
 void send_registry_request(context_t ctx, reg_t rid, msg_t msg);

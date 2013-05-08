@@ -31,7 +31,7 @@ void add_authentication(context_t ctx, const char *user, const char *secret, con
     eXosip_unlock(ctx);
 }
 
-bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route)
+bool make_request_message(context_t ctx, const char *method, const char *to, const char *from, msg_t *msg, const char *route)
 {
     if(!msg)
         return false;
@@ -66,6 +66,52 @@ void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg)
     if(!msg)
         eXosip_lock(ctx);
     eXosip_message_send_answer(ctx, tid, status, msg);
+    eXosip_unlock(ctx);
+}
+
+bool make_ack_message(context_t ctx, did_t did, msg_t *msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_ack(ctx, did, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+    return true;
+}
+
+void send_ack_message(context_t ctx, did_t tid, msg_t msg)
+{
+    if(!msg)
+        eXosip_lock(ctx);
+    eXosip_call_send_ack(ctx, tid, msg);
+    eXosip_unlock(ctx);
+}
+
+bool make_prack_message(context_t ctx, tid_t tid, msg_t *msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock(ctx);
+    eXosip_call_build_prack(ctx, tid, msg);
+    if(!*msg) {
+        eXosip_unlock(ctx);
+        return false;
+    }
+    return true;
+}
+
+void send_prack_message(context_t ctx, tid_t tid, msg_t msg)
+{
+    if(!msg)
+        eXosip_lock(ctx);
+    eXosip_call_send_prack(ctx, tid, msg);
     eXosip_unlock(ctx);
 }
 
@@ -213,7 +259,7 @@ void send_dialog_message(context_t ctx, did_t did, msg_t msg)
     eXosip_unlock(ctx);
 }
 
-bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route)
+bool make_invite_request(context_t ctx, const char *to, const char *from, const char *subject, msg_t *msg, const char *route)
 {
     *msg = NULL;
     eXosip_lock(ctx);
@@ -329,7 +375,7 @@ void add_authentication(context_t ctx, const char *user, const char *secret, con
     eXosip_unlock();
 }
 
-bool make_request_message(context_t ctx, msg_t *msg, const char *method, const char *to, const char *from, const char *route)
+bool make_request_message(context_t ctx, const char *method, const char *to, const char *from, msg_t *msg, const char *route)
 {
     if(!msg)
         return false;
@@ -367,7 +413,7 @@ void send_response_message(context_t ctx, tid_t tid, int status, msg_t msg)
     eXosip_unlock();
 }
 
-bool make_invite_request(context_t ctx, msg_t *msg, const char *to, const char *from, const char *subject, const char *route)
+bool make_invite_request(context_t ctx, const char *to, const char *from, const char *subject, msg_t *msg, const char *route)
 {
     *msg = NULL;
     eXosip_lock();
@@ -461,6 +507,52 @@ void release_call(context_t ctx, call_t cid, did_t did)
 {
     eXosip_lock();
     eXosip_call_terminate(cid, did);
+    eXosip_unlock();
+}
+
+bool make_ack_message(context_t ctx, did_t did, msg_t *msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_ack(did, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+    return true;
+}
+
+void send_ack_message(context_t ctx, did_t tid, msg_t msg)
+{
+    if(!msg)
+        eXosip_lock();
+    eXosip_call_send_ack(tid, msg);
+    eXosip_unlock();
+}
+
+bool make_prack_message(context_t ctx, tid_t tid, msg_t *msg)
+{
+    if(!msg)
+        return false;
+
+    *msg = NULL;
+    eXosip_lock();
+    eXosip_call_build_prack(tid, msg);
+    if(!*msg) {
+        eXosip_unlock();
+        return false;
+    }
+    return true;
+}
+
+void send_prack_message(context_t ctx, tid_t tid, msg_t msg)
+{
+    if(!msg)
+        eXosip_lock();
+    eXosip_call_send_prack(tid, msg);
     eXosip_unlock();
 }
 
