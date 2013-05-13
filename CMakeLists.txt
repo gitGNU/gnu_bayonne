@@ -235,7 +235,7 @@ if(HAVE_ORTP)
     if(WIN32)
         set(ORTP_LIBS ortp winmm)
     else()
-        set(RTP_LIBS ortp)
+        set(ORTP_LIBS ortp)
     endif()
 endif()
 
