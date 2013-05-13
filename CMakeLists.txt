@@ -232,7 +232,11 @@ elseif(HAVE_EXOSIP2)
 endif()
 
 if(HAVE_ORTP)
-    set(ORTP_LIBS ortp)
+    if(WIN32)
+        set(ORTP_LIBS ortp winmm)
+    else()
+        set(RTP_LIBS ortp)
+    endif()
 endif()
 
 check_include_files(resolv.h HAVE_RESOLV)
