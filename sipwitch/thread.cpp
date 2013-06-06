@@ -72,16 +72,20 @@ void thread::run(void)
 
         switch(sevent->type) {
         case EXOSIP_REGISTRATION_SUCCESS:
+#ifndef EXOSIP_API4
         case EXOSIP_REGISTRATION_REFRESHED:
+#endif
             reg = driver::locate(sevent->rid);
             if(reg)
                 reg->activate();
             break;
+#ifndef EXOSIP_API4
         case EXOSIP_REGISTRATION_TERMINATED:
             reg = driver::locate(sevent->rid);
             if(reg)
                 reg->release();
             break;
+#endif
         case EXOSIP_REGISTRATION_FAILURE:
             reg = driver::locate(sevent->rid);
             if(!reg)
