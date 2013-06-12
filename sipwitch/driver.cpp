@@ -157,6 +157,10 @@ int driver::start(void)
         out_context = udp_context;
     }
 
+#ifdef  HAVE_OPENSSL
+    sip::create(&tls_context, agent, family);
+#endif
+
     if(udp_context) {
         if(!sip::listen(udp_context, IPPROTO_UDP, iface, sip_port))
             shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);

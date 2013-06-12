@@ -38,6 +38,6 @@
 #cmakedefine HAVE_MKFIFO 1
 #cmakedefine HAVE_SIGWAIT 1
 #cmakedefine HAVE_SIGWAIT2 1
-#cmakedefine HAVE_TLS 1
+#cmakedefine HAVE_OPENSSL 1
 
 #define OSIP2_LIST_PTR  &
