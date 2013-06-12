@@ -119,13 +119,6 @@ int driver::start(void)
 
     if(transport && eq(transport, "tcp"))
         tcp = true;
-/*
-    else if(transport && eq(transport, "tls")) {
-        protocol = IPPROTO_TCP;
-        out_context = tls_context;
-        tlsmode = 1;
-    }
-*/
 
     if(keys)
         agent = keys->get("agent");
@@ -176,7 +169,7 @@ int driver::start(void)
     }
 
     if(tls_context) {
-        if(!sip::listen(tls_context, IPPROTO_TCP, iface, sip_port))
+        if(!sip::listen(tls_context, IPPROTO_TCP, iface, sip_port, true))
             shell::log(shell::FAIL, "cannot listen port %u for tls", sip_port + 1);
         else
             shell::log(shell::NOTIFY, "listening port %u for tls", sip_port + 1);
