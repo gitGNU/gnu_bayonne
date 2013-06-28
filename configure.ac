@@ -226,6 +226,24 @@ if test x"$has_ortp" = "xyes" ; then
         BUILD_SUBDIRS="$BUILD_SUBDIRS sipwitch" ; fi
 fi
 
+# whether rtp_session_set_local_addr has 3 args
+
+AC_CACHE_CHECK(whether rtp_session_set_local_addr has rtcp,
+    ac_cv_ortp_rtcp_port,
+    AC_TRY_COMPILE([
+        #define _POSIX_PTHREAD_SEMANTICS
+        #define _GNU_SOURCE
+        #include <ortp/ortp.h>
+    ],
+        [rtp_session_set_local_addr(NULL, "0.0.0.0", 0, 0);],
+        ac_cv_ortp_rtcp_port=no,
+        ac_cv_ortp_rtcp_port=yes
+    )
+)
+if test "$ac_cv_ortp_rtcp_port" = "no" ; then
+    ORTP_FLAGS="$ORTP_FLAGS -DORTP_API1"
+fi
+
 if test x"$has_eXosip2" = "xyes" ; then
     PKG_CHECK_MODULES(LIBOSIP2, libosip2 >= 3.0.0)
     AC_DEFINE(OSIP2_LIST_PTR, [&], [define pointer mode])

@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server @ORTP_CFLAGS@ @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server @ORTP_FLAGS@ @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
 LDADD = ../server/libserver.a ../runtime/libbayonne.la @ORTP_LIBS@ @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 
 sbin_PROGRAMS = bayonne-sipwitch
