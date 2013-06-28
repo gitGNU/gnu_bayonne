@@ -76,7 +76,7 @@ void media::attach(timeslot *ts, const char *connect, unsigned port)
     rtp_session_set_scheduling_mode(s, 1);
     rtp_session_set_blocking_mode(s, 0);
 
-    rtp_session_set_local_addr(s, address, ts->media_port);
+    rtp_session_set_local_addr(s, address, ts->media_port, ts->media_port + 1);
     rtp_session_set_remote_addr(s, connect, port);
 
     if(symmetric)
