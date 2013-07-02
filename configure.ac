@@ -236,8 +236,8 @@ AC_CACHE_CHECK(whether rtp_session_set_local_addr has rtcp,
         #include <ortp/ortp.h>
     ],
         [rtp_session_set_local_addr(NULL, "0.0.0.0", 0, 0);],
-        ac_cv_ortp_rtcp_port=no,
-        ac_cv_ortp_rtcp_port=yes
+        ac_cv_ortp_rtcp_port=yes,
+        ac_cv_ortp_rtcp_port=no
     )
 )
 if test "$ac_cv_ortp_rtcp_port" = "no" ; then
