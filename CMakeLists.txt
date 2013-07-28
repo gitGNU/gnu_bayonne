@@ -140,7 +140,7 @@ if (USES_UCOMMON_INCLUDE_DIRS)
     message(STATUS "  Using local ucommon dependency")
 else()
     find_package(PkgConfig)
-    pkg_check_modules(USES_UCOMMON REQUIRED ucommon>=6.0.0)
+    pkg_check_modules(USES_UCOMMON REQUIRED ucommon>=6.0.7)
 endif()
 
 include_directories(${USES_UCOMMON_INCLUDE_DIRS})
