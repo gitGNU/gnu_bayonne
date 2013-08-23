@@ -1100,8 +1100,6 @@ ssize_t AudioFile::getBuffer(encoded_t addr, size_t bytes)
     }
     if (iolimit && ((curpos + bytes) > iolimit))
         bytes = iolimit - curpos;
-    if (bytes < 0)
-        bytes = 0;
 
     getInfo(prior);
 
