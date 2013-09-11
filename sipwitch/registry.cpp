@@ -28,6 +28,17 @@ Registry(keyset)
     sip::msg_t msg = NULL;
     context = driver::out_context;
     const char *identity = keys->get("identity");
+
+    active = false;
+    rid = -1;
+
+    if(!identity)
+        identity = keys->get("uri");
+
+    if(!identity) {
+        shell::log(shell::ERR, "failed to register %s; no uri identity", id);
+        return;
+    }
     
     if(eq(identity, "udp:", 4)) {
         identity += 4;
@@ -64,19 +75,22 @@ Registry(keyset)
     sip::uri_userid(buffer, sizeof(buffer), uri);
     userid = driver::dup(buffer);
 
-    sip::uri_server(buffer, sizeof(buffer), uri);
-    server = driver::dup(buffer);
+    server = keys->get("server");
+    if(!server) {
+        sip::uri_server(buffer, sizeof(buffer), uri);
+        server = driver::dup(buffer);
+    }
 
     secret = keys->get("secret");
     digest = keys->get("digest");
     method = keys->get("method");
     realm = keys->get("realm");
-    active = false;
-    rid = -1;
-
+    
     // inactive contexts ignored...
-    if(!context)
+    if(!context) {
+        shell::log(shell::ERR, "failed to register %s; no context for %s", id, schema);
         return;
+    }
 
     if(!method || !*method)
         method = "md5";
