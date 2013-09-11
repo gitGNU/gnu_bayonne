@@ -29,7 +29,6 @@ public:
     const char *secret;
     const char *digest;
     const char *server;
-    const char *domain;
     const char *method;
     const char *realm;
     const char *uri;

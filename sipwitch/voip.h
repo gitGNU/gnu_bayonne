@@ -89,6 +89,13 @@ bool listen(context_t ctx, int proto = IPPROTO_UDP, const char *iface = NULL, un
 void create(context_t *ctx, const char *agent, int family = AF_INET);
 void release(context_t ctx);
 
+bool uri_create(char *buf, size_t size, const char *server, const char *user = NULL);
+bool uri_dialed(char *buf, size_t size, const char *to, const char *id);
+bool uri_server(char *buf, size_t size, const char *uri);
+bool uri_hostid(char *buf, size_t size, const char *uri);
+bool uri_userid(char *buf, size_t size, const char *uri);
+unsigned short uri_portid(const char *uri);
+
 } // end namespace
 
 #ifndef SESSION_EXPIRES

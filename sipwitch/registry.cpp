@@ -22,29 +22,38 @@ registry::registry(keydata *keyset, unsigned myport, unsigned expiration) :
 Registry(keyset)
 {
     const char *cp = keys->get("expires");
-    const char *schema = keys->get("protocol");
+    const char *schema = NULL;
     char buffer[1024];
     char iface[180];
     sip::msg_t msg = NULL;
-
-    if(!schema)
-        schema = keys->get("transport");
-
-    if(!schema)
-        schema = "sip";
-
     context = driver::out_context;
-    if(eq_case(schema, "sipu") || eq_case("schema", "udp")) {
+    const char *identity = keys->get("identity");
+    
+    if(eq(identity, "udp:", 4)) {
+        identity += 4;
         schema = "sip";
         context = driver::udp_context;
     }
-    else if(eq_case(schema, "sipt") || eq_case(schema, "tcp")) {
+    else if(eq(identity, "tcp:", 4)) {
+        identity += 4;
         schema = "sip";
         context = driver::tcp_context;
     }
-    else if(eq_case(schema, "sips") || eq_case(schema, "tls")) {
+    else if(eq(identity, "sips:", 5)) {
         schema = "sips";
         context = driver::tls_context;
+        identity += 5;
+    }
+    else if(!eq(identity, "sip:", 4))
+        schema = "sip";
+
+    if(schema) {
+        snprintf(buffer, sizeof(buffer), "%s:%s", schema, identity);
+        uri = driver::dup(buffer);
+    }
+    else {
+        uri = identity;
+        schema = "sip";
     }
 
     if(cp)
@@ -52,10 +61,14 @@ Registry(keyset)
     else
         expires = expiration;
 
-    userid = keys->get("userid");
+    sip::uri_userid(buffer, sizeof(buffer), uri);
+    userid = driver::dup(buffer);
+
+    sip::uri_server(buffer, sizeof(buffer), uri);
+    server = driver::dup(buffer);
+
     secret = keys->get("secret");
     digest = keys->get("digest");
-    domain = keys->get("domain");
     method = keys->get("method");
     realm = keys->get("realm");
     active = false;
@@ -64,12 +77,6 @@ Registry(keyset)
     // inactive contexts ignored...
     if(!context)
         return;
-
-    if(!domain || !*domain)
-        domain = "localdomain";
-
-    if(!userid || !*userid)
-        userid = keys->get("user");
 
     if(!method || !*method)
         method = "md5";
@@ -84,34 +91,6 @@ Registry(keyset)
 
     if(secret && userid && realm)
         sip::add_authentication(context, userid, secret, realm);
-
-    unsigned port = 0;
-    cp = keys->get("port");
-    if(cp)
-        port = atoi(cp);
-
-    cp = keys->get("server");
-    if(!cp)
-        cp = id;
-
-    if(port)
-        snprintf(buffer, sizeof(buffer), "%s:%s:%u", schema, cp, port);
-    else
-        snprintf(buffer, sizeof(buffer), "%s:%s", schema, cp);
-
-    server = Driver::dup(buffer);
-
-    if(!domain)
-        domain = getHostid(server);
-
-    if(userid) {
-        snprintf(buffer, sizeof(buffer), "%s:%s@%s", schema, userid, domain);
-        uri = Driver::dup(buffer);
-    }
-    else {
-        snprintf(buffer, sizeof(buffer), "%s:%s", schema, domain);
-        uri = Driver::dup(buffer);
-    }
 
     getInterface(server, iface, sizeof(iface));
     Random::uuid(uuid);
