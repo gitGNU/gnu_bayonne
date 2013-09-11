@@ -184,17 +184,17 @@ int driver::start(void)
     thread *t;
 
     if(udp_context) {
-        t = new thread(udp_context, stack *1024l);
+        t = new thread(udp_context, stack *1024l, "udp");
         t->start(priority);
     }
 
     if(tcp_context) {
-        t = new thread(tcp_context, stack *1024l);
+        t = new thread(tcp_context, stack *1024l, "tcp");
         t->start(priority);
     }
 
     if(tls_context) {
-        t = new thread(tls_context, stack *1024l);
+        t = new thread(tls_context, stack *1024l, "tls");
         t->start(priority);
     }
 

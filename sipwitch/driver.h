@@ -50,7 +50,7 @@ public:
 class __LOCAL thread : public DetachedThread
 {
 private:
-    unsigned instance;
+    const char *instance;
     sip::context_t    context;
     sip::event_t      sevent;
     registry    *reg;
@@ -58,7 +58,7 @@ private:
     void run(void);
 
 public:
-    thread(sip::context_t source, size_t size);
+    thread(sip::context_t source, size_t size, const char *type);
 
     static void shutdown();
 };

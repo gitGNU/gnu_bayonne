@@ -43,22 +43,23 @@ static char *remove_quotes(char *c)
 }
 #endif
 
-thread::thread(sip::context_t source, size_t size) : DetachedThread(size)
+thread::thread(sip::context_t source, size_t size, const char *type) : DetachedThread(size)
 {
     context = source;
+    instance = type;
 }
 
 void thread::run(void)
 {
-    instance = ++startup_count;
-    shell::log(DEBUG1, "starting event thread %d", instance);
+     ++startup_count;
+    shell::log(DEBUG1, "starting event thread %s", instance);
 
     for(;;) {
         if(!shutdown_flag)
             sevent = sip::get_event(context, 1000);
 
         if(shutdown_flag) {
-            shell::log(DEBUG1, "stopping event thread %d", instance);
+            shell::log(DEBUG1, "stopping event thread %s", instance);
             ++shutdown_count;
             return; // exits event thread...
         }
@@ -67,7 +68,7 @@ void thread::run(void)
             continue;
 
         ++active_count;
-        shell::debug(2, "sip: event %d; cid=%d, did=%d, instance=%d",
+        shell::debug(2, "sip: event %d; cid=%d, did=%d, instance=%s",
             sevent->type, sevent->cid, sevent->did, instance);
 
         switch(sevent->type) {
