@@ -76,6 +76,11 @@ Registry(keyset)
     userid = driver::dup(buffer);
 
     server = keys->get("server");
+    if(!server)
+        server = keys->get("proxy");
+    if(!server)
+        server = keys->get("route");
+
     if(server) {
         if(strncmp(server, "sip:", 4))
             server += 4;
