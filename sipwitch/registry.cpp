@@ -76,7 +76,15 @@ Registry(keyset)
     userid = driver::dup(buffer);
 
     server = keys->get("server");
-    if(!server) {
+    if(server) {
+        if(strncmp(server, "sip:", 4))
+            server += 4;
+        if(strncmp(server, "sips:", 5))
+            server += 5;
+        snprintf(buffer, sizeof(buffer), "%s:%s", schema, server);
+        server = driver::dup(buffer); 
+    }
+    else {
         sip::uri_server(buffer, sizeof(buffer), uri);
         server = driver::dup(buffer);
     }
