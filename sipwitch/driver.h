@@ -120,5 +120,18 @@ public:
 
 };
 
+class __LOCAL uri 
+{
+public:
+	static bool create(char *buf, size_t size, const char *server, const char *user = NULL);
+	static bool dialed(char *buf, size_t size, const char *to, const char *id);
+	static bool server(char *buf, size_t size, const char *uri);
+	static bool hostid(char *buf, size_t size, const char *uri);
+	static bool userid(char *buf, size_t size, const char *uri);
+	static bool route(char *buf, size_t size, const char *uri, int family, int protocol);
+	static unsigned short portid(const char *uri);
+};
+
+
 END_NAMESPACE
 
