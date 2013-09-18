@@ -223,7 +223,7 @@ if test x"$has_ortp" = "xyes" ; then
     ORTP_FLAGS="$ORTP_CFLAGS"
     ORTP_LIBS="$ORTP_LIBS"
     if test x"$has_eXosip2" = "xyes" ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS sipwitch" ; fi
+        BUILD_SUBDIRS="$BUILD_SUBDIRS sipw" ; fi
 fi
 
 # whether rtp_session_set_local_addr has 3 args
@@ -351,6 +351,6 @@ AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
 AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
 bayonne.pc bayonne-config
-server/Makefile sipwitch/Makefile
+server/Makefile sipw/Makefile
 )
 

@@ -12,9 +12,9 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server @ORTP_FLAGS@ @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
 LDADD = ../server/libserver.a ../runtime/libbayonne.la @ORTP_LIBS@ @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 
-sbin_PROGRAMS = bayonne-sipwitch
+sbin_PROGRAMS = bayonne-sipw
 noinst_HEADERS = driver.h voip.h
 
-bayonne_sipwitch_SOURCES = driver.cpp registry.cpp timeslot.cpp \
+bayonne_sipw_SOURCES = driver.cpp registry.cpp timeslot.cpp \
 	thread.cpp media.cpp voip.cpp uri.cpp
 

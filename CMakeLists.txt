@@ -270,7 +270,7 @@ if(BUILD_TESTING)
 endif()
 
 if(HAVE_EXOSIP2 AND HAVE_ORTP)
-    add_subdirectory(sipwitch)
+    add_subdirectory(sipw)
 endif()
 
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
