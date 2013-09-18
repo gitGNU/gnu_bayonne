@@ -32,6 +32,7 @@
 #cmakedefine HAVE_SYS_POLL_H 1
 #cmakedefine HAVE_SYS_UIO_H 1
 #cmakedefine HAVE_IOCTL_H 1
+#cmakedefine HAVE_RESOLV_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_GETUID 1

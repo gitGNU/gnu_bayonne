@@ -241,8 +241,8 @@ if(HAVE_ORTP)
     endif()
 endif()
 
-check_include_files(resolv.h HAVE_RESOLV)
-if(HAVE_RESOLV)
+check_include_files(resolv.h HAVE_RESOLV_H)
+if(HAVE_RESOLV_H)
     set(EXOSIP2_LIBS ${EXOSIP2_LIBS} resolv)
 endif()
 
