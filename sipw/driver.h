@@ -55,6 +55,7 @@ private:
     sip::event_t      sevent;
     registry    *reg;
 
+    const char *eid(eXosip_event_type ev);
     void run(void);
 
 public:
