@@ -123,6 +123,29 @@ public:
 class __LOCAL uri 
 {
 public:
+	class address : protected Socket::address
+	{
+	protected:
+		class srvaddrinfo
+		{
+		public:
+		    struct sockaddr_storage addr;
+		    uint16_t weight, priority;
+		};
+
+		class srvaddrinfo *srv;
+		struct sockaddr *entry;
+		uint16_t pri;
+		unsigned count;
+
+	public:
+		address(const char *uri, int family, int protocol);
+		~address();
+
+		inline struct sockaddr *operator*() const
+			{return entry;};
+	};
+
 	static bool create(char *buf, size_t size, const char *server, const char *user = NULL);
 	static bool dialed(char *buf, size_t size, const char *to, const char *id);
 	static bool server(char *buf, size_t size, const char *uri);
