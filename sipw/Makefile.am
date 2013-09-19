@@ -16,5 +16,5 @@ sbin_PROGRAMS = bayonne-sipw
 noinst_HEADERS = driver.h voip.h
 
 bayonne_sipw_SOURCES = driver.cpp registry.cpp timeslot.cpp \
-	thread.cpp media.cpp voip.cpp uri.cpp
+	thread.cpp media.cpp voip.cpp srv.cpp
 

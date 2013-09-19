@@ -23,6 +23,8 @@ sip::context_t driver::udp_context = NULL;
 sip::context_t driver::tls_context = NULL;
 sip::context_t driver::out_context = NULL;
 
+int driver::family = AF_INET;
+
 driver::driver() : Driver("sip", "registry")
 {
     autotimer = 500;
@@ -36,7 +38,6 @@ int driver::start(void)
     unsigned sip_port = 5060, expires = 300, timeslots = 16;
     unsigned rtp_port = 0;
     bool tcp = false;
-    int family = AF_INET;
     size_t stack = 0;
     unsigned priority = 0, mpri = 1;
 

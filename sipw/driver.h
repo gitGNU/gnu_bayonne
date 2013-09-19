@@ -115,46 +115,45 @@ public:
     static sip::context_t udp_context;
     static sip::context_t tcp_context;
     static sip::context_t tls_context;
+    static int family;
 
     static registry *locate(sip::reg_t rid);
 
 };
 
-class __LOCAL uri 
+class srv : protected Socket::address
 {
+protected:
+    class srvaddrinfo
+    {
+    public:
+	struct sockaddr_storage addr;
+	uint16_t weight, priority;
+    };
+
+    class srvaddrinfo *srvlist;
+    struct sockaddr *entry;
+    uint16_t pri;
+    unsigned count;
+
 public:
-	class address : protected Socket::address
-	{
-	protected:
-		class srvaddrinfo
-		{
-		public:
-		    struct sockaddr_storage addr;
-		    uint16_t weight, priority;
-		};
+    srv(const char *uri);
+    ~srv();
 
-		class srvaddrinfo *srv;
-		struct sockaddr *entry;
-		uint16_t pri;
-		unsigned count;
+    inline struct sockaddr *operator*() const
+	    {return entry;};
 
-	public:
-		address(const char *uri, int family, int protocol);
-		~address();
+    inline operator bool() const
+	    {return entry != NULL;}
 
-		inline struct sockaddr *operator*() const
-			{return entry;};
-	};
+    inline bool operator!() const
+	    {return entry == NULL;}
 
-	static bool create(char *buf, size_t size, const char *server, const char *user = NULL);
-	static bool dialed(char *buf, size_t size, const char *to, const char *id);
-	static bool server(char *buf, size_t size, const char *uri);
-	static bool hostid(char *buf, size_t size, const char *uri);
-	static bool userid(char *buf, size_t size, const char *uri);
-	static bool route(char *buf, size_t size, const char *uri, int family, int protocol);
-	static unsigned short portid(const char *uri);
+    struct sockaddr *next(void);
+
+    static sip::context_t route(char *buf, size_t size, const char *uri);
+
 };
-
 
 END_NAMESPACE
 

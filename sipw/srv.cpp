@@ -41,21 +41,25 @@ typedef union {
 using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
 
-uri::address::address(const char *uri, int family, int protocol) : Socket::address()
+srv::srv(const char *uri) : Socket::address()
 {
 #ifdef  _MSWINDOWS_
     Socket::init();
 #endif
 
-    int port = portid(uri);
+    int protocol = IPPROTO_UDP;
+    int port = sip::uri_portid(uri);
     char host[256], svc[10];
     struct addrinfo hint;
+
+    if(driver::out_context == driver::tcp_context)
+        protocol = IPPROTO_TCP;
 
 #if defined(HAVE_RESOLV_H)
     bool nosrv = false;
 #endif
 
-    srv = NULL;
+    srvlist = NULL;
     entry = NULL;
 	count = 0;
 
@@ -80,7 +84,7 @@ uri::address::address(const char *uri, int family, int protocol) : Socket::addre
         uri += 4;    
     }
 
-    hostid(host, sizeof(host), uri);
+    sip::uri_hostid(host, sizeof(host), uri);
     memset(&hint, 0, sizeof(hint));
 
     hint.ai_socktype = 0;
@@ -100,19 +104,9 @@ uri::address::address(const char *uri, int family, int protocol) : Socket::addre
 #ifdef  HAVE_RESOLV_H
         nosrv = true;
 #endif
-
-        if(strchr(host, ':')) {
-#ifdef  AF_INET6
-            family = AF_INET6;
-#else
-            return NULL;
-#endif
-        }
-        else
-            family = AF_INET;
     }
 
-    hint.ai_family = family;
+    hint.ai_family = driver::family;
 
 #if defined(AF_INET6) && defined(AI_V4MAPPED)
     if(hint.ai_family == AF_INET6)
@@ -156,7 +150,7 @@ uri::address::address(const char *uri, int family, int protocol) : Socket::addre
     if(!acount)
         goto nosrv;
 
-    srv = new srvaddrinfo[acount];
+    srvlist = new srvaddrinfo[acount];
     while(qcount-- > 0 && cp < ep) {
         result = dn_expand(mp, ep, cp, hbuf, sizeof(hbuf));
         if(result < 0)
@@ -213,12 +207,12 @@ uri::address::address(const char *uri, int family, int protocol) : Socket::addre
             if(weight)
                 weight = (1 + rand) % ( 10000 * weight);
         
-            srv[count].weight = weight;
-            srv[count].priority = priority;
-            Socket::store(&srv[count].addr, sp);
+            srvlist[count].weight = weight;
+            srvlist[count].priority = priority;
+            Socket::store(&srvlist[count].addr, sp);
             if(!current || priority < current->priority || weight > current->weight) {
-                current = &srv[count];
-                entry = (struct sockaddr *)&srv[count].addr;
+                current = &srvlist[count];
+                entry = (struct sockaddr *)&srvlist[count].addr;
                 pri = priority;
             }
             ++count;
@@ -228,9 +222,9 @@ uri::address::address(const char *uri, int family, int protocol) : Socket::addre
 	
 	return;
 nosrv:
-    if(srv) {
-        delete[] srv;
-        srv = NULL;
+    if(srvlist) {
+        delete[] srvlist;
+        srvlist = NULL;
     }
 #endif
 
@@ -250,11 +244,11 @@ nosrv:
 	}
 }
 
-uri::address::~address()
+srv::~srv()
 {
-    if(srv) {
-        delete[] srv;
-        srv = NULL;
+    if(srvlist) {
+        delete[] srvlist;
+        srvlist = NULL;
     }
 
     if(list) {
@@ -263,224 +257,76 @@ uri::address::~address()
     } 
 }       
 
-bool uri::dialed(char *buf, size_t size, const char *to, const char *id)
+struct sockaddr *srv::next(void)
 {
-    assert(buf != NULL);
-    assert(to != NULL);
-    assert(size > 0);
-
-    buf[0] = 0;
-    const char *schema = "sip:";
-
-    if(eq(to, "sips:", 5)) {
-        schema = "sips:";
-        to += 5;
+#ifdef  HAVE_RESOLV_H
+    unsigned index = 0;
+    srvaddrinfo *node = NULL, *np = NULL;
+    ++pri;
+    while(index < count) {
+        np = &srvlist[index++];
+        if(np->priority < pri)
+            continue;
+        if(!node || np->priority < node->priority || np->weight > node->weight)
+            node = np;
     }
-    else if(eq(to, "sip:", 4)) {
-        to += 4;
+    if(!np) {
+        entry = NULL;
+        return NULL;
     }
-    else if(eq(id, "sips:", 5))
-        schema = "sips:";
-
-    if(strchr(to, '@')) {
-        snprintf(buf, size, "%s%s", schema, to);
-        return true;
-    }
-
-    const char *host = strchr(id, '@');
-    if(host)
-        ++host;
-    else {
-        if(eq(id, "sips:", 5))
-            id += 5;
-        else if(eq(id, "sip:", 4))
-            id += 4;
-        host = id;
-    }
-    snprintf(buf, size, "%s%s@%s", schema, to, host);
-    return true;
-} 
-
-bool uri::create(char *buf, size_t size, const char *server, const char *userid)
-{
-    assert(buf != NULL);
-    assert(size > 0);
-
-    buf[0] = 0;
-    const char *schema="sip:";
-    
-    if(eq(server, "sips:", 5)) {
-        schema="sips:";
-        server += 5;
-    }
-    else if(eq(server, "sip:", 4)) {
-        server += 4;
-    }
-
-    const char *sp = strchr(server, '@');
-    if(!sp && userid) {
-        snprintf(buf, size, "%s%s@%s", schema, userid, server);
-        return true;
-    }
-
-    snprintf(buf, size, "%s%s", schema, server);
-    return true;
-}
-    
-bool uri::server(char *buf, size_t size, const char *uri)
-{
-    assert(buf != NULL);
-    assert(size > 0);
-
-    buf[0] = 0;
-    const char *schema="sip:";
-    
-    if(eq(uri, "sips:", 5)) {
-        schema="sips:";
-        uri += 5;
-    }
-    else if(eq(uri, "sip:", 4)) {
-        uri += 4;
-    }
-
-    const char *sp = strchr(uri, '@');
-    if(sp)
-        uri = ++sp;
-
-    snprintf(buf, size, "%s%s", schema, uri);
-    return true;
+    pri = node->priority;
+    entry = (struct sockaddr *)&node->addr;
+#else
+    entry = NULL;
+#endif
+    return entry;
 }
 
-bool uri::userid(char *buf, size_t size, const char *uri)
-{
-    assert(buf != NULL);
-    assert(size > 0);
-
-	buf[0] = 0;
-	char *ep;
-
-	if(!uri)
-		return false;
-
-    if(eq(uri, "sip:", 4))
-        uri += 4;
-    else if(eq(uri, "sips:", 5))
-        uri += 5;
-
-	if(!strchr(uri, '@'))
-		return false;
-
-    String::set(buf, size, uri);
-    ep = strchr(buf, '@');
-    if(ep)
-        *ep = 0;
-    return true;
-}
-
-unsigned short uri::portid(const char *uri)
-{
-    const char *pp = NULL;
-    const char *fp = NULL;
-
-    if(eq(uri, "sips:", 5))      
-        uri += 5;
-    else if(eq(uri, "sip:", 4))
-        uri += 4;
-    else if(eq(uri, "tcp:", 4))
-        uri += 4;
-    else if(eq(uri, "udp:", 4))
-        uri += 4;
-
-    if(*uri == '[') {
-        pp = strchr(uri, ']');
-        if(pp)
-            pp = strchr(pp, ':');
-    }
-    else {
-        pp = strrchr(uri, ':');
-        fp = strchr(uri, ':');
-        if(fp != pp)
-            pp = NULL;
-    }
-    if(pp)
-        return atoi(++pp);
-    else
-        return 0;
-}
-
-bool uri::route(char *buf, size_t size, const char *uri, int family, int protocol)
+sip::context_t srv::route(char *buf, size_t size, const char *uri)
 {
     char host[256];
     const char *schema = "sip";
+    const char *sid = uri;
+    sip::context_t ctx = driver::out_context;
 
-    if(!uri::hostid(host, sizeof(host), uri))
-        return false;
+    if(!sip::uri_hostid(host, sizeof(host), uri))
+        return NULL;
 
     if(eq(uri, "sips:", 5)) {
         schema = "sips";
-        protocol = IPPROTO_TCP;
+        ctx = driver::tls_context;
     }
     else if(eq(uri, "tcp:", 4)) {
         uri += 4;
-        protocol = IPPROTO_TCP;
+        ctx = driver::tcp_context;
     }
     else if(eq(uri, "udp:", 4)) {
         uri += 4;
-        protocol = IPPROTO_UDP;
+        ctx = driver::udp_context;
     }
 
     buf[0] = 0;
     char *cp = strrchr(host, '.');
-    if(Socket::is_numeric(host) || !cp || eq(cp, ".local") || eq(cp, ".localdomain"))
-        return uri::server(buf, size, uri);
+    if(Socket::is_numeric(host) || !cp || eq(cp, ".local") || eq(cp, ".localdomain")) {
+        if(sip::uri_server(buf, size, uri))
+            return ctx;
+        else
+            return NULL;
+    }
 
-    uri::address addr(uri, family, protocol);
+    srv addr(sid);
 	struct sockaddr *ap = *addr;
     if(!ap)
-        return false;
+        return NULL;
     if(!Socket::query(ap, host, sizeof(host)))
-        return false;
+        return NULL;
 #ifdef	AF_INET6
 	if(ap->sa_family == AF_INET6)
 		snprintf(buf, size, "%s:[%s]:%u", schema, host, (unsigned)ntohs(((struct sockaddr_in6 *)(ap))->sin6_port) & 0xffff);
 	else
 #endif
 		snprintf(buf, size, "%s:%s:%u", schema, host, (unsigned)ntohs(((struct sockaddr_in *)(ap))->sin_port) & 0xffff);
-    return true;
+    return ctx;
 }
 
-bool uri::hostid(char *buf, size_t size, const char *uri)
-{
-    assert(buf != NULL);
-    assert(size > 0);
-
-    buf[0] = 0;
-    
-    if(eq(uri, "sips:", 5))      
-        uri += 5;
-    else if(eq(uri, "sip:", 4))
-        uri += 4;
-    else if(eq(uri, "udp:", 4))
-        uri += 4;
-    else if(eq(uri, "tcp:", 4))
-        uri += 4;
-
-    char *sp = (char *)strchr(uri, '@');
-    if(sp)
-        uri = ++sp;
-
-    if(*uri == '[') {
-        String::set(buf, size, ++uri);
-        sp = strchr(buf, ']');
-        if(sp)
-            (*sp++) = 0;
-    }
-    else {
-        String::set(buf, size, uri);
-        sp = strrchr(buf, ':');
-        if(sp && sp == strchr(buf, ':'))
-            *sp = 0;
-    }
-    return true;
-}
 

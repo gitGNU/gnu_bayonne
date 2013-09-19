@@ -28,6 +28,7 @@ Registry(keyset)
     sip::msg_t msg = NULL;
     context = driver::out_context;
     const char *identity = keys->get("identity");
+    const char *sid = identity;
 
     active = false;
     rid = -1;
@@ -81,18 +82,11 @@ Registry(keyset)
     if(!server)
         server = keys->get("route");
 
-    if(server) {
-        if(strncmp(server, "sip:", 4))
-            server += 4;
-        if(strncmp(server, "sips:", 5))
-            server += 5;
-        snprintf(buffer, sizeof(buffer), "%s:%s", schema, server);
-        server = driver::dup(buffer); 
-    }
-    else {
-        sip::uri_server(buffer, sizeof(buffer), uri);
-        server = driver::dup(buffer);
-    }
+    if(!server)
+        server = sid;
+
+    context = srv::route(buffer, sizeof(buffer), server);
+    server = driver::dup(buffer);
 
     secret = keys->get("secret");
     digest = keys->get("digest");

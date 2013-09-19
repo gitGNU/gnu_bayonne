@@ -833,9 +833,12 @@ bool uri_server(char *buf, size_t size, const char *uri)
         schema="sips:";
         uri += 5;
     }
-    else if(!strncmp(uri, "sip:", 4)) {
+    else if(!strncmp(uri, "sip:", 4))
         uri += 4;
-    }
+    else if(!strncmp(uri, "tcp:", 4))
+        uri += 4;
+    else if(!strncmp(uri, "udp:", 4))
+        uri += 4;
 
     const char *sp = strchr(uri, '@');
     if(sp)
@@ -857,6 +860,10 @@ bool uri_userid(char *buf, size_t size, const char *uri)
         uri += 4;
     else if(!strncmp(uri, "sips:", 5))
         uri += 5;
+    else if(!strncmp(uri, "tcp:", 4))
+        uri += 4;
+    else if(!strncmp(uri, "udp:", 4))
+        uri += 4;
 
 	if(!strchr(uri, '@'))
 		return false;
@@ -875,9 +882,12 @@ unsigned short uri_portid(const char *uri)
 
     if(!strncmp(uri, "sips:", 5))      
         uri += 5;
-    else if(!strncmp(uri, "sip:", 4)) {
+    else if(!strncmp(uri, "sip:", 4))
         uri += 4;
-    }
+    else if(!strncmp(uri, "tcp:", 4))
+        uri += 4;
+    else if(!strncmp(uri, "udp:", 4))
+        uri += 4;
 
     if(*uri == '[') {
         pp = strchr(uri, ']');
