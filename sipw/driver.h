@@ -139,7 +139,12 @@ protected:
 
 public:
     srv(const char *uri);
+    srv();
     ~srv();
+
+    void set(const char *uri);
+
+    void clear(void);
 
     inline struct sockaddr *operator*() const
 	    {return entry;};
@@ -152,8 +157,7 @@ public:
 
     struct sockaddr *next(void);
 
-    static sip::context_t route(char *buf, size_t size, const char *uri);
-
+    sip::context_t route(char *buf, size_t size, const char *uri);
 };
 
 END_NAMESPACE
