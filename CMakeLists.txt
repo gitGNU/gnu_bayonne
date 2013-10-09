@@ -205,13 +205,13 @@ file(GLOB sipw_inc sipw/*.h)
 
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
-add_dependencies(bayonne-runtime ucommon)
-target_link_libraries(bayonne-runtime ${USES_UCOMMON_LIBRARIES})
+add_dependencies(bayonne-runtime ccscript ucommon)
+target_link_libraries(bayonne-runtime ${USES_CCSCRIPT_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${EXOSIP2_LIBS})
 
 if(HAVE_EXOSIP2)
     add_executable(bayonne-sipw ${sipw_src} ${sipw_inc})
-    add_dependencies(bayonne-sipw bayonne-runtime usecure ucommon)
-    target_link_libraries(bayonne-sipw bayonne-runtime usecure ucommon ${EXOSIP2_LIBS} ${SECURE_LIBS} ${UCOMMON_LIBS})
+    add_dependencies(bayonne-sipw bayonne-runtime ccscript usecure ucommon)
+    target_link_libraries(bayonne-sipw bayonne-runtime usecure ucommon ${EXOSIP2_LIBS} ${SECURE_LIBRARIES} ${UCOMMON_LIBRARIES})
 endif()
 
 add_executable(bayonne-control utils/bayonne.cpp)
