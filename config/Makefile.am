@@ -9,9 +9,29 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-EXTRA_DIST = *.conf
+RELEASE = -version-info $(LT_VERSION)
+EXTRA_DIST = bayonne.log bayonne.defaults bayonne.init \
+	bayonne.cron bayonne.conf users.conf
 
-pkgconfdir=$(sysconfdir)/bayonne
+logrotatedir=$(sysconfdir)/logrotate.d
 
-pkgconf_DATA = tones.conf
+sysconf_DATA = bayonne.conf
+conf_DATA = users.conf
+
+confdir = $(sysconfdir)/bayonne
+
+install-data-local:
+	$(mkinstalldirs) $(DESTDIR)/$(logrotatedir)/bayonne
+	$(INSTALL_DATA) bayonne.log $(DESTDIR)/$(logrotatedir)/bayonne
+	if test -d /etc/sysconfig ; then \
+		$(mkinstalldirs) $(DESTDIR)/$(sysconfdir)/sysconfig ; \
+		$(INSTALL_DATA) bayonne.defaults $(DESTDIR)/$(sysconfdir)/sysconfig/bayonne ; \
+	else \
+		$(mkinstalldirs) $(DESTDIR)/$(sysconfdir)/default ; \
+		$(INSTALL_DATA) bayonne.defaults $(DESTDIR)/$(sysconfdir)/default/bayonne ; \
+	fi
+	$(mkinstalldirs) $(DESTDIR)/@INITRDDIR@
+	$(INSTALL) -m 0755 bayonne.init $(DESTDIR)/@INITRDDIR@/bayonne
+	$(mkinstalldirs) $(DESTDIR)/$(sysconfdir)/cron.hourly
+	$(INSTALL) -m 0755 bayonne.cron $(DESTDIR)/$(sysconfdir)/cron.hourly/bayonne
 

@@ -12,33 +12,22 @@
 #cmakedefine PACKAGE "${PROJECT_NAME}"
 
 #define DEFAULT_LIBPATH "${DEFAULT_LIBPATH}"
+#define DEFAULT_LIBEXEC "${DEFAULT_LIBEXEC}"
 #define DEFAULT_VARPATH "${DEFAULT_VARPATH}"
+#define DEFAULT_CFGPATH "${DEFAULT_CFGPATH}"
+#define DEFAULT_SCRPATH "${DEFAULT_SCRPATH}"
 #define DEFAULT_DATADIR "${DEFAULT_DATADIR}"
-#define BAYONNE_LIBEXEC "${BAYONNE_LIBEXEC}"
-#define BAYONNE_CFGPATH "${BAYONNE_CFGPATH}"
 #define DEFAULT_PAGING  "${DEFAULT_PAGING}"
 
-#cmakedefine HAVE_SYS_INOTIFY_H 1
 #cmakedefine HAVE_SYS_RESOURCE_H 1
 #cmakedefine HAVE_PWD_H 1
-#cmakedefine HAVE_ENDIAN_H 1
-#cmakedefine HAVE_SPEEX_SPEEX_H 1
-#cmakedefine HAVE_GSM_H 1
-#cmakedefine HAVE_GSM_GSM_H 1
-#cmakedefine HAVE_MATH_H 1
-#cmakedefine HAVE_STDINT_H 1
-#cmakedefine HAVE_TERMIOS_H 1
-#cmakedefine HAVE_SYS_IOCTL_H 1
-#cmakedefine HAVE_SYS_POLL_H 1
-#cmakedefine HAVE_SYS_UIO_H 1
-#cmakedefine HAVE_IOCTL_H 1
-#cmakedefine HAVE_RESOLV_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1
 #cmakedefine HAVE_GETUID 1
 #cmakedefine HAVE_MKFIFO 1
 #cmakedefine HAVE_SIGWAIT 1
 #cmakedefine HAVE_SIGWAIT2 1
-#cmakedefine HAVE_OPENSSL 1
+#cmakedefine HAVE_EXOSIP2 1
+#cmakedefine HAVE_TLS 1
 
 #define OSIP2_LIST_PTR  &

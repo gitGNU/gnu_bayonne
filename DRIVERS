@@ -1,0 +1,29 @@
+Some Bayonne drivers are very general purpose.  However, Bayonne drivers will
+also be created for solving very specific integration issues and/or to use
+unique features of specific telephony platforms.  We are merging the goals of
+the original Babylon PBX integration server project with bayonne.
+
+"sipapps"
+
+This driver can be used generically to serve applications over SIP and RTP in
+conjuction with an existing SIP server or SIP capable telephone system. Sipapps
+offers specific scripting features for use and integration with GNU sipwitch.
+This driver also offers specific support for automatic uuid-based registration
+and contact authentication when used in conjunction with sipwitch and assumes
+other sipwitch specific behaviors and features by default.  In the future we
+may offer different (additional) sip drivers for Bayonne, for example to
+support 3g IMS platform uses, or for use with different SIP IP-PBX's that may
+have very different behaviors and needs.
+
+"vpbapi"
+
+This is based on version 4 of the Voicetronix API, which supports analog DSP
+Voicetronix voice cards and Sangoma (Voicetronix) span cards.  The vpbapi
+driver is a rather generic driver the will be a foundation for creating similar
+platform specific drivers for legacy analog integrated key systems like the
+Panasonic DBS, and perhaps also for integration with traditional legacy digital
+PBX's like the Fujitsu F9600.  As a "generic" reference driver, vpbapi may also
+offer an optional SMDI capability, and some basic configuration of dial and
+feature access codes. If we can include other platform specific features within
+this driver rather than using a separate driver, we will do that also.
+

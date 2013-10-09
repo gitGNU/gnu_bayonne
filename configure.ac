@@ -8,12 +8,13 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-AC_INIT(autogen.sh)
 
-VERSION="2.99.2"
+AC_INIT([bayonne],[3.0.0])
+AC_CONFIG_SRCDIR([autogen.sh])
+
 LT_VERSION="3:0:0"
-
 UCOMMON_REQUIRES="6.0.7"
+CCSCRIPT_REQUIRES="5.0.0"
 BUILD_SUBDIRS=""
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -25,7 +26,7 @@ AC_PROG_CXX
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE(bayonne, [$VERSION])
+AM_INIT_AUTOMAKE([dist-zip])
 AM_CONFIG_HEADER(bayonne-config.h)
 
 AC_C_RESTRICT
@@ -102,26 +103,6 @@ AC_CACHE_CHECK(whether sigwait has 2 arguments,
 )
 if test "$ac_cv_libc_sigwait2" = "yes" ; then
     AC_DEFINE(HAVE_SIGWAIT2, [1], [2 argument form])
-    AC_DEFINE(HAVE_SIGWAIT, [1], [have sigwait])
-else
-    AC_CACHE_CHECK(whether has any sigwait support,
-        ac_cv_libc_sigwait,
-        AC_TRY_COMPILE([
-            #define _POSIX_PTHREAD_SEMANTICS
-            #define _GNU_SOURCE
-            #include <stdio.h>
-            #include <signal.h>],
-            [sigset_t sigs; int signo = sigwait(&sigs);],
-            ac_cv_libc_sigwait2=yes,
-            ac_cv_libc_sigwait2=no
-        )
-    )
-
-    if test "$ac_cv_libc_sigwait" = "yes" ; then
-        AC_DEFINE(HAVE_SIGWAIT, [1], [have sigwait])
-    else
-        AC_CHECK_FUNCS(sigwait)
-    fi
 fi
 
 # lets check init path
@@ -137,6 +118,12 @@ AC_ARG_WITH(paging,
 if test -z "$default_paging" ; then
     default_paging=4096 ; fi
 
+# lets check init path
+AC_ARG_WITH(initrddir,
+    AC_HELP_STRING([--with-initrddir=path], [specify /etc/init.d path]),[
+        INITRDDIR="$with_initrddir"
+])
+
 # pkgconfig
 
 AC_ARG_WITH(pkg-config,
@@ -144,51 +131,32 @@ AC_ARG_WITH(pkg-config,
     PKG_CHECK_MODULES(UCOMMON, ucommon >= $UCOMMON_REQUIRES)
     UCOMMON_CLINK=`pkg-config --variable=clink ucommon`
     UCOMMON_MODEL=`pkg-config --variable=model ucommon`
+    PKG_CHECK_MODULES(CCSCRIPT, ccscript >= $CCSCRIPT_REQUIRES)
 ],[
     AC_PATH_PROG([UCOMMON],[ucommon-config],[none])
     if test "$UCOMMON" = "none" ; then
         AC_ERROR("required ucommon library missing")
     fi
+    AC_PATH_PROG([CCSCRIPT],[ccscript-config],[none])
+    if test "$UCOMMON" = "none" ; then
+        AC_ERROR("required ccscript library missing")
+    fi
+
     UCOMMON_CLINK=`$UCOMMON --clink`
     UCOMMON_MODEL=`$UCOMMON --model`
     UCOMMON_CFLAGS=`$UCOMMON --cflags`
     UCOMMON_LIBS=`$UCOMMON --libs`
+    CCSCRIPT_CFLAGS=`$CCSCRIPT --cflags`
+    CCSCRIPT_LIBS=`$CCSCRIPT --libs`
 ])
 
 if test "$UCOMMON_MODEL" = "CC" ; then
     LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
-AC_CHECK_HEADERS(sys/resource.h pwd.h endian.h math.h stdint.h termios.h ioctl.h sys/ioctl.h sys/inotify.h sys/poll.h sys/uio.h)
+AC_CHECK_HEADERS(sys/resource.h pwd.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
-AC_CHECK_HEADER(gsm/gsm.h, [
-    ac_gsm_codec=true
-    AC_DEFINE(HAVE_GSM_GSM_H, [1], [gsm header found])
-    EXPORT_LIBS="$EXPORT_LIBS -lgsm"
-],[
-    AC_CHECK_HEADER(gsm.h, [
-        EXPORT_LIBS="$EXPORT_LIBS -lgsm"
-        AC_DEFINE(HAVE_GSM_H, [1], [gsm default header])
-    ])
-])
-
-AC_ARG_ENABLE(speex, [ --disable-speex          disable speex support])
-if test "$enable_speex" != "no" ; then
-    AC_CHECK_HEADER(speex/speex.h, [
-        AC_CHECK_LIB(speex, speex_encode_int, [
-            AC_DEFINE(HAVE_SPEEX_SPEEX_H, [1], [speex codec support])
-            EXPORT_LIBS="$EXPORT_LIBS -lspeex"
-        ])
-    ])
-fi
-
-AC_CHECK_LIB([m], [sqrt], [EXPORT_LIBS="$EXPORT_LIBS -lm"])
-
-#AC_LANG(C++)
-#AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
-#AC_LANG(C)
-
-#AC_CHECK_HEADER(capi20.h, [has_capi20="yes"],[has_capi20="no"])
+AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
 
 PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
     has_eXosip2="yes"
@@ -200,7 +168,6 @@ PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
             [EXOSIP2_LIBS="$with_libeXosip2"],[EXOSIP2_LIBS="-leXosip2"])
 
     AC_CHECK_HEADER(resolv.h,[
-        AC_DEFINE(HAVE_RESOLV_H, 1, [has resolver])
         EXOSIP2_LIBS="$EXOSIP2_LIBS -lresolv"
     ],[])
 
@@ -217,36 +184,11 @@ PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
     ])
 ])
 
-PKG_CHECK_MODULES(ORTP, ortp >= 0.20.0,
-    [has_ortp="yes"], [has_ortp="no"])
-
-if test x"$has_ortp" = "xyes" ; then
-    ORTP_FLAGS="$ORTP_CFLAGS"
-    ORTP_LIBS="$ORTP_LIBS"
-    if test x"$has_eXosip2" = "xyes" ; then
-        BUILD_SUBDIRS="$BUILD_SUBDIRS sipw" ; fi
-fi
-
-# whether rtp_session_set_local_addr has 3 args
-
-AC_CACHE_CHECK(whether rtp_session_set_local_addr has rtcp,
-    ac_cv_ortp_rtcp_port,
-    AC_TRY_COMPILE([
-        #define _POSIX_PTHREAD_SEMANTICS
-        #define _GNU_SOURCE
-        #include <ortp/ortp.h>
-    ],
-        [rtp_session_set_local_addr(NULL, "0.0.0.0", 0, 0);],
-        ac_cv_ortp_rtcp_port=yes,
-        ac_cv_ortp_rtcp_port=no
-    )
-)
-if test "$ac_cv_ortp_rtcp_port" = "no" ; then
-    ORTP_FLAGS="$ORTP_FLAGS -DORTP_API1"
-fi
-
 if test x"$has_eXosip2" = "xyes" ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS sipw"
+
     PKG_CHECK_MODULES(LIBOSIP2, libosip2 >= 3.0.0)
+    AC_DEFINE(HAVE_EXOSIP2, [1], [has exosip2 header])
     AC_DEFINE(OSIP2_LIST_PTR, [&], [define pointer mode])
     EXOSIP2_LIBS="$EXOSIP2_LIBS $LIBOSIP2_LIBS"
     EXOSIP2_FLAGS="$EXOSIP2_CFLAGS $LIBOSIP2_CFLAGS"
@@ -256,6 +198,14 @@ if test x"$has_eXosip2" = "xyes" ; then
         EXOSIP2_LIBS="$EXOSIP2_LIBS -liphlpapi -ldnsapi"
         ;;
     esac
+fi
+
+if test x"$has_vpbapi" = "xyes" ; then
+    BUILD_SUBDIRS="$BUILD_SUBDIRS vpb" ; fi
+
+if test -z "$BUILD_SUBDIRS" ; then
+    AC_ERROR([no buildable targets.  Stopped])
+    exit 1
 fi
 
 AC_LANG_CPLUSPLUS
@@ -280,13 +230,13 @@ for flag in $CXXFLAGS ; do
 done
 export CXXFLAGS="$COMPILER_FLAGS"
 
-BAYONNE_FLAGS="$EXPORT_FLAGS $UCOMMON_CFLAGS"
-BAYONNE_LIBS="$EXPORT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
+BAYONNE_FLAGS="$EXPORT_FLAGS $EXOSIP2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
+BAYONNE_LIBS="$EXPORT_LIBS $EXOSIP2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
 
-if test "$localstatedir" = '${prefix}/var' ; then
+if test "$localstatedir" == '${prefix}/var' ; then
     localstatedir="/var" ; fi
 
-if test "$sysconfdir" = '${prefix}/etc' ; then
+if test "$sysconfdir" == '${prefix}/etc' ; then
     sysconfdir="/etc"
 fi
 
@@ -319,11 +269,12 @@ case "$BAYONNE_FLAGS -I/usr/include" in
     ;;
 esac
 
-AC_DEFINE_UNQUOTED(BAYONNE_CFGPATH, "$default_cfgpath/bayonne", [config path])
-AC_DEFINE_UNQUOTED(BAYONNE_LIBEXEC, "$default_libexec/bayonne", [script path])
-AC_DEFINE_UNQUOTED(DEFAULT_LIBPATH, "$default_libpath", [default libs])
-AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [default data])
-AC_DEFINE_UNQUOTED(DEFAULT_VARPATH, "$default_varpath", [default varpath])
+AC_DEFINE_UNQUOTED(DEFAULT_SCRPATH, "$default_scrpath", [script path])
+AC_DEFINE_UNQUOTED(DEFAULT_CFGPATH, "$default_cfgpath", [config path])
+AC_DEFINE_UNQUOTED(DEFAULT_VARPATH, "$default_varpath", [run path])
+AC_DEFINE_UNQUOTED(DEFAULT_LIBPATH, "$default_libpath", [lib path])
+AC_DEFINE_UNQUOTED(DEFAULT_LIBEXEC, "$default_libexec", [script path])
+AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [data path])
 AC_DEFINE_UNQUOTED(DEFAULT_PAGING, $default_paging, [default page size])
 
 AC_CHECK_LIB(msvcrt, fopen, [
@@ -333,7 +284,6 @@ AC_CHECK_LIB(msvcrt, fopen, [
 AC_SUBST(plugindir)
 AC_SUBST(scriptdir)
 AC_SUBST(INITRDDIR)
-AC_SUBST(UCOMMON_REQUIRES)
 AC_SUBST(UCOMMON_MODEL)
 AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(BUILD_SUBDIRS)
@@ -344,14 +294,11 @@ AC_SUBST(BAYONNE_FLAGS)
 AC_SUBST(BAYONNE_LIBS)
 AC_SUBST(EXOSIP2_LIBS)
 AC_SUBST(EXOSIP2_FLAGS)
-AC_SUBST(ORTP_LIBS)
-AC_SUBST(ORTP_FLAGS)
 AC_SUBST(LT_VERSION)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
-AC_OUTPUT(Makefile inc/Makefile runtime/Makefile test/Makefile utils/Makefile
-bayonne.pc bayonne-config
-server/Makefile sipw/Makefile
-)
+AC_OUTPUT(Makefile common/Makefile utils/Makefile config/Makefile
+sipw/Makefile vpb/Makefile
+inc/Makefile inc/bayonne/Makefile libbayonne.pc bayonne.spec bayonne-config)
 

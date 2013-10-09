@@ -1,0 +1,191 @@
+# spec file for bayonne, used for official builds for GNU Telephony.
+#
+# Copyright (c) 2009 David Sugar, Tycho Softworks.
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+%{!?uses_vpbapi: %global uses_vpbapi 0}
+
+Name: bayonne
+Summary: "bayonne" - Telephony integration server of the GNU project
+Version: @VERSION@
+Release: 0%{?dist}
+License: GPLv3+
+URL: http://www.gnu.org/software/bayonne
+Group: Applications/Communications
+Source: http://www.gnutelephony.org/dist/tarballs/bayonne-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRequires: ucommon-devel >= 2.1.3
+BuildRequires: libeXosip2-devel >= 3.0.0
+Requires(post): chkconfig
+Requires(preun): chkconfig
+Requires(preun): initscripts
+Requires(postun): initscripts
+Requires: %{name}-runtime = %{version}-%{release}
+
+%package runtime
+Group: Development/Libraries
+Summary: Runtime library support for bayonne
+
+%package devel
+Requires: libucommon-devel >= 2.1.1
+Requires: %{name}-runtime = %{version}-%{release}
+Group: Development/Libraries
+Summary: Headers and static link library
+
+%package sipapps
+Requires: %{name} = %{version}-%{release}
+Requires(post): chkconfig
+Requires(preun): chkconfig
+Summary: SIP bayonne driver for use with GNU SIP Witch
+
+%if %{uses_vpbapi}
+%package vpbapi
+Requires: %{name} = %{version}-%{release}
+Requires(post): chkconfig
+Requires(preun): chkconfig
+Summary: Voicetronix bayonne driver for analog and digital circuits.
+%endif
+
+%description
+GNU Bayonne is a script driven telephony integration server.  GNU Bayonne
+can be used together with other GNU telephony services such as GNU Gatekeeper
+and GNU SIP Witch, or behind various PBX systems, to form a complete telephone
+system for Voice Mail and auto-attendent operations, or used to build voice
+broadcast systems, telephone query services, prepaid calling systems,
+telecenters, or other specialized applications. 
+
+%description devel
+Static link and header files for building plugins and drivers for bayonne.
+This might be used for externally creating bayonne modules, though normally
+modules are found or added to the core distribution directly.  This may also
+be for developing external application services which need to communicate with 
+a running bayonne driver instance.
+
+%description runtime
+Runtime library required for bayonne development and for using the server.
+This is available as a separate package so that one building bayonne plugins
+with the required devel package does not also require installing a server
+image.
+
+%description sipapps
+Bayonne sip driver specialy designed for use with GNU SIP Witch.  This includes
+support for sipwitch smart shared secrets through uuid managed registrations,
+and core scripting features useful for building telephony applications.  Some
+special command extensions to set sip witch forwarding and other properties are
+also enabled, along with SIMPLE support for message notification.
+
+%if %{uses_vpbapi}
+%description vpbapi
+Offers a Bayonne driver for telephony hardware which conforms to the standard
+Voicetronix API.  This includes analog and digital telephony cards offered by
+Voicetronix and products from other vendors which are compatible with the
+Voicetronix API.  Some additional PBX-specific telephony integration drivers,
+such as "Panasonic DBS", may also use the voicetronix API with Voicetronix
+telephony analog and digital telephony cards, but have separate Bayonne 
+drivers since they support vendor specific features and integration protocols.
+%endif
+
+%prep
+%setup -q
+sed -i.rpath -e \
+  '/sys_lib_dlsearch_path_spec/s|/usr/lib |/usr/lib /usr/lib64 /lib /lib64 |' \
+  configure
+
+%build
+%configure --with-pkg-config --disable-static --with-initrddir=%{_initrddir} 
+
+%{__make} %{?_smp_mflags} 
+
+%install
+%{__rm} -rf %{buildroot}
+%{__make} DESTDIR=%{buildroot} INSTALL="install -p" install
+%{__rm} -f %{buildroot}/%{_libdir}/*.la
+%{__rm} -f %{buildroot}/%{_libdir}/bayonne/*.la
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files 
+%defattr(-,root,root,-)
+%doc README COPYING NEWS TODO DRIVERS ChangeLog
+%{_mandir}/man8/*.8*
+%{_bindir}/*
+%dir %{_libdir}/bayonne
+%config(noreplace) %{_sysconfdir}/logrotate.d/bayonne
+%attr(0755,root,root) %{_initrddir}/bayonne
+%attr(0755,root,root) %{_sysconfdir}/cron.hourly/bayonne
+%attr(0770,root,root) %dir %{_localstatedir}/lib/bayonne
+%attr(0770,root,root) %dir %{_sysconfdir}/bayonne
+%attr(0770,root,root) %dir %{_sysconfdir}/bayonne.d
+%attr(0660,root,root) %config(noreplace) %{_sysconfdir}/bayonne/server.conf
+%attr(0660,root,root) %config(noreplace) %{_sysconfdir}/bayonne/users.conf
+
+%files runtime
+%defattr(-,root,root,-)
+%{_libdir}/*.so.*
+
+%files sipapps
+%defattr(-,root,root,-)
+%{_sbindir}/bayonne-sipapps
+
+%if %{uses_vpbapi}
+%defattr(-,root,root,-)
+%{_sbindir}/bayonne-vpbapi
+%endif
+
+%files devel
+%defattr(-,root,root,-)
+%{_libdir}/lib*.so
+%{_includedir}/bayonne/
+%{_libdir}/pkgconfig/*.pc
+
+%post
+/sbin/chkconfig --add bayonne
+
+%post runtime
+/sbin/ldconfig
+
+%preun
+if [ $1 = 0 ] ; then
+    /sbin/service bayonne stop >/dev/null 2>&1
+    /sbin/chkconfig --del bayonne
+fi
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove-all bayonne-driver ; fi
+
+
+%postun
+if [ "$1" -ge "1" ] ; then
+    /sbin/service bayonne condrestart >/dev/null 2>&1 || :
+fi
+
+%postun runtime
+/sbin/ldconfig
+
+%post
+if [ -x /sbin/chkconfig ] ; then /sbin/chkconfig --add bayonne ; fi
+
+%post sipapps
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-sipapps 60 ; fi
+
+%preun sipapps
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-sipapps ; fi
+
+%if %{uses_vpbapi}
+%post vpbapi
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-vpbapi 70 ; fi
+
+%preun vpbapi
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-vpbapi ; fi
+%endif
+
+%changelog
+* Mon Dec 29 2008 - dyfet@gnutelephony.org
+- initial spec file distribution.
+

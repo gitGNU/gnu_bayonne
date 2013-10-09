@@ -1,4 +1,4 @@
-# Copyright (C) 2009 David Sugar, Tycho Softworks.
+# Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -9,15 +9,8 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
 
-bin_PROGRAMS = bayonne baylint
-
-bayonne_SOURCES = bayonne.cpp
-bayonne_LDADD = @UCOMMON_LIBS@
-
-baylint_SOURCES = baylint.cpp
-baylint_LDADD = ../common/libbayonne.la @BAYONNE_LIBS@
-
-man_MANS = bayonne.8
+pkgincludedir = $(includedir)/bayonne
+pkginclude_HEADERS = driver.h server.h bayonne.h namespace.h registry.h \
+	signals.h timeslot.h thread.h segment.h stats.h dbi.h voip.h
 

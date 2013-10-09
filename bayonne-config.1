@@ -1,4 +1,4 @@
-.\" bayonne-config - script to get information about bayonne runtime library
+.\" bayonne-config - script to get information about bayonne library
 .\" Copyright (c) 2009 David Sugar <dyfet@gnutelephony.org>
 .\"
 .\" This manual page is free software; you can redistribute it and/or modify
@@ -19,10 +19,14 @@
 .\"
 .TH bayonne-config "1" "July 2009" "GNU Bayonne" "GNU Telephony"
 .SH NAME
-bayonne-config \- script to get information about bayonne runtime library
+bayonne-config \- script to get information about bayonne library
 .SH SYNOPSIS
 .B bayonne-config
-.RB [ options ]
+.BI [--prefix[= DIR ]]
+.BI [--exec-prefix[= DIR ]]
+.B [--version]
+.B [--cflags]
+.B [--libs]
 .SH DESCRIPTION
 .B bayonne-config
 is a tool that is used to configure to determine the compiler and
@@ -71,7 +75,7 @@ options.
 If specified, use
 .I PREFIX
 instead of the installation exec prefix that
-.B bayonne
+.B bayonne 
 was built with when computing the output for the
 .B --cflags
 and
@@ -84,7 +88,7 @@ options.
 .SH "SEE ALSO"
 .IR pkg-config (1).
 .SH AUTHOR
-.B bayonne-config
+.B bayonne-config 
 was written by David Sugar <dyfet@gnutelephony.org>.
 .SH COPYRIGHT
 Copyright \(co 2009 David Sugar, Tycho Softworks.

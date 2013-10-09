@@ -1,0 +1,29 @@
+# rotate bayonne logs every week...
+
+/var/log/bayonne.log {
+    missingok
+	notifempty
+    daily
+    compress
+	delaycompress
+	rotate 5
+}
+
+/var/log/bayonne.stats {
+	missingok
+	notifempty
+	daily
+	compress
+	delaycompress
+	rotate 5
+}
+
+/var/log/bayonne.calls {
+    missingok
+	notifempty
+    weekly
+    compress
+	delaycompress
+	rotate 5
+}
+

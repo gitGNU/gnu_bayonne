@@ -9,12 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = CMakeLists.txt bayonne-config.h.cmake docs/script.tex \
-	*.pc.in *-config.in *-config.1 autogen.sh ChangeLog COPYRIGHT
-SUBDIRS = inc runtime server utils test @BUILD_SUBDIRS@
+EXTRA_DIST = autogen.sh *.pc.in cmodel.sh bayonne.spec.in bayonne.spec \
+	DRIVERS bayonne-config.in bayonne-config.1 docs/script.tex \
+	bayonne-config.h.cmake CMakeLists.txt
+SUBDIRS = common config utils @BUILD_SUBDIRS@ inc
+DIST_SUBDIRS = common config utils sipw vpb inc 
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = bayonne.pc
+pkgconfig_DATA = libbayonne.pc
 
 scriptdir = $(bindir)
 script_SCRIPTS = bayonne-config

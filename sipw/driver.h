@@ -13,152 +13,151 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <../server/server.h>
+#include <bayonne/voip.h>
 #include <ucommon/secure.h>
-#include "voip.h"
+#include <bayonne-config.h>
+
+#ifndef SESSION_EXPIRES
+#define SESSION_EXPIRES "session-expires"
+#endif
+
+#ifndef ALLOW_EVENTS
+#define ALLOW_EVENTS    "allow-events"
+#endif
 
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 
-class __LOCAL registry : public Registry
+class __LOCAL registration : public Registration
 {
-public:
+protected:
     unsigned expires;
-    const char *contact;
-    const char *userid;
-    const char *secret;
-    const char *digest;
-    const char *server;
-    const char *method;
-    const char *realm;
-    const char *uri;
+    const char *volatile authid;
+    const char *volatile userid;
+    const char *volatile secret;
+    const char *volatile server;
+    const char *volatile script;    // default script...
+    const char *volatile domain;
+    const char *volatile targets;   // To: destinations allowed...
+    const char *volatile localnames;
+    const char *uri, *contact;
     char uuid[38];
-    bool active;
+    voip::context_t context;
+    voip::reg_t rid;
 
-    sip::context_t context;
-    sip::reg_t rid;
+public:
+    registration(Registration *root, keydata *keys, unsigned expiration, unsigned port);
 
-    registry(keydata *keyset, unsigned port = 5060, unsigned expiration = 120);
-
+    void reload(keydata *keys);
+    void release(void);
+    bool refresh(void);
+    void cancel(void);
+    void failed(void);
+    void confirm(void);
     void authenticate(const char *realm);
 
-    void activate(void);
+    inline voip::context_t getContext(void)
+        {return context;}
 
-    void release(void);
+    inline int getRegistry(void)
+        {return rid;}
+
+    inline const char *getUUID(void)
+        {return uuid;};
+
+    inline const char *getAuth(void)
+        {return authid;};
+
+    inline const char *getScript(void)
+        {return script;};
+
+    inline const char *getTargets(void)
+        {return targets;};
+
+    inline const char *getLocalnames(void)
+        {return localnames;};
+
+    inline const char *getServer(void)
+        {return server;};
+};
+
+class __LOCAL timeslot : public Timeslot
+{
+public:
+    timeslot();
+
+    int incoming(voip::event_t sevent);
+
+    timeout_t getExpires(time_t now);
+
+private:
+    voip::context_t ctx;
+    voip::did_t did;
+    voip::tid_t tid;
+    Timer timer;
+
+    void disarm(void);
+    void arm(timeout_t timeout);
+    void drop(void);
+    void allocate(long cid, statmap::stat_t stat, Registration *reg);
+    void disconnect(event_t *event);
+    void hangup(event_t *event);
+    void release(event_t *event);
+    void disable(event_t *event);
+};
+
+class __LOCAL driver : public Driver
+{
+public:
+    driver();
+
+    Driver *create(void);
+    void update(void);
+    const char *dispatch(char **argv, int pid);
+
+    static voip::context_t out_context;   // default output context
+    static voip::context_t udp_context;
+    static voip::context_t tcp_context;
+    static voip::context_t tls_context;
+    static int family;
+
+    static registration *contact(const char *uuid);
+    static registration *locate(int regid);
+    static registration *locate(const char *id);
+    static const char *activate(keydata *keys);
+    static const char *realm(void);
+    static void start(void);
+    static void stop(void);
 };
 
 class __LOCAL thread : public DetachedThread
 {
 private:
     const char *instance;
-    sip::context_t    context;
-    sip::event_t      sevent;
-    registry    *reg;
+    voip::context_t context;
+    voip::event_t sevent;
+    registration *registry;
+    char buffer[256];
 
-    const char *eid(eXosip_event_type ev);
+    thread();
+
+    void invite(void);
     void run(void);
 
 public:
-    thread(sip::context_t source, size_t size, const char *type);
+    thread(voip::context_t source, size_t stack, const char *type);
 
-    static void shutdown();
+    static void activate(int priority, size_t stack);
+    static void shutdown(void);
 };
 
-class __LOCAL timeslot : public Timeslot
+class __LOCAL background : public Background
 {
+public:
+    background(size_t stack);
+
 private:
-    virtual void shutdown(void);
-
-public:
-    RtpSession *session;
-    unsigned media_port;
-
-    timeslot(unsigned port);
-};
-
-class __LOCAL media : public DetachedThread
-{
-private:
-    friend class driver;
-
-    static unsigned jitter;
-    static size_t buffer;
-    static const char *address;
-    static bool symmetric;
-
-    SessionSet *waiting, *pending;
-    unsigned sessions;
-    int events;
-    Mutex lock;
-
-    void run(void);
-
-public:
-    media(size_t size);
-
-    static void shutdown();
-    static void attach(timeslot *ts, const char *host, unsigned port);
-    static void release(timeslot *ts);
-};
-
-class driver : public Driver
-{
-public:
-    friend class registry;
-
-    driver();
-
-    int start(void);
-
-    void stop(void);
-
-    static sip::context_t out_context;   // default output context
-    static sip::context_t udp_context;
-    static sip::context_t tcp_context;
-    static sip::context_t tls_context;
-    static int family;
-
-    static registry *locate(sip::reg_t rid);
-
-};
-
-class srv : protected Socket::address
-{
-protected:
-    class srvaddrinfo
-    {
-    public:
-	struct sockaddr_storage addr;
-	uint16_t weight, priority;
-    };
-
-    class srvaddrinfo *srvlist;
-    struct sockaddr *entry;
-    uint16_t pri;
-    unsigned count;
-
-public:
-    srv(const char *uri);
-    srv();
-    ~srv();
-
-    void set(const char *uri);
-
-    void clear(void);
-
-    inline struct sockaddr *operator*() const
-	    {return entry;};
-
-    inline operator bool() const
-	    {return entry != NULL;}
-
-    inline bool operator!() const
-	    {return entry == NULL;}
-
-    struct sockaddr *next(void);
-
-    sip::context_t route(char *buf, size_t size, const char *uri);
+    void automatic(void);
 };
 
 END_NAMESPACE
-

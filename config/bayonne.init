@@ -1,0 +1,164 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:             bayonne
+# Required-Start:       $named $network $syslog $remote_fs
+# Required-Stop:        $named $network $syslog $remote_fs
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Start and stop bayonne service daemon.
+# Description:          This script manages startup and shutdown for
+#                       GNU Bayonne telephony application services.
+### END INIT INFO
+#
+# Copyright (C) 2009 David Sugar, Tycho Softworks.  
+#
+# This file is free software; as a special exception the author gives
+# unlimited permission to copy and/or distribute it, with or without
+# modifications, as long as this notice is preserved.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# bayonne         This shell script takes care of starting and stopping
+#                 a bayonne server running as a system service.
+#
+# chkconfig: - 96 14
+# description: GNU Bayonne telephony service.
+
+DRIVER="driver"
+NAME="bayonne"
+DESC="bayonne"
+FIFO="/var/run/bayonne/control"
+OPTIONS="-d"
+PRELOAD=""
+PLUGINS=""
+GROUP=""
+CONCURRENCY=""
+PRIORITY=""
+DEFAULT="/etc/default/bayonne"
+START="1"
+
+set -e
+
+if [ -f /etc/sysconfig/bayonne ] ; then
+	DEFAULT="/etc/sysconfig/bayonne"
+	. /etc/sysconfig/bayonne
+elif [ -f /etc/default/bayonne ] ; then
+	. /etc/default/bayonne
+elif [ -f /etc/conf.d/bayonne ] ; then
+	. /etc/conf.d/bayonne
+elif [ -f /etc/site-start.d/bayonne ] ; then
+	. /etc/site-start.d/bayonne
+fi
+
+if [ ! -z "$PLUGINS" ] ; then
+	export PLUGINS
+else
+	START="0"
+fi
+
+if [ ! -z "$GROUP" ] ; then
+	export GROUP ; fi
+
+if [ ! -z "$CONCURRENCY" ] ; then
+	export CONCURRENCY ; fi
+
+if [ ! -z "$PRIORITY" ] ; then
+	export PRIORITY ; fi
+
+if test -z "$DRIVER" ; then
+	DRIVER="none" ; fi
+
+case "$DRIVER" in
+sipw|sip|sipwitch|apps|sipapps|sipa)
+	DRIVER="sipapps"
+	;;
+voicetronix|vpb|vpbapi|openline|openpri)
+	DRIVER="vpbapi"
+	;;
+esac
+
+DAEMON="/usr/sbin/bayonne-$DRIVER"
+test -x "$DAEMON" || exit 0
+
+if [ ! -z "$PRELOAD" ] ; then		
+	if [ -z "$LD_PRELOAD" ] ; then
+		LD_PRELOAD="$PRELOAD"
+	else
+		LD_PRELOAD="$LD_PRELOAD:$PRELOAD"
+	fi
+	export LD_PRELOAD
+fi
+
+
+case "$1" in
+start)
+	if [ "$START" = "0" ] ; then
+		if test -z "$PLUGINS" ; then
+			echo "You have to define PLUGINS in $DEFAULT before running sipwitch"
+		else
+			echo "You have to modify config and START in $DEFAULT before running"
+		fi
+		exit 0
+	fi
+	
+	if [ -p $FIFO ] ; then
+		echo "already started"
+		exit 1
+	fi
+
+	$DAEMON $OPTIONS
+	echo "$NAME."
+	if test -d /var/lock/subsys ; then
+		touch /var/lock/subsys/bayonne ; fi
+	;;
+stop)
+	if [ ! -p $FIFO ] ; then
+		exit 0 ; fi
+
+	echo -n "Stopping $DESC: "
+	echo "down" >$FIFO
+	echo "$NAME."
+
+	if test -d /var/lock/subsys ; then
+		rm -rf /var/lock/subsys/bayonne ; fi
+	;;
+reload)
+	if [ ! -p $FIFO ] ; then
+		exit 0 ; fi
+	echo -n "Reloading $DESC: "
+	echo "reload" >$FIFO
+	echo "$NAME."
+	;;
+status)
+	bayonne status
+	;;
+condrestart|try-restart)
+    if [ -p $FIFO ] ; then
+        echo "down" >$FIFO
+        sleep 3
+        $DAEMON $OPTIONS
+    fi
+    ;;
+restart|force-reload)
+	echo -n "Restarting $DESC: "
+	of [ -p $FIFO ] ; then
+		echo "down" >$FIFO
+		sleep 3
+	fi
+	$DAEMON $OPTIONS
+	echo "$NAME."
+	;;
+*)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload|status|reload|condrestart}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
+
+
+
+

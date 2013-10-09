@@ -1,7 +1,0 @@
-Name: bayonne
-Description: GNU Bayonne Telephony library servoces for use with ucommon
-Version: @VERSION@
-Requires: ucommon >= @UCOMMON_REQUIRES@
-Libs:  -lbayonne @EXPORT_LIBS@
-Cflags: @EXPORT_FLAGS@
-

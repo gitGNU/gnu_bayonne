@@ -9,12 +9,11 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc -I$(top_srcdir)/server @ORTP_FLAGS@ @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
-LDADD = ../server/libserver.a ../runtime/libbayonne.la @ORTP_LIBS@ @EXOSIP2_LIBS@ @BAYONNE_LIBS@
+AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
+LDADD = ../common/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@ 
 
 sbin_PROGRAMS = bayonne-sipw
-noinst_HEADERS = driver.h voip.h
+noinst_HEADERS = driver.h
 
-bayonne_sipw_SOURCES = driver.cpp registry.cpp timeslot.cpp \
-	thread.cpp media.cpp voip.cpp srv.cpp
+bayonne_sipw_SOURCES = driver.cpp registry.cpp thread.cpp timeslot.cpp
 

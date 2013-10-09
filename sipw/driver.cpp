@@ -15,278 +15,342 @@
 
 #include "driver.h"
 
-using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
+using namespace UCOMMON_NAMESPACE;
 
-sip::context_t driver::tcp_context = NULL;
-sip::context_t driver::udp_context = NULL;
-sip::context_t driver::tls_context = NULL;
-sip::context_t driver::out_context = NULL;
-
+voip::context_t driver::tcp_context = NULL;
+voip::context_t driver::udp_context = NULL;
+voip::context_t driver::tls_context = NULL;
+voip::context_t driver::out_context = NULL;
 int driver::family = AF_INET;
 
-driver::driver() : Driver("sip", "registry")
+static const char *sip_realm = NULL;
+static const char *sip_schema = "sip:";
+static unsigned expires = 300;
+static const char *iface = NULL;
+static bool started = false;
+static unsigned registries = 40;
+static unsigned short port = 5060;
+
+static shell::groupopt driveropts("Driver Options");
+static shell::numericopt portopt(0, "--port", "Port to bind (5060)", "port", 5060);
+static shell::stringopt realmopt(0, "--realm", "Realm of server", "string", NULL);
+static shell::numericopt slots('t', "--timeslots", "Number of timeslots to allocate", "ports", 16);
+
+driver::driver() :
+Driver("voip")
 {
-    autotimer = 500;
     udp_context = tcp_context = tls_context = out_context = NULL;
 }
 
-int driver::start(void)
+Driver *driver::create(void)
 {
-    linked_pointer<keydata> kp = keyserver.get("registry");
-    const char *cp = NULL, *iface = NULL, *transport = NULL, *agent = NULL;
-    unsigned sip_port = 5060, expires = 300, timeslots = 16;
-    unsigned rtp_port = 0;
-    bool tcp = false;
-    size_t stack = 0;
-    unsigned priority = 0, mpri = 1;
-
-    if(keys)
-        cp = keys->get("port");
-    else
-        cp = NULL;
-
-    if(cp)
-        sip_port = atoi(cp);
-
-    if(keys)
-        cp = keys->get("jitter");
-    else
-        cp = NULL;
-
-    if(cp)
-        media::jitter = atoi(cp);
-
-
-    if(keys)
-        cp = keys->get("buffer");
-    else
-        cp = NULL;
-
-    if(cp)
-        media::buffer = atoi(cp) * 1024l;
-
-    if(keys)
-        cp = keys->get("expires");
-    else
-        cp = NULL;
-
-    if(cp)
-        expires = atoi(cp);
-
-    if(keys)
-        cp = keys->get("stack");
-    else
-        cp = NULL;
-
-    if(cp)
-        stack = atoi(cp);
-
-    if(keys)
-        cp = keys->get("priority");
-    else
-        cp = NULL;
-
-    if(cp)
-        priority = atoi(cp);
-
-    if(keys)
-        cp = keys->get("media");
-    else
-        cp = NULL;
-
-    if(cp)
-        mpri = atoi(cp);
-
-    if(keys)
-        iface = keys->get("interface");
-
-    if(iface) {
-#ifdef  AF_INET6
-        if(strchr(iface, ':'))
-            family = AF_INET6;
-#endif
-        if(eq(iface, "::*")) 
-            iface = "::0";
-        else if(eq(iface, "*"))
-            iface = "0.0.0.0";
-        media::address = iface;
-    }
-
-    if(keys)
-        transport = keys->get("transport");
-    if(keys && !transport)
-        transport = keys->get("protocol");
-
-    if(transport && eq(transport, "tcp"))
-        tcp = true;
-
-    if(keys)
-        agent = keys->get("agent");
-
-    if(!agent)
-        agent = "bayonne-" VERSION "/exosip2";
-
-    sip_port = sip_port & 0xfffe;
-
-    ortp_init();
-    ortp_scheduler_init();
-
-    ortp_set_log_level_mask(ORTP_WARNING|ORTP_ERROR);
-    ortp_set_log_file(stdout);
-
-#if UCOMMON_ABI > 5
-    Socket::query(family);
-#else
-    Socket::family(family);
-#endif
-    if(tcp) {
-        sip::create(&tcp_context, agent, family);
-        sip::create(&udp_context, agent, family);
-        out_context = tcp_context;
-    }
-    else {
-        sip::create(&udp_context, agent, family);
-        sip::create(&tcp_context, agent, family);
-        out_context = udp_context;
-    }
-
-#ifdef  HAVE_OPENSSL
-    sip::create(&tls_context, agent, family);
-#endif
-
-    if(udp_context) {
-        if(!sip::listen(udp_context, IPPROTO_UDP, iface, sip_port))
-            shell::log(shell::FAIL, "cannot listen port %u for udp", sip_port);
-        else
-            shell::log(shell::NOTIFY, "listening port %u for udp", sip_port);
-    }
-
-    if(tcp_context) {
-        if(!sip::listen(tcp_context, IPPROTO_TCP, iface, sip_port))
-            shell::log(shell::FAIL, "cannot listen port %u for tcp", sip_port);
-        else
-            shell::log(shell::NOTIFY, "listening port %u for tcp", sip_port);
-    }
-
-    if(tls_context) {
-        if(!sip::listen(tls_context, IPPROTO_TCP, iface, sip_port, true))
-            shell::log(shell::FAIL, "cannot listen port %u for tls", sip_port + 1);
-        else
-            shell::log(shell::NOTIFY, "listening port %u for tls", sip_port + 1);
-    }
-
-    osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
-
-    // create only one media thread for now...
-    media *m = new media(stack * 1024l);
-    m->start(mpri);
-
-    thread *t;
-
-    if(udp_context) {
-        t = new thread(udp_context, stack *1024l, "udp");
-        t->start(priority);
-    }
-
-    if(tcp_context) {
-        t = new thread(tcp_context, stack *1024l, "tcp");
-        t->start(priority);
-    }
-
-    if(tls_context) {
-        t = new thread(tls_context, stack *1024l, "tls");
-        t->start(priority);
-    }
-
-    if(is(kp)) {
-        new registry(*kp, sip_port, expires);
-        return 0;
-    }
-
-    kp = keygroup.begin();
-    while(is(kp)) {
-        new registry(*kp, sip_port, expires);
-        kp.next();
-    }
-
-    if(keys)
-        cp = keys->get("timeslots");
-    else
-        cp = NULL;
-
-    if(cp)
-        timeslots = atoi(cp);
-
-    if(keys)
-        cp = keys->get("rtp");
-    else
-        cp = NULL;
-
-    if(cp)
-        rtp_port = atoi(cp);
-
-    if(!rtp_port)
-        rtp_port = ((sip_port / 2) * 2) + 2;
-
-    if(keys)
-        cp = keys->get("symmetric");
-    else
-        cp = NULL;
-
-    if(cp && (toupper(*cp) == 'Y' || toupper(*cp) == 'T' || atoi(cp) > 0))
-        media::symmetric = true;
-    
-    tsIndex = new Timeslot *[timeslots];
-    while(timeslots--) {
-        timeslot *ts = new timeslot(rtp_port);
-        tsIndex[tsCount++] = (Timeslot *)ts;
-        rtp_port += 2;
-    }
-
-    return tsCount;
+    return new driver();
 }
 
-void driver::stop(void)
+registration *driver::contact(const char *uuid)
 {
-    sip::release(tcp_context);
-    sip::release(udp_context);
-    sip::release(tls_context);
+    assert(uuid != NULL && *uuid != 0);
 
-    thread::shutdown();
-
-    unsigned index = 0;
-    while(index < tsCount) {
-        Timeslot *ts = tsIndex[index++];
-        ts->shutdown();
-    }
-
-    media::shutdown();
-}
-
-registry *driver::locate(sip::reg_t rid)
-{
-    linked_pointer<registry>  rp = Group::begin();
+    linked_pointer<registration> rp = registrations;
 
     while(is(rp)) {
-        if(rp->rid == rid)
+        if(String::equal(rp->getUUID(), uuid))
             return *rp;
         rp.next();
     }
     return NULL;
 }
 
+registration *driver::locate(const char *id)
+{
+    assert(id != NULL && *id != 0);
+
+    linked_pointer<registration> rp = registrations;
+
+    while(is(rp)) {
+        if(eq(rp->getId(), id))
+            return *rp;
+        rp.next();
+    }
+    return NULL;
+}
+
+registration *driver::locate(int rid)
+{
+    assert(rid != -1);
+
+    linked_pointer<registration> rp = registrations;
+
+    while(is(rp)) {
+        if(rp->getRegistry() == rid)
+            return *rp;
+        rp.next();
+    }
+    shell::log(shell::WARN, "unknown registry id %d requested", rid);
+    return NULL;
+}
+
+const char *driver::realm(void)
+{
+    if(is(realmopt))
+        return *realmopt;
+
+    if(sip_realm && *sip_realm)
+        return sip_realm;
+
+    return NULL;
+}
+
+void driver::update(void)
+{
+    keydata *keys = keyfile::get("sip");
+    const char *id;
+    const char *err;
+    const char *new_realm = NULL;
+
+    if(!keys)
+        keys = keyfile::get("sips");
+
+    linked_pointer<keydata::keyvalue> kv;
+    if(keys)
+        kv = keys->begin();
+
+    while(is(kv)) {
+        if(String::equal(kv->id, "timing"))
+            background::schedule(atol(kv->value));
+        else if(String::equal(kv->id, "stepping"))
+            stepping = atol(kv->value);
+        else if(String::equal(kv->id, "realm")) {
+            if(String::equal(kv->value, sip_realm))
+                new_realm = sip_realm;
+            else
+                new_realm = memcopy(kv->value);
+        }
+        kv.next();
+    }
+
+    sip_realm = new_realm;
+
+    linked_pointer<keydata> kp = registry();
+
+    // we don't have keys on update...
+
+    while(started && is(kp)) {
+        err = NULL;
+        id = kp->get();
+        if(!locate(id)) {
+            const char *regtype = kp->get("type");
+            if(!regtype)
+                regtype = "peer";
+            if(String::equal(regtype, "peer") || String::equal(regtype, "friend"))
+                err = activate(*kp);
+        }
+        if(err)
+            shell::log(shell::ERR, "registering %s, %s", id, err);
+        kp.next();
+    }
+    Driver::update();
+}
+
+void driver::start(void)
+{
+    const char *agent = "bayonne-" VERSION "/exosip2";
+    bool tcp = false;
+    const char *err, *id;
+    char buffer[256];
+    size_t len;
+    size_t stack = 0;
+    unsigned priority = 1;
+
+    ts_count = 16;      // default if not modified...
+    ts_alloc = sizeof(timeslot);
+
+    Driver *drv = Driver::get();
+    keydata *keys = drv->keyfile::get("sip");
+    linked_pointer<keydata::keyvalue> kv;
+
+    if(keys)
+        kv = keys->begin();
+
+    while(is(kv)) {
+        if(String::equal(kv->id, "iface")) {
+            iface = kv->value;
+#ifdef  AF_INET6
+            if(strchr(iface, ':'))
+                family = AF_INET6;
+#endif
+            if(String::equal(iface, ":::") || String::equal(iface, "::0") || String::equal(iface, "*") || iface[0] == 0)
+                iface = NULL;
+            else
+                iface = memcopy(iface);
+        } else if(eq(kv->id, "protocol") || eq(kv->id, "transport")) {
+            if(eq(kv->value, "tcp"))
+                tcp = true;                
+        } else if(eq(kv->id, "agent"))
+            agent = memcopy(kv->value);
+        else if(eq(kv->id, "port"))
+            port = atoi(kv->value);
+        else if(eq(kv->id, "stack"))
+            stack = atoi(kv->value) * 1024;
+        else if(eq(kv->id, "expires"))
+            expires = atoi(kv->value);
+        else if(eq(kv->id, "priority"))
+            priority = atoi(kv->value);
+        else if(eq(kv->id, "sessions"))
+            ts_count = atoi(kv->value);
+        else if(eq(kv->id, "timeslots"))
+            ts_count = atoi(kv->value);
+        else if(eq(kv->id, "registries"))
+            registries = atoi(kv->value);
+        else if(eq(kv->id, "realm"))
+            sip_realm = memcopy(kv->value);
+        kv.next();
+    }
+
+    if(is(slots))
+        ts_count = *slots;
+
+    if(is(portopt))
+        port = *portopt;
+
+    stats = statmap::create(registries);
+    len = strlen(buffer);
+    snprintf(buffer + len, sizeof(buffer) - len, ":%u", port);
+
+
+    Socket::query(family);
+
+    if(tcp) {
+        voip::create(&tcp_context, agent, family);
+        voip::create(&udp_context, agent, family);
+        out_context = tcp_context;
+    }
+    else {
+        voip::create(&udp_context, agent, family);
+        voip::create(&tcp_context, agent, family);
+        out_context = udp_context;
+    }
+
+#ifdef  HAVE_OPENSSL
+    voip::create(&tls_context, agent, family);
+#endif
+
+    if(udp_context) {
+        if(!voip::listen(udp_context, IPPROTO_UDP, iface, port))
+            shell::log(shell::FAIL, "cannot listen port %u for udp", port);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for udp", port);
+    }
+
+    if(tcp_context) {
+        if(!voip::listen(tcp_context, IPPROTO_TCP, iface, port))
+            shell::log(shell::FAIL, "cannot listen port %u for tcp", port);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for tcp", port);
+    }
+
+    if(tls_context) {
+        if(!voip::listen(tls_context, IPPROTO_TCP, iface, port, true))
+            shell::log(shell::FAIL, "cannot listen port %u for tls", port + 1);
+        else
+            shell::log(shell::NOTIFY, "listening port %u for tls", port + 1);
+    }
+
+    osip_trace_initialize_syslog(TRACE_LEVEL0, (char *)"bayonne");
+
+    timeslots = (caddr_t)new timeslot[ts_count];
+
+    Driver::start();
+    thread::activate(priority, stack);
+
+    started = true;
+    len = strlen(sip_schema);
+
+    linked_pointer<keydata> kp = drv->registry();
+
+    while(is(kp)) {
+        err = NULL;
+        id = kp->get();
+        const char *regtype = kp->get("type");
+        if(!regtype)
+            regtype = "peer";
+        if(eq(regtype, "peer") || eq(regtype, "friend"))
+            err = activate(*kp);
+        if(err)
+            shell::log(shell::ERR, "registering %s, %s", id, err);
+        ++kp;
+    }
+
+    Driver::release(drv);
+}
+
+void driver::stop(void)
+{
+    linked_pointer<registration> rp = registrations;
+
+    while(is(rp)) {
+        rp->release();
+        rp.next();
+    }
+
+    thread::shutdown();
+    Driver::stop();
+}
+
+const char *driver::dispatch(char **argv, int pid)
+{
+    return Driver::dispatch(argv, pid);
+}
+
+const char *driver::activate(keydata *keys)
+{
+    registration *reg;
+    const char *uri = keys->get();
+
+    if(strchr(uri, '@'))
+        return "invalid server uri";
+
+    caddr_t mp = memget(sizeof(registration));
+    registrations = reg = new(mp) registration(registrations, keys, expires, port);
+    shell::log(shell::INFO, "registering with %s", reg->getServer());
+
+    reg->refresh();
+
+    if(reg->getRegistry() != -1)
+        return NULL;
+
+    return "failed registration";
+}
+
+static void init(int argc, char **argv, bool detached, shell::mainproc_t svc = NULL)
+{
+    static Script::keyword_t keywords[] = {
+        {NULL}};
+
+    server::parse(argc, argv, "sip");
+    server::startup(svc, detached);
+
+    Script::assign(keywords);   // bind local driver keywords if any...
+
+    Driver::commit(new driver());
+
+    driver::start();
+    server::dispatch();
+    driver::stop();
+
+    server::release();
+}
+
 static SERVICE_MAIN(main, argc, argv)
 {
     signals::service("bayonne");
-    server::start(argc, argv);
+    init(argc, argv, true);
 }
 
 PROGRAM_MAIN(argc, argv)
 {
-    new driver;
-    server::start(argc, argv, &service_main);
+    init(argc, argv, false, &service_main);
     PROGRAM_EXIT(0);
 }
-
 

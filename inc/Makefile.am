@@ -10,6 +10,5 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 
-include_HEADERS = bayonne.h
-
+SUBDIRS = bayonne
 

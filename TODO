@@ -1,0 +1,12 @@
+* Integration drivers for:
+
+	sipx (and sipx http based service activation...)
+	vpb/voicetronix, dialogic/globalcall, aculab, etc...
+	gk (gnu gatekeeper/h323 specific)
+	dbs (panasonic dbs application services)
+	ims/carrier class call engine/voice broadcast services
+	f9600 (fujitsu f9600 application services)
+
+* tmp (GNU Telephony Management Protocol) plugin and client app
+
+* lots of basic things

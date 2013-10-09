@@ -14,184 +14,212 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "driver.h"
+#include <ctype.h>
 
-using namespace UCOMMON_NAMESPACE;
 using namespace BAYONNE_NAMESPACE;
+using namespace UCOMMON_NAMESPACE;
 
-registry::registry(keydata *keyset, unsigned myport, unsigned expiration) :
-Registry(keyset)
+registration::registration(Registration *root, keydata *keys, unsigned expiration, unsigned myport) :
+Registration(root, keys, "sip:")
 {
     const char *cp = keys->get("expires");
-    const char *schema = NULL;
-    char buffer[1024];
+    const char *auth = keys->get("authorize");
+    char buffer[256];
     char iface[180];
-    sip::msg_t msg = NULL;
-    context = driver::out_context;
-    const char *identity = keys->get("identity");
-    const char *sid = identity;
-    srv resolver;
 
-    active = false;
-    rid = -1;
-
-    if(!identity)
-        identity = keys->get("uri");
-
-    if(!identity) {
-        shell::log(shell::ERR, "failed to register %s; no uri identity", id);
-        return;
-    }
-    
-    if(eq(identity, "udp:", 4)) {
-        identity += 4;
-        schema = "sip";
-        context = driver::udp_context;
-    }
-    else if(eq(identity, "tcp:", 4)) {
-        identity += 4;
-        schema = "sip";
-        context = driver::tcp_context;
-    }
-    else if(eq(identity, "sips:", 5)) {
-        schema = "sips";
-        context = driver::tls_context;
-        identity += 5;
-    }
-    else if(!eq(identity, "sip:", 4))
-        schema = "sip";
-
-    if(schema) {
-        snprintf(buffer, sizeof(buffer), "%s:%s", schema, identity);
-        uri = driver::dup(buffer);
-    }
-    else {
-        uri = identity;
-        schema = "sip";
-    }
+    if(auth)
+        authid = memcopy(auth);
+    else
+        authid = uuid;
 
     if(cp)
         expires = atoi(cp);
     else
         expires = expiration;
 
-    sip::uri_userid(buffer, sizeof(buffer), uri);
-    userid = driver::dup(buffer);
+    userid = memcopy(keys->get("userid"));
+    secret = memcopy(keys->get("secret"));
+    script = memcopy(keys->get("script"));
+    domain = memcopy(keys->get("domain"));
+    targets = memcopy(keys->get("targets"));
+    localnames = memcopy(keys->get("localnames"));
+    rid = -1;
 
-    server = keys->get("server");
-    if(!server)
-        server = keys->get("proxy");
-    if(!server)
-        server = keys->get("route");
+    if(!script)
+        script = id;
 
-    if(!server)
-        server = sid;
+    if(!userid)
+        userid = memcopy(keys->get("user"));
 
-    context = resolver.route(buffer, sizeof(buffer), server);
-    server = driver::dup(buffer);
+    if(!secret)
+        authid = NULL;
 
-    secret = keys->get("secret");
-    digest = keys->get("digest");
-    method = keys->get("method");
-    realm = keys->get("realm");
-    
-    // inactive contexts ignored...
-    if(!context) {
-        shell::log(shell::ERR, "failed to register %s; no context for %s", id, schema);
-        return;
+    unsigned port = 0;
+    cp = keys->get("port");
+    if(cp)
+        port = atoi(cp);
+
+    cp = keys->get("server");
+    if(!cp)
+        cp = id;
+
+    if(port)
+        snprintf(buffer, sizeof(buffer), "%s%s:%u", schema, cp, port);
+    else
+        snprintf(buffer, sizeof(buffer), "%s%s", schema, cp);
+
+    server = memcopy(buffer);
+
+    if(!domain)
+        domain = getHostid(server);
+
+    if(userid) {
+        snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, userid, domain);
+        uri = memcopy(buffer);
     }
-
-    if(!method || !*method)
-        method = "md5";
-
-    if(!digest && secret && userid && realm) {
-        digest_t tmp = method;
-        if(tmp.puts(str(userid) + ":" + realm + ":" + secret))
-            digest = strdup(*tmp);
-        else
-            shell::errexit(6, "*** bayonne: digest: unsupported computation");
+    else {
+        snprintf(buffer, sizeof(buffer), "%s%s", schema, domain);
+        uri = memcopy(buffer);
     }
-
-    if(secret && userid && realm)
-        sip::add_authentication(context, userid, secret, realm);
 
     getInterface(server, iface, sizeof(iface));
     Random::uuid(uuid);
 
     if(strchr(iface, ':'))
-        snprintf(buffer, sizeof(buffer), "%s:%s@[%s]:%u", schema, uuid, iface, myport);
+        snprintf(buffer, sizeof(buffer), "%s%s@[%s]:%u", schema, uuid, iface, myport);
     else
-        snprintf(buffer, sizeof(buffer), "%s:%s@%s:%u", schema, uuid, iface, myport);
-    contact = Driver::dup(buffer);
+        snprintf(buffer, sizeof(buffer), "%s%s@%s:%u", schema, uuid, iface, myport);
+    contact = memcopy(buffer);
+}
 
-    if(-1 != (rid = sip::make_registry_request(context, uri, server, contact, expires, &msg))) {
+void registration::reload(keydata *keys)
+{
+    char buffer[256];
+
+    const char *changed_userid = keys->get("userid");
+    const char *changed_secret = keys->get("secret");
+    const char *changed_script = keys->get("script");
+    const char *changed_domain = keys->get("domain");
+    const char *changed_targets = keys->get("targets");
+    const char *changed_authid = keys->get("authorize");
+    const char *changed_localnames = keys->get("localnames");
+    bool newuri = false;
+
+    if(!changed_domain)
+        changed_domain = keys->get("domain");
+
+    if(!changed_userid)
+        changed_userid = keys->get("user");
+
+    if(!changed_script)
+        changed_script = id;
+
+    if(changed_authid && !eq(changed_authid, authid))
+        authid = memcopy(changed_authid);
+    else if(!changed_authid)
+        authid = uuid;
+
+    if(changed_domain && !eq(changed_domain, domain)) {
+        domain = memcopy(changed_domain);
+        newuri = true;
+    }
+
+    if(changed_userid && !eq(changed_userid, userid)) {
+        newuri = true;
+        userid = memcopy(changed_userid);
+    }
+
+    if(changed_secret && !eq(changed_secret, secret))
+        secret = memcopy(changed_secret);
+
+    if(changed_script && !eq(changed_script, script))
+        script = memcopy(changed_script);
+
+    if(changed_targets && (!targets || !String::equal(changed_targets, targets)))
+        targets = memcopy(changed_targets);
+    else if(!changed_targets)
+        targets = NULL;
+
+    if(changed_localnames && (!localnames || !String::equal(changed_localnames, localnames)))
+        localnames = memcopy(changed_localnames);
+    else if(!changed_localnames)
+        localnames = NULL;
+
+    if(newuri) {
+        snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, userid, domain);
+        uri = memcopy(buffer);
+    }
+
+    Registration::reload(keys);
+    refresh();
+}
+
+bool registration::refresh(void)
+{
+    voip::msg_t msg = NULL;
+
+    if(rid != -1)
+        return true;
+
+    context = driver::out_context;
+    if(-1 != (rid = voip::make_registry_request(context, uri, server, contact, expires, &msg))) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
         osip_message_set_header(msg, "Allow-Events", "presence");
-
-        if(digest) {
-            stringbuf<64> response;
-            stringbuf<64> once;
-            char nounce[64];
-            snprintf(buffer, sizeof(buffer), "%s:%s", "REGISTER", uri);
-            Random::uuid(nounce);
-            digest_t auth = "md5";
-            auth.puts(nounce);
-            once = *auth;
-            auth = method;
-            auth.puts(buffer);
-            response = *auth;
-            snprintf(buffer, sizeof(buffer), "%s:%s:%s", digest, *once, *response);
-            auth.reset();
-            auth.puts(buffer);
-            response = *auth;
-            snprintf(buffer, sizeof(buffer),
-                "Digest username=\"%s\""
-                ",realm=\"%s\""
-                ",uri=\"%s\""
-                ",response=\"%s\""
-                ",nonce=\"%s\""
-                ",algorithm=%s"
-                ,userid, realm, uri, *response, *once, method);
-            osip_message_set_header(msg, AUTHORIZATION, buffer);
-        }
-
-        sip::send_registry_request(context, rid, msg);
-        shell::debug(3, "registry id %d assigned to %s", rid, id);
+        voip::send_registry_request(context, rid, msg);
     }
-    else {
-        shell::log(shell::ERR, "failed to register %s with %s", id, server);
+    else
         rid = -1;
-    }
+
+    shell::debug(3, "registry id %d assigned to %s", rid, id);
+
+    if(rid == -1)
+        return false;
+
+    return true;
 }
 
-void registry::authenticate(const char *sip_realm)
+void registration::release(void)
 {
     if(rid == -1)
         return;
 
-    if(secret && userid && sip_realm) {
-        shell::debug(3, "registry id %d authenticating to \"%s\"", rid, sip_realm);
-        sip::add_authentication(context, userid, secret, sip_realm, true);
-    }
-}
+    Registration::release();
 
-void registry::activate(void)
-{
-    if(rid == -1 || active)
-        return;
-
-    shell::debug(3, "registry id %d activated", rid);
-    active = true;
-}
-
-void registry::release(void)
-{
-    if(rid == -1 || !active)
-        return;
-
-    if(sip::release_registry(context, rid))
-        shell::debug(3, "registry id %d released", rid);
-    active = false;
+    voip::release_registry(context, rid);
+    shell::debug(3, "registry id %d released", rid);
     rid = -1;
 }
 
+void registration::confirm(void)
+{
+    if(rid == -1 || activated != 0)
+        return;
+
+    Registration::activate();
+    shell::debug(3, "registry id %d activated", rid);
+}
+
+void registration::failed(void)
+{
+    if(rid == -1)
+        return;
+
+    Registration::release();
+    shell::debug(3, "registry id %d failed", rid);
+}
+
+void registration::cancel(void)
+{
+    if(rid == -1)
+        return;
+
+    Registration::release();
+    shell::debug(3, "registry id %d terminated", rid);
+    rid = -1;
+}
+
+void registration::authenticate(const char *realm)
+{
+    voip::add_authentication(context, userid, secret, realm);
+}

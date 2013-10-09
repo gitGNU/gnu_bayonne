@@ -1,12 +1,3 @@
-NOTICE:
-
-Prior to the 3rd release we are building a test release of the new 3.0 api and
-core utilities alone WITHOUT a new bayonne server.  This is to help test and
-debug Bayonne audio processing as we prepare a formal 3.0 release of the GNU
-Bayonne package.
-
-----
-
 Welcome to the 3rd major release series of GNU Bayonne.  This release series is
 dedicated to improving the use of bayonne as a script driven telephony
 integration and application services platform in conjunction with an existing

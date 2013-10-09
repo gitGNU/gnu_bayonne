@@ -1,0 +1,98 @@
+.TH bayonne "8" "January 2009" "GNU Bayonne" "GNU Telephony"
+.SH NAME
+bayonne \- Script control and manage GNU bayonne driver.
+.SH SYNOPSIS
+.B bayonne \fIcommand\fR \fI[arguments...]\fR
+.br
+.SH DESCRIPTION
+The bayonne command allows one to interact with a running bayonne driver
+instance on the current machine.  This can be used to create management shell
+scripts or to perform basic service operations, using the bayonne fifo control
+interface.  Normally this command would be used only by root or someone in an
+admin group that the bayonne deamon is running under.  If the bayonne deamon
+is started by an ordinary user, the command can be used by the same user to
+control that daemon instance.
+.PP
+.TP
+\fBabort\fR
+terminate running daemon with core for debugging.
+.TP
+\fBboards\fR
+dump telephony boards listing for the driver.
+.TP
+\fBcheck\fR
+verify running daemon for deadlocks or other problems.
+.TP
+\fBconcurrency\fR \fIlevel\fR
+set concurrency level of the daemon.  See pthread_setconcurrency.
+.TP
+\fBdisable\fR \fItimeslot|span\fR
+disables a timeslot or all timeslots associated with a specific resource such
+as a PRI span.
+.TP
+\fBdown\fR
+stop and shutdown the running sipwitch daemon.
+.TP
+\fBdrop|hangup\fR \fItimeslot|span|uri\fR
+drop (disconnect) a call on a specific timeslot, or on all timeslots associated
+with a specific resource such as a PRI span or a uri registration.
+.TP
+\fBenable\fR \fItimeslot|span\fR
+re-enabled a specified and disabled timeslot, or all timeslots associated with 
+a specific resource such as a PRI span.
+.TP
+\fBhistory\fR \fI[size]\fR
+set size or dump recent history of error and debug events.
+.TP
+\fBperiod\fR \fIinterval\fR
+dump periodic stats for specified minute interval, often used for cron.
+.TP
+\fBpstats\fR
+dump server periodic statistics.  See ``stats''.
+.TP
+\fBrefresh\fR \fIregistry\fR
+attempt to reactivate a registry entry if has become offline.
+.TP
+\fBrelease\fR \fIregistry\fR
+clear an active registration with a remote call server.
+.TP
+\fBreload\fR
+load server configuration while live.
+.TP
+\fBrestart\fR
+force server restart.
+.TP
+\fBresume\fR \fIboard-id\fR
+resume a telephony board that has been suspended.
+.TP
+\fBsnapshot\fR
+create snapshot diagnostic file from daemon.
+.TP
+\fBspans\fR
+dump map of digital spans.
+.TP
+\fBstats\fR
+dump server call statistics.
+.TP
+\fBsuspend\fR \fIboard-id\fR
+suspend an active telephony board.
+.TP
+\fBverbose\fR \fIlevel\fR
+set daemon error logging verbosity.
+.SH "EXIT STATUS"
+Normally exit status is 0 if the request was successfully processed by the
+bayonne driver daemon.  An exit status of 1 indicates the request timed
+out and 2 indicates the daemon is offline.  If the request failed, then a
+3 is returned.  A 255 (\-1) indicates a syntax error in the command request
+or arguments. 
+.SH AUTHOR
+Written by David Sugar.
+.SH "REPORTING BUGS"
+Report bugs to <dyfet@gnutelephony.org>.
+.SH COPYRIGHT
+Copyright \(co 2009 David Sugar, Tycho Softworks.
+.br
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE. 
+

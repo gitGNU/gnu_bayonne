@@ -1,0 +1,4 @@
+#!/bin/sh
+if test -p /var/run/bayonne/control ; then
+        bayonne period 60 ; fi
+

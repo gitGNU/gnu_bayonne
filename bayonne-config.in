@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (C) 2009 David Sugar, Tycho Softworks.
+# Copyright (C) 2006-2009 David Sugar, Tycho Softworks.
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -23,7 +23,7 @@ fi
 usage()
 {
     cat <<EOF
-Usage: bayonne-config [OPTION]
+Usage: libbayonne-config [OPTION]
 
 Known values for OPTION are:
 
