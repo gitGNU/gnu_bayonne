@@ -77,7 +77,7 @@ const char *Registration::getHostid(const char *id)
         return id;
 
     size_t len = strlen(schema);
-    if(String::equal(schema, id, len))
+    if(eq(schema, id, len))
         id += len;
 
     return id;

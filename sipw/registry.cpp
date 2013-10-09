@@ -135,12 +135,12 @@ void registration::reload(keydata *keys)
     if(changed_script && !eq(changed_script, script))
         script = memcopy(changed_script);
 
-    if(changed_targets && (!targets || !String::equal(changed_targets, targets)))
+    if(changed_targets && (!targets || !eq(changed_targets, targets)))
         targets = memcopy(changed_targets);
     else if(!changed_targets)
         targets = NULL;
 
-    if(changed_localnames && (!localnames || !String::equal(changed_localnames, localnames)))
+    if(changed_localnames && (!localnames || !eq(changed_localnames, localnames)))
         localnames = memcopy(changed_localnames);
     else if(!changed_localnames)
         localnames = NULL;

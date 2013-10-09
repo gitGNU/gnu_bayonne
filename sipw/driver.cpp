@@ -38,7 +38,7 @@ static shell::stringopt realmopt(0, "--realm", "Realm of server", "string", NULL
 static shell::numericopt slots('t', "--timeslots", "Number of timeslots to allocate", "ports", 16);
 
 driver::driver() :
-Driver("voip")
+Driver("registry")
 {
     udp_context = tcp_context = tls_context = out_context = NULL;
 }
@@ -55,7 +55,7 @@ registration *driver::contact(const char *uuid)
     linked_pointer<registration> rp = registrations;
 
     while(is(rp)) {
-        if(String::equal(rp->getUUID(), uuid))
+        if(eq(rp->getUUID(), uuid))
             return *rp;
         rp.next();
     }
@@ -117,12 +117,12 @@ void driver::update(void)
         kv = keys->begin();
 
     while(is(kv)) {
-        if(String::equal(kv->id, "timing"))
+        if(eq(kv->id, "timing"))
             background::schedule(atol(kv->value));
-        else if(String::equal(kv->id, "stepping"))
+        else if(eq(kv->id, "stepping"))
             stepping = atol(kv->value);
-        else if(String::equal(kv->id, "realm")) {
-            if(String::equal(kv->value, sip_realm))
+        else if(eq(kv->id, "realm")) {
+            if(eq(kv->value, sip_realm))
                 new_realm = sip_realm;
             else
                 new_realm = memcopy(kv->value);
@@ -143,7 +143,7 @@ void driver::update(void)
             const char *regtype = kp->get("type");
             if(!regtype)
                 regtype = "peer";
-            if(String::equal(regtype, "peer") || String::equal(regtype, "friend"))
+            if(eq(regtype, "peer") || eq(regtype, "friend"))
                 err = activate(*kp);
         }
         if(err)
@@ -174,13 +174,13 @@ void driver::start(void)
         kv = keys->begin();
 
     while(is(kv)) {
-        if(String::equal(kv->id, "iface")) {
+        if(eq(kv->id, "iface")) {
             iface = kv->value;
 #ifdef  AF_INET6
             if(strchr(iface, ':'))
                 family = AF_INET6;
 #endif
-            if(String::equal(iface, ":::") || String::equal(iface, "::0") || String::equal(iface, "*") || iface[0] == 0)
+            if(eq(iface, ":::") || eq(iface, "::0") || eq(iface, "*") || iface[0] == 0)
                 iface = NULL;
             else
                 iface = memcopy(iface);

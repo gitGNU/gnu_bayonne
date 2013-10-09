@@ -115,7 +115,7 @@ keyfile()
         char *ep = strrchr(dirpath + len, '.');
         if(!ep)
             continue;
-        if(!String::equal(ep, ".def"))
+        if(!eq(ep, ".def"))
             continue;
         shell::log(shell::INFO, "compiling %s", dirpath + len);
         def = Script::compile(def, dirpath, NULL);
@@ -141,7 +141,7 @@ noscr:
         caddr_t mp;
         if(!ep)
             continue;
-        if(!String::equal(ep, ".scr"))
+        if(!eq(ep, ".scr"))
             continue;
         shell::log(shell::INFO, "compiling %s", dirpath + len);
         img = Script::compile(NULL, dirpath, *image_definitions);
@@ -249,17 +249,17 @@ void Driver::update(void)
         kv = keys->begin();
 
     while(is(kv)) {
-        if(String::equal(kv->id, "stacking"))
+        if(eq(kv->id, "stacking"))
             Script::stacking = atoi(kv->value);
-        else if(String::equal(kv->id, "decimals"))
+        else if(eq(kv->id, "decimals"))
             Script::decimals = atoi(kv->value);
-        else if(String::equal(kv->id, "stepping"))
+        else if(eq(kv->id, "stepping"))
             Script::stepping = atoi(kv->value);
-        else if(String::equal(kv->id, "paging"))
+        else if(eq(kv->id, "paging"))
             Script::paging = atol(kv->value);
-        else if(String::equal(kv->id, "symbols"))
+        else if(eq(kv->id, "symbols"))
             Script::sizing = atoi(kv->value);
-        else if(String::equal(kv->id, "indexing"))
+        else if(eq(kv->id, "indexing"))
             Script::indexing = atoi(kv->value);
         kv.next();
     }
@@ -299,7 +299,7 @@ Script *Driver::getOutgoing(const char *name)
 
     ip = driver->image_services;
     while(is(ip)) {
-        if(String::equal(ip->id, name)) {
+        if(eq(ip->id, name)) {
             ip->ptr->retain();
             scr = ip->ptr.get();
             break;
@@ -324,7 +324,7 @@ Script *Driver::getIncoming(const char *name)
 
     ip = driver->image_services;
     while(is(ip)) {
-        if(String::equal(ip->id, name)) {
+        if(eq(ip->id, name)) {
             ip->ptr->retain();
             scr = ip->ptr.get();
             break;
@@ -362,10 +362,10 @@ const char *Driver::dispatch(char **argv, int pid)
 {
     linked_pointer<Registration> rp;
 
-    if(String::equal(argv[0], "release")) {
+    if(eq(argv[0], "release")) {
         rp = registrations;
         while(is(rp)) {
-            if(String::equal(rp->getId(), argv[1])) {
+            if(eq(rp->getId(), argv[1])) {
                 rp->release();
                 return NULL;
             }
@@ -374,16 +374,16 @@ const char *Driver::dispatch(char **argv, int pid)
         return "unknown resource";
     }
 
-    if(String::equal(argv[0], "drop") || String::equal(argv[0], "hangup") || String::equal(argv[0], "enable") || String::equal(argv[0], "disable"))
+    if(eq(argv[0], "drop") || eq(argv[0], "hangup") || eq(argv[0], "enable") || eq(argv[0], "disable"))
         return "unknown resource";
 
-    if(String::equal(argv[0], "refresh")) {
+    if(eq(argv[0], "refresh")) {
         if(argv[1] == NULL || argv[2] != NULL)
             goto invalid;
 
         rp = registrations;
         while(is(rp)) {
-            if(String::equal(rp->getId(), argv[1])) {
+            if(eq(rp->getId(), argv[1])) {
                 if(rp->refresh())
                     return NULL;
                 return "refresh failed";

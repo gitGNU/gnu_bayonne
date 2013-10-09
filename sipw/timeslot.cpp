@@ -105,12 +105,12 @@ int timeslot::incoming(voip::event_t sevent)
 
 	if(via && from) {
 		remote = true;
-		if(String::equal(from->host, via->host) && from_port == via_port)
+		if(eq(from->host, via->host) && from_port == via_port)
 			remote = false;
 	}
 	else if(from && to) {
 		remote = true;
-		if(String::equal(from->host, to->host) && from_port == to_port)
+		if(eq(from->host, to->host) && from_port == to_port)
 			remote = false;
 	}
 	
@@ -144,16 +144,16 @@ int timeslot::incoming(voip::event_t sevent)
 	// script= entry is our default script for the request uri...
 	// special script names decline, none,reject, and busy are immediate error...
 
-	if(!scrname || String::equal(scrname, "decline"))
+	if(!scrname || eq(scrname, "decline"))
 		return SIP_DECLINE;
 
-	if(String::equal(scrname, "none"))
+	if(eq(scrname, "none"))
 		return SIP_NOT_FOUND;
 
-	if(String::equal(scrname, "busy"))
+	if(eq(scrname, "busy"))
 		return SIP_BUSY_HERE;
 
-	if(String::equal(scrname, "reject"))
+	if(eq(scrname, "reject"))
 		return SIP_FORBIDDEN;
 
 attach:
