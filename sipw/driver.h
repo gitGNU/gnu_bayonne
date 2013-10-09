@@ -141,6 +141,7 @@ private:
 
     thread();
 
+    void options(void);
     void invite(void);
     void run(void);
 

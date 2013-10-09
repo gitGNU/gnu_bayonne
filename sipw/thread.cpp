@@ -180,13 +180,14 @@ void thread::run(void)
 	registration *reg;
 	Timeslot *ts;
 	Timeslot::event_t event;
+    int error;
 
 	++startup_count;
 	shell::debug(1, "starting thread %s", instance);
 
 	for(;;) {
-		assert(instance > 0);
-		
+		error = SIP_BAD_REQUEST;
+
 		if(!shutdown_flag)
 			sevent = voip::get_event(context, background::schedule());
 
@@ -255,7 +256,24 @@ void thread::run(void)
 				event.id = Timeslot::RELEASE;
 				ts->post(&event);
 			}
-			break; 
+			break;
+        case EXOSIP_MESSAGE_NEW:
+            if(sevent->request) {
+                if(MSG_IS_OPTIONS(sevent->request)) {
+                    options();
+                    error = SIP_OK;
+                }
+                else if(MSG_IS_BYE(sevent->request)) {
+                    ts = Timeslot::get(sevent->cid);
+                    if(ts) {
+                        event.id = Timeslot::DROP;
+                        ts->post(&event);
+                        error = SIP_OK;
+                    }
+                }
+            }
+            voip::send_answer_response(context, sevent->tid, error, NULL);
+            break; 
 		default:
 			shell::log(shell::WARN, "unsupported message %d", sevent->type);
 		}
@@ -263,6 +281,19 @@ void thread::run(void)
         voip::release_event(sevent);
 		--active_count;
 	}
+}
+
+void thread::options(void)
+{
+    voip::msg_t reply = NULL;
+
+    if(voip::make_options_response(context, sevent->tid, SIP_OK, &reply)) {
+        voip::server_accepts(reply);
+        voip::server_allows(reply);
+        voip::send_options_response(context, sevent->tid, SIP_OK, reply);
+    }
+    else
+        voip::send_options_response(context, sevent->tid, SIP_BAD_REQUEST, NULL);
 }
 
 void thread::invite(void)
