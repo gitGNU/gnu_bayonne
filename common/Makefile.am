@@ -17,5 +17,5 @@ lib_LTLIBRARIES = libbayonne.la
 
 libbayonne_la_LDFLAGS = @BAYONNE_LIBS@ $(RELEASE) 
 libbayonne_la_SOURCES = server.cpp driver.cpp registry.cpp timeslot.cpp \
-	thread.cpp segment.cpp stats.cpp dbi.cpp signals.cpp voip.cpp
+	thread.cpp segment.cpp stats.cpp dbi.cpp signals.cpp voip.cpp uri.cpp
 

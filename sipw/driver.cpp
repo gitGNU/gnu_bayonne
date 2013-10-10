@@ -23,6 +23,7 @@ voip::context_t driver::udp_context = NULL;
 voip::context_t driver::tls_context = NULL;
 voip::context_t driver::out_context = NULL;
 int driver::family = AF_INET;
+int driver::protocol = IPPROTO_UDP;
 
 static const char *sip_realm = NULL;
 static const char *sip_schema = "sip:";
@@ -156,7 +157,6 @@ void driver::update(void)
 void driver::start(void)
 {
     const char *agent = "bayonne-" VERSION "/exosip2";
-    bool tcp = false;
     const char *err, *id;
     char buffer[256];
     size_t len;
@@ -186,7 +186,7 @@ void driver::start(void)
                 iface = memcopy(iface);
         } else if(eq(kv->id, "protocol") || eq(kv->id, "transport")) {
             if(eq(kv->value, "tcp"))
-                tcp = true;                
+                protocol = IPPROTO_TCP;                
         } else if(eq(kv->id, "agent"))
             agent = memcopy(kv->value);
         else if(eq(kv->id, "port"))
@@ -221,7 +221,7 @@ void driver::start(void)
 
     Socket::query(family);
 
-    if(tcp) {
+    if(protocol == IPPROTO_TCP) {
         voip::create(&tcp_context, agent, family);
         voip::create(&udp_context, agent, family);
         out_context = tcp_context;

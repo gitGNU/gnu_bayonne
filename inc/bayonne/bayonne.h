@@ -50,4 +50,5 @@
 #include <bayonne/thread.h>
 #include <bayonne/stats.h>
 #include <bayonne/dbi.h>
+#include <bayonne/uri.h>
 #endif

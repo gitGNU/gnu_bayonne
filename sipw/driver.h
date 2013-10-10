@@ -119,7 +119,7 @@ public:
     static voip::context_t udp_context;
     static voip::context_t tcp_context;
     static voip::context_t tls_context;
-    static int family;
+    static int family, protocol;
 
     static registration *contact(const char *uuid);
     static registration *locate(int regid);
@@ -159,6 +159,16 @@ public:
 
 private:
     void automatic(void);
+};
+
+class __LOCAL srv : public uri
+{
+public:
+    srv(const char *id);
+    srv();
+    ~srv();
+
+    voip::context_t route(const char *uri, char *buf, size_t size);
 };
 
 END_NAMESPACE

@@ -15,5 +15,6 @@ LDADD = ../common/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 sbin_PROGRAMS = bayonne-sipw
 noinst_HEADERS = driver.h
 
-bayonne_sipw_SOURCES = driver.cpp registry.cpp thread.cpp timeslot.cpp
+bayonne_sipw_SOURCES = driver.cpp registry.cpp thread.cpp timeslot.cpp \
+	srv.cpp
 

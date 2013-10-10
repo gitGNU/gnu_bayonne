@@ -20,6 +20,7 @@
 #define DEFAULT_PAGING  "${DEFAULT_PAGING}"
 
 #cmakedefine HAVE_SYS_RESOURCE_H 1
+#cmakedefine HAVE_RESOLV_H 1
 #cmakedefine HAVE_PWD_H 1
 #cmakedefine HAVE_SETRLIMIT 1
 #cmakedefine HAVE_SETPGRP 1

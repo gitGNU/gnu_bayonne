@@ -186,8 +186,8 @@ elseif(HAVE_EXOSIP2)
     set(EXOSIP2_LIBS eXosip2 osip2 osipparser2)
 endif()
 
-check_include_files(resolv.h HAVE_RESOLV)
-if(HAVE_RESOLV)
+check_include_files(resolv.h HAVE_RESOLV_H)
+if(HAVE_RESOLV_H)
     set(EXOSIP2_LIBS ${EXOSIP2_LIBS} resolv)
 endif()
 
