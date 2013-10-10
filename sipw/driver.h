@@ -167,7 +167,7 @@ public:
     srv(const char *id);
     srv();
 
-    voip::context_t route(const char *uri, char *buf, size_t size);
+    voip::context_t route(char *buf, size_t size, const char *uri);
 };
 
 END_NAMESPACE

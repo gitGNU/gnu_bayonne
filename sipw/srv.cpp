@@ -26,7 +26,7 @@ uri(uri_id, driver::family, driver::protocol)
 
 srv::srv() : uri() {}
 
-voip::context_t srv::route(const char *uri, char *buf, size_t size)
+voip::context_t srv::route(char *buf, size_t size, const char *uri)
 {
     char host[256];
     const char *schema = "sip";

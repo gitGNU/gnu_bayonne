@@ -22,10 +22,14 @@ using namespace UCOMMON_NAMESPACE;
 registration::registration(Registration *root, keydata *keys, unsigned expiration, unsigned myport) :
 Registration(root, keys, "sip:")
 {
+    const char *identity = keys->get("identity");
     const char *cp = keys->get("expires");
     const char *auth = keys->get("authorize");
-    char buffer[256];
-    char iface[180];
+    char buffer[256], host[256];
+    char iface[180], user[80];
+    srv resolver;
+
+    context = NULL;
 
     if(auth)
         authid = memcopy(auth);
@@ -37,6 +41,23 @@ Registration(root, keys, "sip:")
     else
         expires = expiration;
 
+    if(!identity)
+        identity = keys->get("uri");
+
+    if(!identity) {
+        context = NULL;
+        return;
+    }
+
+    cp = keys->get("server");
+    if(!cp)
+        cp = identity;
+
+    context = resolver.route(buffer, sizeof(buffer), cp);
+    if(!context)
+        return;
+
+    server = memcopy(buffer);
     userid = memcopy(keys->get("userid"));
     secret = memcopy(keys->get("secret"));
     script = memcopy(keys->get("script"));
@@ -51,36 +72,21 @@ Registration(root, keys, "sip:")
     if(!userid)
         userid = memcopy(keys->get("user"));
 
+    uri::userid(user, sizeof(user), identity);
+    uri::hostid(host, sizeof(host), identity);
+    if(!domain)
+        domain = memcopy(host);
+    
     if(!secret)
         authid = NULL;
 
-    unsigned port = 0;
-    cp = keys->get("port");
-    if(cp)
-        port = atoi(cp);
-
-    cp = keys->get("server");
-    if(!cp)
-        cp = id;
-
-    if(port)
-        snprintf(buffer, sizeof(buffer), "%s%s:%u", schema, cp, port);
-    else
-        snprintf(buffer, sizeof(buffer), "%s%s", schema, cp);
-
-    server = memcopy(buffer);
-
-    if(!domain)
-        domain = getHostid(server);
-
-    if(userid) {
-        snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, userid, domain);
-        uri = memcopy(buffer);
+    if(!userid) {
+        uri::userid(buffer, sizeof(buffer), identity);
+        userid = memcopy(buffer);
     }
-    else {
-        snprintf(buffer, sizeof(buffer), "%s%s", schema, domain);
-        uri = memcopy(buffer);
-    }
+
+    snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, user, host);
+    uri = memcopy(buffer);
 
     getInterface(server, iface, sizeof(iface));
     Random::uuid(uuid);
@@ -158,10 +164,12 @@ bool registration::refresh(void)
 {
     voip::msg_t msg = NULL;
 
+    if(!context)
+        return false;
+
     if(rid != -1)
         return true;
 
-    context = driver::out_context;
     if(-1 != (rid = voip::make_registry_request(context, uri, server, contact, expires, &msg))) {
         osip_message_set_supported(msg, "100rel");
         osip_message_set_header(msg, "Event", "Registration");
@@ -181,7 +189,7 @@ bool registration::refresh(void)
 
 void registration::release(void)
 {
-    if(rid == -1)
+    if(rid == -1 || !context)
         return;
 
     Registration::release();
@@ -189,6 +197,7 @@ void registration::release(void)
     voip::release_registry(context, rid);
     shell::debug(3, "registry id %d released", rid);
     rid = -1;
+    context = NULL;
 }
 
 void registration::confirm(void)
