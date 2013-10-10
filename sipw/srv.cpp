@@ -24,3 +24,60 @@ uri(uri_id, driver::family, driver::protocol)
 {
 }
 
+srv::srv() : uri() {}
+
+voip::context_t srv::route(const char *uri, char *buf, size_t size)
+{
+    char host[256];
+    const char *schema = "sip";
+    const char *sid = uri;
+    unsigned short port = uri::portid(uri);
+    voip::context_t ctx = driver::out_context;
+
+    if(!uri::hostid(host, sizeof(host), uri))
+        return NULL;
+
+    if(eq(uri, "sips:", 5)) {
+        schema = "sips";
+        ctx = driver::tls_context;
+    }
+    else if(eq(uri, "tcp:", 4)) {
+        uri += 4;
+        ctx = driver::tcp_context;
+    }
+	else if(eq(uri, "udp:", 4)) {
+        uri += 4;
+        ctx = driver::udp_context;
+    }
+
+    buf[0] = 0;
+    char *cp = strrchr(host, '.');
+    if(Socket::is_numeric(host) || !cp || eq(cp, ".local") || eq(cp, ".localdomain")) {
+        if(!port) {
+            if(eq(schema, "sips"))
+                port = 5061;
+            else
+                port = 5060;
+        }
+        if(strchr(host, ':'))
+            snprintf(buf, size, "%s:[%s]:%u", schema, host, port);
+        else
+            snprintf(buf, size, "%s:%s:%u", schema, host, port);
+        sid = buf;
+    }
+    set(sid, driver::family, driver::protocol);
+    if(!entry)
+        return NULL;
+
+    if(!Socket::query(entry, host, sizeof(host)))
+        return NULL;
+
+#ifdef  AF_INET6
+    if(entry->sa_family == AF_INET6)
+        snprintf(buf, size, "%s:[%s]:%u", schema, host, (unsigned)ntohs(((struct sockaddr_in6 *)(entry))->sin6_port) & 0xffff);
+    else
+#endif
+        snprintf(buf, size, "%s:%s:%u", schema, host, (unsigned)ntohs(((struct sockaddr_in *)(entry))->sin_port) & 0xffff);
+    return ctx;
+}
+

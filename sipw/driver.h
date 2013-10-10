@@ -166,7 +166,6 @@ class __LOCAL srv : public uri
 public:
     srv(const char *id);
     srv();
-    ~srv();
 
     voip::context_t route(const char *uri, char *buf, size_t size);
 };
