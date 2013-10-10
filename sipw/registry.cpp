@@ -51,6 +51,8 @@ Registration(root, keys, "sip:")
 
     cp = keys->get("server");
     if(!cp)
+        cp = keys->get("srv");
+    if(!cp)
         cp = identity;
 
     context = resolver.route(buffer, sizeof(buffer), cp);
