@@ -34,9 +34,13 @@ static unsigned registries = 40;
 static unsigned short port = 5060;
 
 static shell::groupopt driveropts("Driver Options");
-static shell::numericopt portopt(0, "--port", "Port to bind (5060)", "port", 5060);
-static shell::stringopt realmopt(0, "--realm", "Realm of server", "string", NULL);
-static shell::numericopt slots('t', "--timeslots", "Number of timeslots to allocate", "ports", 16);
+#ifdef  AF_INET6
+static shell::flagopt ipv6('6', "--ipv6", "default to ipv6");
+#endif
+static shell::numericopt portopt(0, "--port", "port to bind (5060)", "port", 5060);
+static shell::stringopt realmopt(0, "--realm", "realm of server", "string", NULL);
+static shell::flagopt tcp(0, "--tcp", "default to sip over tcp");
+static shell::numericopt slots('t', "--timeslots", "number of timeslots to allocate", "ports", 16);
 
 driver::driver() :
 Driver("registry")
@@ -213,6 +217,14 @@ void driver::start(void)
 
     if(is(portopt))
         port = *portopt;
+
+    if(is(tcp))
+        protocol = IPPROTO_TCP;
+
+#ifdef  AF_INET6
+    if(is(ipv6))
+        family = AF_INET6;
+#endif
 
     stats = statmap::create(registries);
     len = strlen(buffer);
