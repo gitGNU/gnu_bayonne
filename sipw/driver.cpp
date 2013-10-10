@@ -135,7 +135,7 @@ void driver::update(void)
 
     linked_pointer<keydata> kp = registry();
 
-    if(started && !is(kp)) {
+    if(started) {
         keydata *regkeys = keyfile::get("registry");
         if(regkeys) {
             const char *regtype = regkeys->get("type");
@@ -282,17 +282,15 @@ void driver::start(void)
 
     linked_pointer<keydata> kp = drv->registry();
 
-    if(!is(kp)) {
-        keydata *regkeys = drv->keyfile::get("registry");
-        if(regkeys) {
-            const char *regtype = regkeys->get("type");
-            if(!regtype)
-                regtype = "peer";
-            if(eq(regtype, "peer") || eq(regtype, "friend"))
-                err = activate(regkeys);
-            if(err)
-                shell::log(shell::ERR, "registering registry, %s", err);
-        }
+    keydata *regkeys = drv->keyfile::get("registry");
+    if(regkeys) {
+        const char *regtype = regkeys->get("type");
+        if(!regtype)
+            regtype = "peer";
+        if(eq(regtype, "peer") || eq(regtype, "friend"))
+            err = activate(regkeys);
+        if(err)
+            shell::log(shell::ERR, "registering registry, %s", err);
     }
 
     while(is(kp)) {
