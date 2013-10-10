@@ -107,7 +107,7 @@ void driver::update(void)
 {
     keydata *keys = keyfile::get("sip");
     const char *id;
-    const char *err;
+    const char *err = NULL;
     const char *new_realm = NULL;
 
     if(!keys)
@@ -135,6 +135,19 @@ void driver::update(void)
 
     linked_pointer<keydata> kp = registry();
 
+    if(started && !is(kp)) {
+        keydata *regkeys = keyfile::get("registry");
+        if(regkeys) {
+            const char *regtype = regkeys->get("type");
+            if(!regtype)
+                regtype = "peer";
+            if(eq(regtype, "peer") || eq(regtype, "friend"))
+                err = activate(regkeys);
+            if(err)
+                shell::log(shell::ERR, "registering registry, %s", err);
+        }
+    }
+
     // we don't have keys on update...
 
     while(started && is(kp)) {
@@ -157,7 +170,7 @@ void driver::update(void)
 void driver::start(void)
 {
     const char *agent = "bayonne-" VERSION "/exosip2";
-    const char *err, *id;
+    const char *err = NULL, *id;
     char buffer[256];
     size_t len;
     size_t stack = 0;
@@ -268,6 +281,19 @@ void driver::start(void)
     len = strlen(sip_schema);
 
     linked_pointer<keydata> kp = drv->registry();
+
+    if(!is(kp)) {
+        keydata *regkeys = drv->keyfile::get("registry");
+        if(regkeys) {
+            const char *regtype = regkeys->get("type");
+            if(!regtype)
+                regtype = "peer";
+            if(eq(regtype, "peer") || eq(regtype, "friend"))
+                err = activate(regkeys);
+            if(err)
+                shell::log(shell::ERR, "registering registry, %s", err);
+        }
+    }
 
     while(is(kp)) {
         err = NULL;

@@ -88,11 +88,14 @@ keyfile()
     size_t len;
     dir_t dir;
     const char *cp = env("config");
+    const char *dpath = env("configs");
 
     shell::debug(2, "reloading config from %s", cp);
+    load(cp);
+
     server::load();
 
-    snprintf(dirpath, sizeof(dirpath), "%s/%s" CONFIG_EXTENSION, cp, dname);
+    snprintf(dirpath, sizeof(dirpath), "%s/%s" CONFIG_EXTENSION, dpath, dname);
     if(fsys::is_file(dirpath)) {
         shell::debug(2, "reloading registrations from %s", dirpath);
         regfile.load(dirpath);
