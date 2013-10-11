@@ -10,6 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
+EXTRA_DIST = bayonne.8
 
 bin_PROGRAMS = bayonne baylint
 

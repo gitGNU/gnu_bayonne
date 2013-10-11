@@ -161,6 +161,7 @@ AC_CHECK_HEADER(resolv.h,[
     AC_DEFINE(HAVE_RESOLV_H, [1], [resolv header])
 ],[])
 
+AC_LANG_CPLUSPLUS
 AC_CHECK_HEADER(vpbapi.h, [has_vpbapi="yes"],[has_vpbapi="no"])
 
 PKG_CHECK_MODULES(EXOSIP2, eXosip2 >= 3.0.0, [
@@ -209,7 +210,6 @@ if test -z "$BUILD_SUBDIRS" ; then
     exit 1
 fi
 
-AC_LANG_CPLUSPLUS
 COMPILER_FLAGS=""
 
 for flag in $CXXFLAGS ; do
