@@ -148,9 +148,16 @@ else()
     pkg_check_modules(USES_CCSCRIPT REQUIRED ccscript>=5.0.0)
 endif()
 
-include_directories(${USES_CCSCRIPT_INCLUDE_DIRS} ${USES_UCOMMON_INCLUDE_DIRS})
-link_directories(${USES_CCSCRIPT_LIBRARY_DIRS} ${USES_UCOMMON_LIBRARY_DIRS})
-add_definitions(${USES_CCSCRIPT_CFLAGS} ${USES_UCOMMON_CFLAGS})
+if (USES_CCAUDIO2_INCLUDE_DIRS)
+    message(STATUS "  Using local ccaudio2 dependency")
+else()
+    find_package(PkgConfig)
+    pkg_check_modules(USES_CCAUDIO2 REQUIRED ccaudio2>=2.1.0)
+endif()
+
+include_directories(${USES_CCSCRIPT_INCLUDE_DIRS} ${USES_CCAUDIO2_INCLUDE_DIRS} ${USES_UCOMMON_INCLUDE_DIRS})
+link_directories(${USES_CCSCRIPT_LIBRARY_DIRS} ${USES_CCAUDIO2_LIBRARY_DIRS} ${USES_UCOMMON_LIBRARY_DIRS})
+add_definitions(${USES_CCSCRIPT_CFLAGS} ${USES_CCAUDIO2_CFLAGS} ${USES_UCOMMON_CFLAGS})
 
 # by default we build static libs for windows, shared libs for unix.
 # we may also set this from a top level cmake or -DWITH_XX_LIBS
@@ -205,7 +212,7 @@ file(GLOB runtime_inc inc/bayonne/*.h)
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ccscript usecure ucommon)
-target_link_libraries(bayonne-runtime ccscript usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${EXOSIP2_LIBS})
+target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${EXOSIP2_LIBS})
 
 if(HAVE_EXOSIP2)
     add_subdirectory(sipw)

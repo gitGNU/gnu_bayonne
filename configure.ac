@@ -15,6 +15,7 @@ AC_CONFIG_SRCDIR([autogen.sh])
 LT_VERSION="3:0:0"
 UCOMMON_REQUIRES="6.0.7"
 CCSCRIPT_REQUIRES="5.0.0"
+CCAUDIO2_REQUIRES="2.1.0"
 BUILD_SUBDIRS=""
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -132,14 +133,20 @@ AC_ARG_WITH(pkg-config,
     UCOMMON_CLINK=`pkg-config --variable=clink ucommon`
     UCOMMON_MODEL=`pkg-config --variable=model ucommon`
     PKG_CHECK_MODULES(CCSCRIPT, ccscript >= $CCSCRIPT_REQUIRES)
+    PKG_CHECK_MODULES(CCAUDIO2, ccaudio2 >= $CCAUDIO2_REQUIRES)
 ],[
     AC_PATH_PROG([UCOMMON],[ucommon-config],[none])
     if test "$UCOMMON" = "none" ; then
         AC_ERROR("required ucommon library missing")
     fi
     AC_PATH_PROG([CCSCRIPT],[ccscript-config],[none])
-    if test "$UCOMMON" = "none" ; then
+    if test "$CCSCRIPT" = "none" ; then
         AC_ERROR("required ccscript library missing")
+    fi
+
+    AC_PATH_PROG([CCAUDIO2],[ccaudio2-config],[none])
+    if test "$CCAUDIO2" = "none" ; then
+        AC_ERROR("required ccaudio2 library missing")
     fi
 
     UCOMMON_CLINK=`$UCOMMON --clink`
@@ -148,6 +155,8 @@ AC_ARG_WITH(pkg-config,
     UCOMMON_LIBS=`$UCOMMON --libs`
     CCSCRIPT_CFLAGS=`$CCSCRIPT --cflags`
     CCSCRIPT_LIBS=`$CCSCRIPT --libs`
+    CCAUDIO2_CFLAGS=`$CCAUDIO2 --cflags`
+    CCAUDIO2_LIBS=`$CCAUDIO2 --libs`
 ])
 
 if test "$UCOMMON_MODEL" = "CC" ; then
@@ -231,8 +240,8 @@ for flag in $CXXFLAGS ; do
 done
 export CXXFLAGS="$COMPILER_FLAGS"
 
-BAYONNE_FLAGS="$EXPORT_FLAGS $EXOSIP2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
-BAYONNE_LIBS="$EXPORT_LIBS $EXOSIP2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
+BAYONNE_FLAGS="$EXPORT_FLAGS $EXOSIP2_FLAGS $CCAUDIO2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
+BAYONNE_LIBS="$EXPORT_LIBS $EXOSIP2_LIBS $CCAUDIO2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
 
 if test "$localstatedir" == '${prefix}/var' ; then
     localstatedir="/var" ; fi
@@ -284,6 +293,9 @@ AC_CHECK_LIB(msvcrt, fopen, [
 
 AC_SUBST(plugindir)
 AC_SUBST(scriptdir)
+AC_SUBST(UCOMMON_REQUIRES)
+AC_SUBST(CCSCRIPT_REQUIRES)
+AC_SUBST(CCAUDIO2_REQUIRES)
 AC_SUBST(INITRDDIR)
 AC_SUBST(UCOMMON_MODEL)
 AC_SUBST(UCOMMON_CLINK)

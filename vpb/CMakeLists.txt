@@ -13,8 +13,8 @@ file(GLOB vpb_src *.cpp)
 file(GLOB vpb_inc *.h)
 
 add_executable(bayonne-vpb ${vpb_src} ${vpb_inc})
-add_dependencies(bayonne-vpb bayonne-runtime ccscript ucommon)
-target_link_libraries(bayonne-vpb bayonne-runtime ucommon vpb ${UCOMMON_LIBRARIES})
+add_dependencies(bayonne-vpb bayonne-runtime ccscript ccaudio2 ucommon)
+target_link_libraries(bayonne-vpb bayonne-runtime ccscript ccaudio2 ucommon vpb ${UCOMMON_LIBRARIES})
 
 install(TARGETS bayonne-vpb DESTINATION ${INSTALL_SBINDIR})
 
