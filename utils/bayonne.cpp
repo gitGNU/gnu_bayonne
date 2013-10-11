@@ -208,6 +208,7 @@ static void resource(char **argv, int timeout)
 	command(argv, timeout);
 }
 
+/*
 static void registry(char **argv, int timeout)
 {
 	if(!argv[1]) {
@@ -220,6 +221,7 @@ static void registry(char **argv, int timeout)
 	}
 	command(argv, timeout);
 }
+*/
 
 static void level(char **argv, int timeout)
 {
