@@ -12,6 +12,7 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(bayonne)
 INCLUDE(CheckIncludeFiles)
+INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckFunctionExists)
 
 set (VERSION 3.0.0)
@@ -167,6 +168,7 @@ endif()
 check_include_files(sys/resource.h HAVE_SYS_RESOURCE_H)
 check_include_files(pwd.h HAVE_PWD_H)
 check_include_files(eXosip2/eXosip.h HAVE_EXOSIP2)
+check_include_file_cxx(vpbapi.h HAVE_VPBAPI)
 check_function_exists(setrlimit HAVE_SETRLIMIT)
 check_function_exists(setpgrp HAVE_SETPGRP)
 check_function_exists(getuid HAVE_GETUID)
@@ -207,6 +209,10 @@ target_link_libraries(bayonne-runtime ccscript usecure ucommon ${USES_CCSCRIPT_L
 
 if(HAVE_EXOSIP2)
     add_subdirectory(sipw)
+endif()
+
+if(HAVE_VPBAPI)
+    add_subdirectory(vpb)
 endif()
 
 add_executable(bayonne-control utils/bayonne.cpp)

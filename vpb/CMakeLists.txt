@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2009 David Sugar, Tycho Softworks.
+# Copyright (C) 2010 David Sugar, Tycho Softworks
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -7,14 +7,16 @@
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
 
-MAINTAINERCLEANFILES = Makefile.in Makefile
-AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-LDADD = -lvpb ../common/libbayonne.la @BAYONNE_LIBS@ 
-EXTRA_DIST = CMakeLists.txt
+file(GLOB vpb_src *.cpp)
+file(GLOB vpb_inc *.h)
 
-sbin_PROGRAMS = bayonne-vpb
-noinst_HEADERS = driver.h driver.cpp
+add_executable(bayonne-vpb ${vpb_src} ${vpb_inc})
+add_dependencies(bayonne-vpb bayonne-runtime ccscript ucommon)
+target_link_libraries(bayonne-vpb bayonne-runtime ucommon vpb ${UCOMMON_LIBRARIES})
 
-bayonne_vpb_SOURCES = driver.cpp board.cpp
+install(TARGETS bayonne-vpb DESTINATION ${INSTALL_SBINDIR})
+
+
 
