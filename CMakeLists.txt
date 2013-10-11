@@ -197,7 +197,7 @@ endif()
 
 check_include_files(resolv.h HAVE_RESOLV_H)
 if(HAVE_RESOLV_H)
-    set(UCOMMON_LIBS ${UCOMMON_LIBS} resolv)
+    set(USES_UCOMMON_LIBRARIES ${USES_UCOMMON_LIBRARIES} resolv)
 endif()
 
 if(HAVE_EXOSIP2 AND WIN32 AND NOT CYGWIN)
@@ -224,12 +224,12 @@ endif()
 
 add_executable(bayonne-control utils/bayonne.cpp)
 add_dependencies(bayonne-control ucommon)
-target_link_libraries(bayonne-control ucommon ${UCOMMON_LIBS})
+target_link_libraries(bayonne-control ucommon ${USES_UCOMMON_LIBRARIES})
 set_target_properties(bayonne-control PROPERTIES OUTPUT_NAME bayonne)
 
 add_executable(bayonne-lint utils/baylint.cpp)
 add_dependencies(bayonne-lint bayonne-runtime ucommon)
-target_link_libraries(bayonne-lint bayonne-runtime ucommon ${UCOMMON_LIBS})
+target_link_libraries(bayonne-lint bayonne-runtime ucommon ${USES_UCOMMON_LIBRARIES})
 set_target_properties(bayonne-lint PROPERTIES OUTPUT_NAME baylint)
 
 install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
