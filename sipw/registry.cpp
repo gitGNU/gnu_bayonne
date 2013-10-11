@@ -147,8 +147,11 @@ void registration::release(void)
 void registration::failed(void)
 {
     Mutex::guard lock(this);
-    if(fwd)
+    if(fwd) {
         fwd->failed();
+        rid = -1;
+        return;
+    }
 
     if(rid == -1)
         return;
@@ -161,13 +164,16 @@ void registration::failed(void)
 void registration::cancel(void)
 {
     Mutex::guard lock(this);
-    if(fwd)
+    if(fwd) {
         fwd->cancel();
+        rid = -1;
+        // context kept for attached scripts...
+        return;
+    }
 
     if(rid == -1)
         return;
 
-    voip::release_registry(context, rid);
     rid = -1;
     context = NULL;
 
