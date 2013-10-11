@@ -29,6 +29,7 @@ Registration(list, keys, "sip:")
     srv resolver;
 
     context = NULL;
+    fwd = NULL;
 
     if(cp)
         expires = atoi(cp);
@@ -111,6 +112,11 @@ Registration(list, keys, "sip:")
 void registration::confirm(void)
 {
     Mutex::guard lock(this);
+    if(fwd) {
+        fwd->confirm();
+        return;
+    }
+
     if(rid == -1 || !context || activated != 0)
         return;
 
@@ -138,6 +144,11 @@ void registration::release(void)
 void registration::failed(void)
 {
     Mutex::guard lock(this);
+    if(fwd) {
+        fwd->failed();
+        return;
+    }
+
     if(rid == -1)
         return;
 
@@ -149,6 +160,11 @@ void registration::failed(void)
 void registration::cancel(void)
 {
     Mutex::guard lock(this);
+    if(fwd) {
+        fwd->cancel();
+        return;
+    }
+
     if(rid == -1)
         return;
 

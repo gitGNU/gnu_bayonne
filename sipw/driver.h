@@ -31,14 +31,15 @@ using namespace UCOMMON_NAMESPACE;
 class __LOCAL registration : public Registration
 {
 protected:
+    registration *fwd;          // forwarding on replacement...
     unsigned expires;
     const char *userid;
     const char *secret;
     const char *server;
-    const char *script;             // default script...
+    const char *script;         // default script...
     const char *uri, *contact;
-    const char *targets;            // To: destinations allowed...
-    const char *localnames;         // hostnames we answer under
+    const char *targets;        // To: destinations allowed...
+    const char *localnames;     // hostnames we recognize as local
     char uuid[38];
     voip::context_t context;
     voip::reg_t rid;
