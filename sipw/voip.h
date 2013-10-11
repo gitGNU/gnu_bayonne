@@ -13,9 +13,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _BAYONNE_VOIP_H_
-#define _BAYONNE_VOIP_H_
-
 #pragma GCC diagnostic ignored "-Wvariadic-macros"
 #undef  HAVE_CONFIG_H
 
@@ -38,7 +35,7 @@ using namespace UCOMMON_NAMESPACE;
 #define EXOSIP_API4
 #endif
 
-class __EXPORT voip
+class __LOCAL voip
 {
 public:
 	#ifdef  EXOSIP_API4
@@ -160,5 +157,3 @@ public:
 
 
 END_NAMESPACE
-
-#endif

@@ -13,16 +13,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/voip.h>
+#include "driver.h"
 
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-#ifdef  HAVE_EXOSIP2
 static int family = AF_INET;
 
 #ifdef	EXOSIP_API4
@@ -945,4 +940,3 @@ void voip::attach(msg_t msg, const char *type, const char *body)
     attach(msg, type, body, strlen(body));
 }
 
-#endif

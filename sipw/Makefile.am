@@ -14,8 +14,8 @@ LDADD = ../common/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 EXTRA_DIST = CMakeLists.txt
 
 sbin_PROGRAMS = bayonne-sipw
-noinst_HEADERS = driver.h
+noinst_HEADERS = driver.h voip.h
 
 bayonne_sipw_SOURCES = driver.cpp registry.cpp thread.cpp timeslot.cpp \
-	srv.cpp
+	srv.cpp voip.cpp
 

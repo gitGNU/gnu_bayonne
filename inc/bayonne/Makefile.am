@@ -12,5 +12,5 @@ MAINTAINERCLEANFILES = Makefile.in Makefile
 
 pkgincludedir = $(includedir)/bayonne
 pkginclude_HEADERS = driver.h server.h bayonne.h namespace.h registry.h \
-	signals.h timeslot.h thread.h segment.h stats.h dbi.h voip.h uri.h
+	signals.h timeslot.h thread.h segment.h stats.h dbi.h uri.h
 

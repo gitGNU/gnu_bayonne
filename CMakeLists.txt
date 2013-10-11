@@ -197,7 +197,7 @@ endif()
 
 check_include_files(resolv.h HAVE_RESOLV_H)
 if(HAVE_RESOLV_H)
-    set(EXOSIP2_LIBS ${EXOSIP2_LIBS} resolv)
+    set(UCOMMON_LIBS ${UCOMMON_LIBS} resolv)
 endif()
 
 if(HAVE_EXOSIP2 AND WIN32 AND NOT CYGWIN)
@@ -212,7 +212,7 @@ file(GLOB runtime_inc inc/bayonne/*.h)
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ccscript usecure ucommon)
-target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${EXOSIP2_LIBS})
+target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES})
 
 if(HAVE_EXOSIP2)
     add_subdirectory(sipw)
