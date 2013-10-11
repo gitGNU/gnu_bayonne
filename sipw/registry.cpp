@@ -128,6 +128,9 @@ void registration::confirm(void)
 void registration::release(void)
 {
     Mutex::guard lock(this);
+
+    int pid = rid;
+
     if(fwd)
         return;
 
@@ -135,35 +138,40 @@ void registration::release(void)
         return;
 
     Registration::release();
-
     voip::release_registry(context, rid);
     rid = -1;
     context = NULL;
 
     lock.release();
-    shell::debug(3, "registry id %d released", rid);
+    shell::debug(3, "registry id %d released", pid);
 }
 
 void registration::failed(void)
 {
     Mutex::guard lock(this);
+    int pid = rid;
     if(fwd) {
         fwd->failed();
         rid = -1;
         return;
     }
 
-    if(rid == -1)
+    if(rid == -1 || !context)
         return;
 
+    if(activated)
+        voip::release_registry(context, rid);
     Registration::release();
+    rid = -1;
+
     lock.release();
-    shell::debug(3, "registry id %d failed", rid);
+    shell::debug(3, "registry id %d failed", pid);
 }
 
 void registration::cancel(void)
 {
     Mutex::guard lock(this);
+    int pid = rid;
     if(fwd) {
         fwd->cancel();
         rid = -1;
@@ -174,12 +182,13 @@ void registration::cancel(void)
     if(rid == -1)
         return;
 
-    rid = -1;
-    context = NULL;
-
+    if(activated)
+        voip::release_registry(context, rid);
     Registration::release();
+    rid = -1;
+
     lock.release();
-    shell::debug(3, "registry id %d terminated", rid);
+    shell::debug(3, "registry id %d terminated", pid);
 }
 
 void registration::authenticate(const char *realm)
