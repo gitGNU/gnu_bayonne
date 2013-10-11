@@ -67,15 +67,16 @@ if [ ! -z "$CONCURRENCY" ] ; then
 if [ ! -z "$PRIORITY" ] ; then
 	export PRIORITY ; fi
 
+# used for /etc/alternatives mechanism
 if test -z "$DRIVER" ; then
-	DRIVER="none" ; fi
+	DRIVER="daemon" ; fi
 
 case "$DRIVER" in
-sipw|sip|sipwitch|apps|sipapps|sipa)
-	DRIVER="sipapps"
+sipw|sip|sipwitch|apps|sipapps|sipw)
+	DRIVER="sipw"
 	;;
 voicetronix|vpb|vpbapi|openline|openpri)
-	DRIVER="vpbapi"
+	DRIVER="vpb"
 	;;
 esac
 
@@ -91,12 +92,11 @@ if [ ! -z "$PRELOAD" ] ; then
 	export LD_PRELOAD
 fi
 
-
 case "$1" in
 start)
 	if [ "$START" = "0" ] ; then
 		if test -z "$PLUGINS" ; then
-			echo "You have to define PLUGINS in $DEFAULT before running sipwitch"
+			echo "You have to define PLUGINS in $DEFAULT before running bayonne"
 		else
 			echo "You have to modify config and START in $DEFAULT before running"
 		fi

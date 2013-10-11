@@ -11,9 +11,10 @@
 MAINTAINERCLEANFILES = Makefile.in Makefile
 RELEASE = -version-info $(LT_VERSION)
 EXTRA_DIST = bayonne.log bayonne.defaults bayonne.init \
-	bayonne.cron bayonne.conf users.conf
+	bayonne.cron bayonne.conf users.conf bayonne.service
 
 logrotatedir=$(sysconfdir)/logrotate.d
+systemddir=$(libdir)/systemd/system
 
 sysconf_DATA = bayonne.conf
 conf_DATA = users.conf
@@ -31,7 +32,11 @@ install-data-local:
 		$(INSTALL_DATA) bayonne.defaults $(DESTDIR)/$(sysconfdir)/default/bayonne ; \
 	fi
 	$(mkinstalldirs) $(DESTDIR)/@INITRDDIR@
-	$(INSTALL) -m 0755 bayonne.init $(DESTDIR)/@INITRDDIR@/bayonne
 	$(mkinstalldirs) $(DESTDIR)/$(sysconfdir)/cron.hourly
 	$(INSTALL) -m 0755 bayonne.cron $(DESTDIR)/$(sysconfdir)/cron.hourly/bayonne
+	if test "@INITRDDIR@" != "none" ; then $(mkinstalldirs) $(DESTDIR)/@INITRDDIR@ ; fi
+	if test "@INITRDDIR@" != "none" ; then $(INSTALL) -m 0755 bayonne.init $(DESTDIR)/@INITRDDIR@/bayonne ; fi
+	if test "@INITRDDIR@" = "none" ; then $(mkinstalldirs) $(DESTDIR)/$(systemddir) ; fi
+	if test "@INITRDDIR@" = "none" ; then $(INSTALL) -m 0644 bayonne.service $(DESTDIR)/$(systemddir)/sipwitch.service ; fi
+
 

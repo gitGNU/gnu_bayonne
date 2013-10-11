@@ -4,7 +4,7 @@
 # A driver must be specified, such as sipapps, voicetronix, etc.  On typical
 # GNU/Linux systems, the default driver is selected through the 
 # /etc/alternatives symlink mechanism, and this can be used as an override...
-#DRIVER=sipapps
+#DRIVER=sipw
 
 # install optional plugins.  Default is auto.
 PLUGINS="auto"
