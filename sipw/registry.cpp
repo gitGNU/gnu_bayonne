@@ -128,6 +128,9 @@ void registration::confirm(void)
 void registration::release(void)
 {
     Mutex::guard lock(this);
+    if(fwd)
+        return;
+
     if(rid == -1 || !context)
         return;
 
@@ -144,15 +147,13 @@ void registration::release(void)
 void registration::failed(void)
 {
     Mutex::guard lock(this);
-    if(fwd) {
+    if(fwd)
         fwd->failed();
-        return;
-    }
 
     if(rid == -1)
         return;
 
-    activated = 0;
+    Registration::release();
     lock.release();
     shell::debug(3, "registry id %d failed", rid);
 }
@@ -160,10 +161,8 @@ void registration::failed(void)
 void registration::cancel(void)
 {
     Mutex::guard lock(this);
-    if(fwd) {
+    if(fwd)
         fwd->cancel();
-        return;
-    }
 
     if(rid == -1)
         return;
@@ -172,7 +171,7 @@ void registration::cancel(void)
     rid = -1;
     context = NULL;
 
-    activated = 0;
+    Registration::release();
     lock.release();
     shell::debug(3, "registry id %d terminated", rid);
 }
