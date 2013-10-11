@@ -75,7 +75,7 @@ public:
      * @param keys of /etc/bayonne.conf config entry used.
      * @param schema of registry.
      */
-    Registration(Registration *root, keydata *keys, const char *schema);
+    Registration(LinkedObject **list, keydata *keys, const char *schema);
 
     /**
      * Activate registration instance.  May cause registration with external
@@ -88,19 +88,6 @@ public:
      * external call server.
      */
     virtual void release(void);
-
-    /**
-     * Refresh registration instance.  Useful if call server was terminated
-     * and later restarted.
-     */
-    virtual bool refresh(void);
-
-    /**
-     * Reload registration instance.  Used when the server configuration is
-     * reloaded to reset registration properties such as for authentication.
-     * @param keys of matching /etc/bayonne.conf entry.
-     */
-    virtual void reload(keydata *keys);
 
     /**
      * Return functional network interface of network based uri registrations.

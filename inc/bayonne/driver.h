@@ -184,7 +184,7 @@ protected:
      */
     virtual ~Driver();
 
-    static Registration *volatile registrations;
+    static LinkedObject *registrations;
     static condlock_t locking;
     static Driver *active;
     static caddr_t timeslots;

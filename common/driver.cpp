@@ -24,7 +24,7 @@ using namespace UCOMMON_NAMESPACE;
 
 static LinkedObject *callbacks = NULL;
 
-Registration *volatile Driver::registrations = NULL;
+LinkedObject *Driver::registrations = NULL;
 caddr_t Driver::timeslots = NULL;
 caddr_t Driver::boards = NULL;
 caddr_t Driver::spans = NULL;
@@ -225,21 +225,9 @@ Driver *Driver::get(void)
 
 void Driver::reload(void)
 {
-    linked_pointer<Registration> rp = registrations;
-
     locking.access();
     Driver *driver = active->create();
     locking.release();
-
-    while(is(rp)) {
-        keydata *keys = driver->regfile.get(rp->getId());
-        if(keys)
-            rp->reload(keys);
-        else
-            rp->release();
-        rp.next();
-    }
-
     commit(driver);
 }
 
@@ -379,22 +367,6 @@ const char *Driver::dispatch(char **argv, int pid)
 
     if(eq(argv[0], "drop") || eq(argv[0], "hangup") || eq(argv[0], "enable") || eq(argv[0], "disable"))
         return "unknown resource";
-
-    if(eq(argv[0], "refresh")) {
-        if(argv[1] == NULL || argv[2] != NULL)
-            goto invalid;
-
-        rp = registrations;
-        while(is(rp)) {
-            if(eq(rp->getId(), argv[1])) {
-                if(rp->refresh())
-                    return NULL;
-                return "refresh failed";
-            }
-            rp.next();
-        }
-        return "unknown resource";
-    }
 
     return "unknown command";
 

@@ -110,8 +110,6 @@ const char *driver::realm(void)
 void driver::update(void)
 {
     keydata *keys = keyfile::get("sip");
-    const char *id;
-    const char *err = NULL;
     const char *new_realm = NULL;
 
     if(!keys)
@@ -136,38 +134,6 @@ void driver::update(void)
     }
 
     sip_realm = new_realm;
-
-    linked_pointer<keydata> kp = registry();
-
-    if(started) {
-        keydata *regkeys = keyfile::get("registry");
-        if(regkeys) {
-            const char *regtype = regkeys->get("type");
-            if(!regtype)
-                regtype = "peer";
-            if(eq(regtype, "peer") || eq(regtype, "friend"))
-                err = activate(regkeys);
-            if(err)
-                shell::log(shell::ERR, "registering registry, %s", err);
-        }
-    }
-
-    // we don't have keys on update...
-
-    while(started && is(kp)) {
-        err = NULL;
-        id = kp->get();
-        if(!locate(id)) {
-            const char *regtype = kp->get("type");
-            if(!regtype)
-                regtype = "peer";
-            if(eq(regtype, "peer") || eq(regtype, "friend"))
-                err = activate(*kp);
-        }
-        if(err)
-            shell::log(shell::ERR, "registering %s, %s", id, err);
-        kp.next();
-    }
     Driver::update();
 }
 
@@ -296,11 +262,7 @@ void driver::start(void)
 
     keydata *regkeys = drv->keyfile::get("registry");
     if(regkeys) {
-        const char *regtype = regkeys->get("type");
-        if(!regtype)
-            regtype = "peer";
-        if(eq(regtype, "peer") || eq(regtype, "friend"))
-            err = activate(regkeys);
+        err = activate(regkeys);
         if(err)
             shell::log(shell::ERR, "registering registry, %s", err);
     }
@@ -308,11 +270,7 @@ void driver::start(void)
     while(is(kp)) {
         err = NULL;
         id = kp->get();
-        const char *regtype = kp->get("type");
-        if(!regtype)
-            regtype = "peer";
-        if(eq(regtype, "peer") || eq(regtype, "friend"))
-            err = activate(*kp);
+        err = activate(*kp);
         if(err)
             shell::log(shell::ERR, "registering %s, %s", id, err);
         ++kp;
@@ -341,17 +299,9 @@ const char *driver::dispatch(char **argv, int pid)
 
 const char *driver::activate(keydata *keys)
 {
-    registration *reg;
-    const char *uri = keys->get();
-
-    if(strchr(uri, '@'))
-        return "invalid server uri";
-
     caddr_t mp = memget(sizeof(registration));
-    registrations = reg = new(mp) registration(registrations, keys, expires, port);
+    registration *reg = new(mp) registration(&registrations, keys, expires, port);
     shell::log(shell::INFO, "registering with %s", reg->getServer());
-
-    reg->refresh();
 
     if(reg->getRegistry() != -1)
         return NULL;

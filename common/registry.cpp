@@ -22,8 +22,8 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-Registration::Registration(Registration *root, keydata *keys, const char *sid) :
-LinkedObject()
+Registration::Registration(LinkedObject **list, keydata *keys, const char *sid) :
+LinkedObject(list)
 {
     const char *cp = keys->get("limit");
 
@@ -38,7 +38,6 @@ LinkedObject()
     activated = 0;
     id = memcopy(id);
     schema = sid;
-    Next = root;
 }
 
 void Registration::release(void)
@@ -49,22 +48,6 @@ void Registration::release(void)
 void Registration::activate(void)
 {
     time(&activated);
-}
-
-bool Registration::refresh(void)
-{
-    return false;
-}
-
-void Registration::reload(keydata *keys)
-{
-    const char *cp = keys->get("limit");
-    if(cp)
-        limit = atoi(cp);
-    else
-        limit = 0;
-    if(stats)
-        stats->timeslots = limit;
 }
 
 const char *Registration::getHostid(const char *id)

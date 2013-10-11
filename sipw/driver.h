@@ -32,25 +32,21 @@ class __LOCAL registration : public Registration
 {
 protected:
     unsigned expires;
-    const char *volatile authid;
-    const char *volatile userid;
-    const char *volatile secret;
-    const char *volatile server;
-    const char *volatile script;    // default script...
-    const char *volatile domain;
-    const char *volatile targets;   // To: destinations allowed...
-    const char *volatile localnames;
+    const char *userid;
+    const char *secret;
+    const char *server;
+    const char *script;             // default script...
     const char *uri, *contact;
+    const char *targets;            // To: destinations allowed...
+    const char *localnames;         // hostnames we answer under
     char uuid[38];
     voip::context_t context;
     voip::reg_t rid;
 
 public:
-    registration(Registration *root, keydata *keys, unsigned expiration, unsigned port);
+    registration(LinkedObject **list, keydata *keys, unsigned expiration, unsigned port);
 
-    void reload(keydata *keys);
     void release(void);
-    bool refresh(void);
     void cancel(void);
     void failed(void);
     void confirm(void);
@@ -63,22 +59,19 @@ public:
         {return rid;}
 
     inline const char *getUUID(void)
-        {return uuid;};
-
-    inline const char *getAuth(void)
-        {return authid;};
+        {return uuid;}
 
     inline const char *getScript(void)
-        {return script;};
+        {return script;}
+
+    inline const char *getServer(void)
+        {return server;}
 
     inline const char *getTargets(void)
         {return targets;};
 
     inline const char *getLocalnames(void)
-        {return localnames;};
-
-    inline const char *getServer(void)
-        {return server;};
+        {return localnames;}
 };
 
 class __LOCAL timeslot : public Timeslot

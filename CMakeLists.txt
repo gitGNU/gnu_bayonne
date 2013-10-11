@@ -78,7 +78,7 @@ if (WIN32)
 else()
     option(BUILD_STATIC "Set to ON to build static libraries" OFF)
     option(HAVE_SIGWAIT2 "Set to OFF to build with single argument" ON)
-    set(HAVE_SIGWAIT2 true)
+    set(HAVE_SIGWAIT true)
 endif()
 
 MESSAGE( STATUS "Configuring GNU bayonne ${VERSION}...")

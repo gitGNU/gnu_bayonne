@@ -847,7 +847,6 @@ void server::dispatch(void)
     unsigned count = Driver::getCount();
 
     signals::start();
-
     DateTimeString dt;
 
     server::printlog("server starting %s", (const char *)dt);

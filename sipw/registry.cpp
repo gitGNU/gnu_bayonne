@@ -19,22 +19,16 @@
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
-registration::registration(Registration *root, keydata *keys, unsigned expiration, unsigned myport) :
-Registration(root, keys, "sip:")
+registration::registration(LinkedObject **list, keydata *keys, unsigned expiration, unsigned myport) :
+Registration(list, keys, "sip:")
 {
     const char *identity = keys->get("identity");
     const char *cp = keys->get("expires");
-    const char *auth = keys->get("authorize");
     char buffer[256], host[256];
     char iface[180], user[80];
     srv resolver;
 
     context = NULL;
-
-    if(auth)
-        authid = memcopy(auth);
-    else
-        authid = uuid;
 
     if(cp)
         expires = atoi(cp);
@@ -63,7 +57,6 @@ Registration(root, keys, "sip:")
     userid = memcopy(keys->get("userid"));
     secret = memcopy(keys->get("secret"));
     script = memcopy(keys->get("script"));
-    domain = memcopy(keys->get("domain"));
     targets = memcopy(keys->get("targets"));
     localnames = memcopy(keys->get("localnames"));
     rid = -1;
@@ -76,12 +69,7 @@ Registration(root, keys, "sip:")
 
     uri::userid(user, sizeof(user), identity);
     uri::hostid(host, sizeof(host), identity);
-    if(!domain)
-        domain = memcopy(host);
     
-    if(!secret)
-        authid = NULL;
-
     if(!userid) {
         uri::userid(buffer, sizeof(buffer), identity);
         userid = memcopy(buffer);
@@ -93,84 +81,20 @@ Registration(root, keys, "sip:")
     getInterface(server, iface, sizeof(iface));
     Random::uuid(uuid);
 
+    localnames = memcopy(keys->get("localnames"));
+    if(!localnames) {
+        snprintf(buffer, sizeof(buffer), 
+            "localhost, localhost.localdomain, %s", host);
+        localnames = memcopy(host);
+    }
+
     if(strchr(iface, ':'))
         snprintf(buffer, sizeof(buffer), "%s%s@[%s]:%u", schema, uuid, iface, myport);
     else
         snprintf(buffer, sizeof(buffer), "%s%s@%s:%u", schema, uuid, iface, myport);
     contact = memcopy(buffer);
-}
 
-void registration::reload(keydata *keys)
-{
-    char buffer[256];
-
-    const char *changed_userid = keys->get("userid");
-    const char *changed_secret = keys->get("secret");
-    const char *changed_script = keys->get("script");
-    const char *changed_domain = keys->get("domain");
-    const char *changed_targets = keys->get("targets");
-    const char *changed_authid = keys->get("authorize");
-    const char *changed_localnames = keys->get("localnames");
-    bool newuri = false;
-
-    if(!changed_domain)
-        changed_domain = keys->get("domain");
-
-    if(!changed_userid)
-        changed_userid = keys->get("user");
-
-    if(!changed_script)
-        changed_script = id;
-
-    if(changed_authid && !eq(changed_authid, authid))
-        authid = memcopy(changed_authid);
-    else if(!changed_authid)
-        authid = uuid;
-
-    if(changed_domain && !eq(changed_domain, domain)) {
-        domain = memcopy(changed_domain);
-        newuri = true;
-    }
-
-    if(changed_userid && !eq(changed_userid, userid)) {
-        newuri = true;
-        userid = memcopy(changed_userid);
-    }
-
-    if(changed_secret && !eq(changed_secret, secret))
-        secret = memcopy(changed_secret);
-
-    if(changed_script && !eq(changed_script, script))
-        script = memcopy(changed_script);
-
-    if(changed_targets && (!targets || !eq(changed_targets, targets)))
-        targets = memcopy(changed_targets);
-    else if(!changed_targets)
-        targets = NULL;
-
-    if(changed_localnames && (!localnames || !eq(changed_localnames, localnames)))
-        localnames = memcopy(changed_localnames);
-    else if(!changed_localnames)
-        localnames = NULL;
-
-    if(newuri) {
-        snprintf(buffer, sizeof(buffer), "%s%s@%s", schema, userid, domain);
-        uri = memcopy(buffer);
-    }
-
-    Registration::reload(keys);
-    refresh();
-}
-
-bool registration::refresh(void)
-{
     voip::msg_t msg = NULL;
-
-    if(!context)
-        return false;
-
-    if(rid != -1)
-        return true;
 
     if(-1 != (rid = voip::make_registry_request(context, uri, server, contact, expires, &msg))) {
         osip_message_set_supported(msg, "100rel");
@@ -179,14 +103,9 @@ bool registration::refresh(void)
         voip::send_registry_request(context, rid, msg);
     }
     else
-        rid = -1;
+        return;
 
     shell::debug(3, "registry id %d assigned to %s", rid, id);
-
-    if(rid == -1)
-        return false;
-
-    return true;
 }
 
 void registration::release(void)

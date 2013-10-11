@@ -344,7 +344,7 @@ void thread::invite(void)
 		remove_quotes(auth->nonce);
 		remove_quotes(auth->response);
 
-		if(!eq(auth->username, registry->getAuth()))
+		if(!eq(auth->username, registry->getUUID()))
 			goto reply;
 
 		// CHECK MD5 SUMS!!!
