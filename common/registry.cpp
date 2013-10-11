@@ -45,11 +45,6 @@ void Registration::release(void)
     activated = 0;
 }
 
-void Registration::activate(void)
-{
-    time(&activated);
-}
-
 const char *Registration::getHostid(const char *id)
 {
     const char *cp = strrchr(id, '@');

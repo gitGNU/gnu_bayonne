@@ -168,6 +168,7 @@ protected:
 
     object_pointer<Script> image_definitions;
     LinkedObject *image_services;
+    LinkedObject *activations;      // dynamic registry list...
 
     /**
      * Construct driver instance singleton.

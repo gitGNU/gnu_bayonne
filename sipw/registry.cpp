@@ -108,45 +108,57 @@ Registration(list, keys, "sip:")
     shell::debug(3, "registry id %d assigned to %s", rid, id);
 }
 
+void registration::confirm(void)
+{
+    Mutex::guard lock(this);
+    if(rid == -1 || !context || activated != 0)
+        return;
+
+    time(&activated);
+    lock.release();
+    shell::debug(3, "registry id %d activated", rid);
+}
+
 void registration::release(void)
 {
+    Mutex::guard lock(this);
     if(rid == -1 || !context)
         return;
 
     Registration::release();
 
     voip::release_registry(context, rid);
-    shell::debug(3, "registry id %d released", rid);
     rid = -1;
     context = NULL;
-}
 
-void registration::confirm(void)
-{
-    if(rid == -1 || activated != 0)
-        return;
-
-    Registration::activate();
-    shell::debug(3, "registry id %d activated", rid);
+    lock.release();
+    shell::debug(3, "registry id %d released", rid);
 }
 
 void registration::failed(void)
 {
+    Mutex::guard lock(this);
     if(rid == -1)
         return;
 
-    Registration::release();
+    activated = 0;
+    lock.release();
     shell::debug(3, "registry id %d failed", rid);
 }
 
 void registration::cancel(void)
 {
+    Mutex::guard lock(this);
     if(rid == -1)
         return;
 
-    Registration::release();
-    shell::debug(3, "registry id %d terminated", rid);
+    voip::release_registry(context, rid);
     rid = -1;
+    context = NULL;
+
+    activated = 0;
+    lock.release();
+    shell::debug(3, "registry id %d terminated", rid);
 }
 
 void registration::authenticate(const char *realm)

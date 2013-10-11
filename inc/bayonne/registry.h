@@ -78,12 +78,6 @@ public:
     Registration(LinkedObject **list, keydata *keys, const char *schema);
 
     /**
-     * Activate registration instance.  May cause registration with external
-     * call server.
-     */
-    void activate(void);
-
-    /**
      * Release registration instance.  May cause deregistration from an
      * external call server.
      */

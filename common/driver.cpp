@@ -102,6 +102,7 @@ keyfile()
     }
 
     image_services = NULL;
+    activations = NULL;
 
     String::set(dirpath, sizeof(dirpath), env("scripts"));
     dir.open(dirpath);
@@ -175,6 +176,12 @@ Driver::~Driver()
         img.next();
     }
     image_definitions = NULL;
+
+    linked_pointer<Registration> rp = activations;
+    while(is(rp)) {
+        rp->release();
+        rp.next();
+    }
 }
 
 unsigned Driver::errors(Script *image)
@@ -369,9 +376,6 @@ const char *Driver::dispatch(char **argv, int pid)
         return "unknown resource";
 
     return "unknown command";
-
-invalid:
-    return "missing or invalid argument";
 }
 
 void Driver::errlog(shell::loglevel_t level, const char *text)

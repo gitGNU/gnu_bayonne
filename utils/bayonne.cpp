@@ -173,7 +173,6 @@ static void usage(void)
 		"  history                 Dump recent errlog history records\n"
 		"  period <interval>       Collect periodic statistics\n"
 		"  pstats                  Dump periodic statistics\n"
-        "  refresh <registry>      Refresh registration entry\n"
         "  release <registry>      Release registration entry\n"
 		"  reload                  Reload configuration\n"
         "  restart                 Driver daemon restart\n"
@@ -442,8 +441,6 @@ PROGRAM_MAIN(argc, argv)
 	}
 	else if(String::equal(*argv, "down") || String::equal(*argv, "restart") || String::equal(*argv, "abort"))
 		single(argv, 0);
-	else if(String::equal(*argv, "refresh") || String::equal(*argv, "release"))
-		registry(argv, 10);
 	else if(String::equal(*argv, "verbose") || String::equal(*argv, "concurrency"))
 		level(argv, 10);
 	else if(String::equal(*argv, "enable") || String::equal(*argv, "disable") || String::equal(*argv, "drop") || String::equal(*argv, "hangup"))
