@@ -201,7 +201,7 @@ if(HAVE_RESOLV_H)
 endif()
 
 if(HAVE_EXOSIP2 AND WIN32 AND NOT CYGWIN)
-    set(EXOSIP2_LIBS ${EXOSIP2_LIBS} Iphlpapi dnsapi)
+    set(EXOSIP2_LIBS ${EXOSIP2_LIBS} iphlpapi dnsapi)
 endif()
 
 configure_file( bayonne-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/bayonne-config.h)
