@@ -571,7 +571,7 @@ void server::parse(int argc, char **argv, const char *dname)
     set("config", _STR(str(prefix) + "/bayonne.ini"));
     set("configs", _STR(str(prefix) + "/config"));
     set("drivers", _STR(str(prefix) + "/" + dname + ".ini"));
-    set("services", _STR(str(prefix) + "/services"));
+    set("scripts", _STR(str(prefix) + "/scripts-enabled"));
     set("controls", rundir);
     set("control", "\\\\.\\mailslot\\bayonne_ctrl");
     set("snapshot", _STR(str(rundir) + "/snapshot.log"));
@@ -582,7 +582,7 @@ void server::parse(int argc, char **argv, const char *dname)
     set("calls", _STR(str(prefix) + "/logs/bayonne.calls"));
     set("stats", _STR(str(prefix) + "/logs/bayonne.stats"));
     set("prefix", rundir);
-    set("scripts", _STR(str(prefix) + "/scripts"));
+    set("definitions", _STR(str(prefix) + "/definitions"));
     set("shell", "cmd.exe");
     prefix = rundir;
 #else
@@ -594,7 +594,7 @@ void server::parse(int argc, char **argv, const char *dname)
     set("config", DEFAULT_CFGPATH "/bayonne.conf");
     set("configs", DEFAULT_CFGPATH "/bayonne");
     set("drivers", _STR(str(DEFAULT_CFGPATH "/bayonne/") + dname + ".conf"));
-    set("services", DEFAULT_SCRPATH);
+    set("services", DEFAULT_CFGPATH "/bayonne/scripts-enabled");
     set("controls", DEFAULT_VARPATH "/run/bayonne");
     set("control", DEFAULT_VARPATH "/run/bayonne/control");
     set("snapshot", DEFAULT_VARPATH "/run/bayonne/snapshot");
@@ -605,7 +605,7 @@ void server::parse(int argc, char **argv, const char *dname)
     set("calls", DEFAULT_VARPATH "/log/bayonne.calls");
     set("stats", DEFAULT_VARPATH "/log/bayonne.stats");
     set("prefix", DEFAULT_VARPATH "/lib/bayonne");
-    set("scripts", DEFAULT_DATADIR "/bayonne");
+    set("definitions", DEFAULT_DATADIR "/bayonne");
     set("shell", "/bin/sh");
 #endif
 
@@ -632,7 +632,7 @@ void server::parse(int argc, char **argv, const char *dname)
         set("config", _STR(str(pwd->pw_dir) + "/.bayonnerc"));
         set("configs", prefix);
         set("drivers", _STR(str(pwd->pw_dir) + "/.bayonne/" + dname + ".conf"));
-        set("services", prefix);
+        set("services", _STR(str(prefix) + "/scripts-enabled"));
         set("controls", rundir);
         set("control", _STR(str(rundir) + "/control"));
         set("snapshot", _STR(str(rundir) + "/snapshot"));
@@ -640,7 +640,7 @@ void server::parse(int argc, char **argv, const char *dname)
         set("spans", _STR(str(rundir) + "/spans"));
         set("logfiles", rundir);
         set("logfile", _STR(str(rundir) + "/logfile"));
-        set("scripts", prefix);
+        set("definitions", _STR(str(prefix) + "/definitions"));
         set("calls", _STR(str(rundir) + "/calls"));
         set("stats", _STR(str(rundir) + "/stats"));
         set("prefix", prefix);

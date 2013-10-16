@@ -104,7 +104,7 @@ keyfile()
     image_services = NULL;
     activations = NULL;
 
-    String::set(dirpath, sizeof(dirpath), env("scripts"));
+    String::set(dirpath, sizeof(dirpath), env("definitions"));
     dir.open(dirpath);
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot compile definitions from %s", dirpath);
@@ -119,7 +119,7 @@ keyfile()
         char *ep = strrchr(dirpath + len, '.');
         if(!ep)
             continue;
-        if(!eq(ep, ".def"))
+        if(!eq(ep, ".bcs"))
             continue;
         shell::log(shell::INFO, "compiling %s", dirpath + len);
         def = Script::compile(def, dirpath, NULL);
@@ -127,7 +127,7 @@ keyfile()
     dir.close();
 
 noscr:
-    String::set(dirpath, sizeof(dirpath), env("services"));
+    String::set(dirpath, sizeof(dirpath), env("scripts"));
     dir.open(dirpath);
     if(!is(dir)) {
         shell::log(shell::ERR, "cannot compile from %s", dirpath);
@@ -145,7 +145,7 @@ noscr:
         caddr_t mp;
         if(!ep)
             continue;
-        if(!eq(ep, ".scr"))
+        if(!eq(ep, ".bcs"))
             continue;
         shell::log(shell::INFO, "compiling %s", dirpath + len);
         img = Script::compile(NULL, dirpath, *image_definitions);
