@@ -1,0 +1,8 @@
+usr/bin/audiotool
+usr/bin/tonetool
+usr/bin/phrasebook
+usr/bin/baylint
+usr/share/man/man1/phrasebook.1
+usr/share/man/man1/baylint.1
+usr/share/man/man1/audiotool.1
+usr/share/man/man1/tonetool.1

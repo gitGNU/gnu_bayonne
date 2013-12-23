@@ -1,0 +1,20 @@
+# Default values for daemon operation.  This should be edited and is invoked
+# by init script.
+
+# A driver must be specified, such as sipapps, voicetronix, etc.  On typical
+# GNU/Linux systems, the default driver is selected through the 
+# /etc/alternatives symlink mechanism, and this can be used as an override...
+DRIVER=deamon
+
+# install optional plugins.  Default is auto.
+PLUGINS="auto"
+
+# runtime priority, recommended realtime for high capacity
+PRIORITY="1"
+
+# can be used to adjust pthread concurrency...
+#CONCURRENCY=??
+
+# can be used to specify running effective user/group id for the server
+GROUP="bayonne"
+

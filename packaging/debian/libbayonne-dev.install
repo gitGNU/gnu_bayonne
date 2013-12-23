@@ -1,0 +1,6 @@
+usr/include/bayonne.h
+usr/lib/lib*.so
+usr/lib/pkgconfig/*
+usr/bin/bayonne-config
+usr/share/man/man1/bayonne-config.*
+

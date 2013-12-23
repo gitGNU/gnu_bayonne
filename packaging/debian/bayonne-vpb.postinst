@@ -1,0 +1,29 @@
+#! /bin/sh
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+
+case "$1" in
+configure)
+	# add bayonne control group.
+
+	if ! getent group bayonne > /dev/null ; then
+		echo 'Adding control group for bayonne' 1>&2
+		addgroup --system bayonne
+	fi
+	
+	ln -sf bayonne-vpb /usr/sbin/bayonne-daemon
+	;;
+esac
+
+#DEBHELPER#
+
+exit 0
+

@@ -1,0 +1,25 @@
+bayonne (3.0.0-0gt1) UNRELEASED; urgency=low
+
+  * For formal release
+
+ -- David Sugar <dyfet@gnutelephony.org>  Fri, 11 Oct 2013 08:29:28 -0400
+
+bayonne (2.99+3.0apionly2-1) UNRELEASED; urgency=low
+
+  * New serial device manager interface.  
+    - now requires ucommon 5.1 or later.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 18 Dec 2011 06:35:36 -0500
+
+bayonne (2.99+3.0apionly1-2) UNRELEASED; urgency=low
+
+  * Missing speex and gsm support 
+
+ -- David Sugar <dyfet@gnutelephony.org>  Sun, 11 Dec 2011 19:06:45 -0500
+
+bayonne (2.99+3.0apionly1-1) UNRELEASED; urgency=low
+
+  * Core api package and utilities only.  Servers to be added later.
+
+ -- David Sugar <dyfet@gnutelephony.org>  Mon, 28 Nov 2011 10:00:05 -0500
+
