@@ -387,7 +387,7 @@ void Timeslot::enable(event_t *event)
     time(&now);
 
     server::printlog("timeslot %d online after %ld seconds",
-        instance, now - mapped->started);
+        instance, (long)(now - mapped->started));
 
     setIdle();
     mutex.release();

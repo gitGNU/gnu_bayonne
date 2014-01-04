@@ -362,7 +362,7 @@ challenge:
 	shell::debug(1, "challenge required");
 
 	time(&now);
-	snprintf(nonce, sizeof(nonce), "%08lx", now);
+    snprintf(nonce, sizeof(nonce), "%08lx", (long)now);
 	snprintf(buffer, sizeof(buffer),
 		"Digest realm=\"%s\", nonce=\"%s\", algorithm=MD5",	realm, nonce);
     if(voip::make_answer_response(context, sevent->tid, SIP_UNAUTHORIZED, &reply)) {

@@ -338,13 +338,13 @@ static void stats(char **argv)
 		else if(!map->lastcall)
 			printf("%s -\n", text);
 		else if(now - map->lastcall > (3600l * 99l))
-			printf("%s %ld%c\n", text, (now - map->lastcall) / (3600l * 24l), 'd');
+            printf("%s %ld%c\n", text, (long)((now - map->lastcall) / (3600l * 24l)), 'd');
 		else if(now - map->lastcall > (60l * 120l))
-			printf("%s %ld%c\n", text, (now - map->lastcall) / 3600l, 'h');
+            printf("%s %ld%c\n", text, (long)((now - map->lastcall) / 3600l), 'h');
 		else if(now - map->lastcall > 120l)
-			printf("%s %ld%c\n", text, (now - map->lastcall) / 60l, 'm');
+            printf("%s %ld%c\n", text, (long)((now - map->lastcall) / 60l), 'm');
 		else
-			printf("%s %ld%c\n", text, now - map->lastcall, 's');
+            printf("%s %ld%c\n", text, (long)(now - map->lastcall), 's');
 	}
 	exit(0);
 }
