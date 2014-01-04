@@ -384,7 +384,7 @@ bool server::period(long slice)
     fp = fopen(env("stats"), "a");
     if(fp) {
         DateTimeString dt(periodic);
-        fprintf(fp, "%s %ld\n", buf, next - periodic);
+        fprintf(fp, "%s %ld\n", buf, (long)(next - periodic));
     }
     statmap::period(fp);
     if(fp)
@@ -409,7 +409,7 @@ void server::snapshot(int pid)
     time(&now);
     fprintf(fp, "BAYONNE:\n");
     fprintf(fp, "  timeslots: %d\n", Driver::getCount());
-    fprintf(fp, "  uptime:    %ld\n", now - uptime);
+    fprintf(fp, "  uptime:    %ld\n", (long)(now - uptime));
     if(fp)
         fclose(fp);
 }
