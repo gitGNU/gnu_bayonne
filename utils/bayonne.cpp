@@ -34,6 +34,7 @@ static void version(void)
     exit(0);
 }
 
+#ifndef _MSWINDOWS_
 static void capture(void)
 {
 	char buffer[512];
@@ -48,7 +49,6 @@ static void capture(void)
 		fclose(fp);
 }
 
-#ifndef	_MSWINDOWS_
 static void runfiles(char **argv)
 {
 	char buffer[256];
