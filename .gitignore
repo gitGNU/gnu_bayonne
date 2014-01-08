@@ -1,7 +1,6 @@
 /auto*/
 CMakeFiles/
 cmake_*
-configure
 Makefile
 Makefile.in
 config.h.in
@@ -9,11 +8,17 @@ config.h
 config.log
 config.status
 configure.lineno
+/INSTALL
 /libtool
+/configure
+/bayonne-config
+/bayonne-config.h.in
 /bayonne-config.h
 test/bayonneScript
 /baylint
 /bayonne
+utils/baylint
+utils/bayonne
 sipw/bayonne-sipw
 stamp*
 *.obj
