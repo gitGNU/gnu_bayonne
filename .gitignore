@@ -1,5 +1,4 @@
-build/
-auto*/
+/auto*/
 CMakeFiles/
 cmake_*
 configure
@@ -10,15 +9,12 @@ config.h
 config.log
 config.status
 configure.lineno
-libtool
-bayonne-config.h
+/libtool
+/bayonne-config.h
 test/bayonneScript
-sipwitch/bayonne-sipwitch
-utils/audiotool
-utils/baylint
-utils/bayonne
-utils/phrasebook
-utils/tonetool
+/baylint
+/bayonne
+sipw/bayonne-sipw
 stamp*
 *.obj
 *.lib
