@@ -14,7 +14,7 @@ EXTRA_DIST = bayonne.log bayonne.defaults bayonne.init \
 	bayonne.cron bayonne.conf users.conf bayonne.service
 
 logrotatedir=$(sysconfdir)/logrotate.d
-systemddir=$(libdir)/systemd/system
+systemddir=$(prefix)/lib/systemd/system
 
 sysconf_DATA = bayonne.conf
 conf_DATA = users.conf
