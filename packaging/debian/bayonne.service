@@ -1,0 +1,16 @@
+[Unit]
+Description=GNU Bayonne, a script driven telephony application service.
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/bayonne/pidfile
+EnvironmentFile=-/etc/conf.d/bayonne
+EnvironmentFile=-/etc/sysconfig/bayonne
+EnvironmentFile=-/etc/default/bayonne
+ExecStartPre=-/bin/rm -f /var/run/bayonne/control
+ExecStart=/usr/sbin/bayonne-daemon -f $OPTIONS
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

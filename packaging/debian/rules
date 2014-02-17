@@ -11,7 +11,7 @@ DEB_INSTALL_CHANGELOG_ALL := ChangeLog
 DEBIAN_DIR := $(shell echo ${MAKEFILE_LIST} | awk '{print $$1}' | xargs dirname )
 
 %:
-	dh $@
+	dh $@ --with=systemd
 
 .PHONY: override_dh_strip
 
