@@ -10,7 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@ @EXOSIP2_FLAGS@
-LDADD = ../common/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@ 
+LDADD = ../common/libbayonne.la @EXOSIP2_LIBS@ @BAYONNE_LIBS@
 EXTRA_DIST = CMakeLists.txt
 
 sbin_PROGRAMS = bayonne-sipw

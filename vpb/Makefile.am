@@ -10,7 +10,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-LDADD = -lvpb ../common/libbayonne.la @BAYONNE_LIBS@ 
+LDADD = -lvpb ../common/libbayonne.la @BAYONNE_LIBS@
 EXTRA_DIST = CMakeLists.txt
 
 sbin_PROGRAMS = bayonne-vpb

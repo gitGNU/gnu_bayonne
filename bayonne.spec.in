@@ -23,10 +23,7 @@ Source: http://www.gnutelephony.org/dist/tarballs/bayonne-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: ucommon-devel >= 2.1.3
 BuildRequires: libeXosip2-devel >= 3.0.0
-Requires(post): chkconfig
-Requires(preun): chkconfig
-Requires(preun): initscripts
-Requires(postun): initscripts
+BuildRequires: systemd-devel >= 200
 Requires: %{name}-runtime = %{version}-%{release}
 
 %package runtime
@@ -39,17 +36,19 @@ Requires: %{name}-runtime = %{version}-%{release}
 Group: Development/Libraries
 Summary: Headers and static link library
 
-%package sipapps
+%package sipw
 Requires: %{name} = %{version}-%{release}
-Requires(post): chkconfig
-Requires(preun): chkconfig
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
 Summary: SIP bayonne driver for use with GNU SIP Witch
 
 %if %{uses_vpbapi}
-%package vpbapi
+%package vpb
 Requires: %{name} = %{version}-%{release}
-Requires(post): chkconfig
-Requires(preun): chkconfig
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
 Summary: Voicetronix bayonne driver for analog and digital circuits.
 %endif
 
@@ -74,7 +73,7 @@ This is available as a separate package so that one building bayonne plugins
 with the required devel package does not also require installing a server
 image.
 
-%description sipapps
+%description sipw
 Bayonne sip driver specialy designed for use with GNU SIP Witch.  This includes
 support for sipwitch smart shared secrets through uuid managed registrations,
 and core scripting features useful for building telephony applications.  Some
@@ -82,7 +81,7 @@ special command extensions to set sip witch forwarding and other properties are
 also enabled, along with SIMPLE support for message notification.
 
 %if %{uses_vpbapi}
-%description vpbapi
+%description vpb
 Offers a Bayonne driver for telephony hardware which conforms to the standard
 Voicetronix API.  This includes analog and digital telephony cards offered by
 Voicetronix and products from other vendors which are compatible with the
@@ -131,13 +130,13 @@ sed -i.rpath -e \
 %defattr(-,root,root,-)
 %{_libdir}/*.so.*
 
-%files sipapps
+%files sipw
 %defattr(-,root,root,-)
-%{_sbindir}/bayonne-sipapps
+%{_sbindir}/bayonne-sipw
 
 %if %{uses_vpbapi}
 %defattr(-,root,root,-)
-%{_sbindir}/bayonne-vpbapi
+%{_sbindir}/bayonne-vpb
 %endif
 
 %files devel
@@ -146,43 +145,40 @@ sed -i.rpath -e \
 %{_includedir}/bayonne/
 %{_libdir}/pkgconfig/*.pc
 
-%post
-/sbin/chkconfig --add bayonne
-
 %post runtime
 /sbin/ldconfig
 
 %preun
-if [ $1 = 0 ] ; then
-    /sbin/service bayonne stop >/dev/null 2>&1
-    /sbin/chkconfig --del bayonne
-fi
 if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove-all bayonne-driver ; fi
 
 
-%postun
-if [ "$1" -ge "1" ] ; then
-    /sbin/service bayonne condrestart >/dev/null 2>&1 || :
-fi
+%postun sipw
+%systemd_postun_with_restart bayonne.service
 
 %postun runtime
 /sbin/ldconfig
 
-%post
-if [ -x /sbin/chkconfig ] ; then /sbin/chkconfig --add bayonne ; fi
+%post sipw
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-sipw 60 ; fi
+%systemd_post bayonne.service 
 
-%post sipapps
-if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-sipapps 60 ; fi
-
-%preun sipapps
-if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-sipapps ; fi
+%preun sipw
+%systemd_preun bayonne.service
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-sipw ; fi
 
 %if %{uses_vpbapi}
-%post vpbapi
-if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-vpbapi 70 ; fi
 
-%preun vpbapi
-if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-vpbapi ; fi
+%post vpb
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --install /usr/sbin/bayonne-driver bayonne-driver /usr/sbin/bayonne-vpb 70 ; fi
+%systemd_post bayonne.service 
+
+%preun vpb
+%systemd_preun bayonne.service
+if [ -x /usr/sbin/update-alternatives ] ; then /usr/sbin/update-alternatives --remove bayonne-driver /usr/sbin/bayonne-vpb ; fi
+
+%postun vpb
+%systemd_postun_with_restart bayonne.service
+
 %endif
 
 %changelog

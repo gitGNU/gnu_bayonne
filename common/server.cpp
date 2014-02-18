@@ -24,6 +24,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef  HAVE_SYSTEMD
+#include <systemd/sd-daemon.h>
+#endif
+
 using namespace BAYONNE_NAMESPACE;
 using namespace UCOMMON_NAMESPACE;
 
@@ -52,6 +56,7 @@ static shell::stringopt loglevel('L', "--logging", _TEXT("set log level"), "leve
 static shell::stringopt loading('l', "--plugins", _TEXT("specify modules to load"), "names", "none");
 static shell::counteropt priority('p', "--priority", _TEXT("set priority level"), "level");
 static shell::flagopt restart('r', "--restartable", _TEXT("set to restartable process"));
+static shell::flagopt sservice('S', "--service", _TEXT("system service mode"));
 #ifdef  HAVE_PWD_H
 static shell::stringopt user('u', "--user", _TEXT("user to run as"), "userid", "nobody");
 #endif
@@ -798,6 +803,11 @@ void server::startup(shell::mainproc_t proc, bool detached)
 
     shell::loglevel_t level = (shell::loglevel_t)*verbose;
 
+#ifdef  HAVE_SYSTEMD
+    if(is(sservice))
+        detached = true;
+#endif
+
     shell::logmode_t logmode = shell::SYSTEM_LOG;
     if(daemon_flag) {
         if(!detached)
@@ -855,6 +865,11 @@ void server::dispatch(void)
         shell::log(shell::INFO, "%d timeslots active", count);
     else
         shell::log(shell::ERR, "no timeslots active");
+
+#ifdef  HAVE_SYSTEMD
+    if(is(sservice))
+        sd_notify(0, "READY=1");
+#endif
 
     while(running && NULL != (cp = server::receive())) {
         shell::debug(9, "received request <%s>\n", cp);

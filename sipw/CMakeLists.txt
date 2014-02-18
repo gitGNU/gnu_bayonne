@@ -14,7 +14,7 @@ file(GLOB sipw_inc *.h)
 
 add_executable(bayonne-sipw ${sipw_src} ${sipw_inc})
 add_dependencies(bayonne-sipw bayonne-runtime ccscript ccaudio2 usecure ucommon)
-target_link_libraries(bayonne-sipw bayonne-runtime ccscript ccaudio2 usecure ucommon ${EXOSIP2_LIBS} ${SECURE_LIBRARIES} ${UCOMMON_LIBRARIES})
+target_link_libraries(bayonne-sipw bayonne-runtime ccscript ccaudio2 usecure ucommon ${EXOSIP2_LIBS} ${SECURE_LIBRARIES} ${UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})
 
 install(TARGETS bayonne-sipw DESTINATION ${INSTALL_SBINDIR})
 

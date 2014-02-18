@@ -287,8 +287,13 @@ AC_DEFINE_UNQUOTED(DEFAULT_LIBEXEC, "$default_libexec", [script path])
 AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [data path])
 AC_DEFINE_UNQUOTED(DEFAULT_PAGING, $default_paging, [default page size])
 
+PKG_CHECK_MODULES(SYSTEMD, libsystemd-daemon >= 44, [
+    AC_DEFINE(HAVE_SYSTEMD, 1, [systemd daemon support])
+    BAYONNE_LIBS="$BAYONNE_LIBS $SYSTEMD_LIBS"
+],[SYSTEMD_LIBS=""])
+
 AC_CHECK_LIB(msvcrt, fopen, [
-    SERVER_LIBS="$SERVER_LIBS -ladvapi32"
+    BAYONNE_LIBS="$BAYONNE_LIBS -ladvapi32"
 ])
 
 AC_SUBST(plugindir)

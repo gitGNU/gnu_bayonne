@@ -17,6 +17,10 @@
 #include <vpbapi.h>
 #include <bayonne-config.h>
 
+#ifdef	HAVE_SYSTEMD
+#include <systemd/sd-daemon.h>
+#endif
+
 NAMESPACE_BAYONNE
 using namespace UCOMMON_NAMESPACE;
 

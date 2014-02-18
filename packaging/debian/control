@@ -8,7 +8,8 @@ Build-Depends: debhelper (>= 7.0.50),
                libccscript-dev (>= 5.0.0),
                libccaudio2-dev (>= 2.1.0),
                libexosip2-dev (>= 3.6.0),
-               pkg-config, libvpb-dev, dh-systemd (>= 1.3)
+               pkg-config, libvpb-dev, dh-systemd (>= 1.3),
+               libsystemd-daemon-dev (>= 44)
 Standards-Version: 3.9.2
 Homepage: http://www.gnu.org/software/ccaudio/
 

@@ -181,6 +181,11 @@ check_function_exists(setpgrp HAVE_SETPGRP)
 check_function_exists(getuid HAVE_GETUID)
 check_function_exists(mkfifo HAVE_MKFIFO)
 
+pkg_check_modules(USES_SYSTEMD libsystemd-daemon>=44)
+if(USES_SYSTEMD_FOUND)
+    set(HAVE_SYSTEMD true)
+endif()
+
 if(HAVE_EXOSIP2)
     check_include_files(openssl/ssl.h HAVE_OPENSSL)
 endif()
