@@ -217,7 +217,7 @@ file(GLOB runtime_inc inc/bayonne/*.h)
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ccscript usecure ucommon)
-target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES})
+target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})
 
 if(HAVE_EXOSIP2)
     add_subdirectory(sipw)
