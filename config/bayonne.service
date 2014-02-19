@@ -1,6 +1,6 @@
 [Unit]
 Description=GNU Bayonne, a script driven telephony application service.
-After=network.target
+After=syslog.target network.target
 
 [Service]
 Type=notify
@@ -9,7 +9,7 @@ EnvironmentFile=-/etc/conf.d/bayonne
 EnvironmentFile=-/etc/sysconfig/bayonne
 EnvironmentFile=-/etc/default/bayonne
 ExecStartPre=-/bin/rm -f /var/run/bayonne/control
-ExecStart=/usr/sbin/bayonne-daemon -f $OPTIONS
+ExecStart=/usr/sbin/bayonne-daemon -S $OPTIONS
 Restart=always
 NotifyAccess=main
 
