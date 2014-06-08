@@ -2,8 +2,13 @@
 
 # Ensure at build time that the library has no dependencies on undefined
 # symbols, and speed up loading.
+LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS)
+CPPFLAGS = $(shell dpkg-buildflags --get CPPFLAGS)
+CXXFLAGS = $(shell dpkg-buildflags --get CXXFLAGS)
+CFLAGS = $(shell dpkg-buildflags --get CFLAGS)
 LDFLAGS += -Wl,-z,defs -Wl,-O1
 
+DEB_CONFIGURE_EXTRA_FLAGS = --with-initrddir=none 
 DEB_DH_INSTALL_ARGS := --sourcedir=debian/tmp
 DEB_DH_STRIP_ARGS := --dbg-package=bayonne-dbg
 DEB_INSTALL_DOCS_ALL :=
@@ -14,6 +19,13 @@ DEBIAN_DIR := $(shell echo ${MAKEFILE_LIST} | awk '{print $$1}' | xargs dirname 
 	dh $@ --with=systemd
 
 .PHONY: override_dh_strip
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		--disable-silent-rules --with-pkg-config \
+		CFLAGS="$(CFLAGS) $(CPPFLAGS)" \
+		CXXFLAGS="$(CXXFLAGS) $(CPPFLAGS)" \
+		LDFLAGS="$(LDFLAGS)"
 
 override_dh_strip:
 	dh_strip $(DEB_DH_STRIP_ARGS)
