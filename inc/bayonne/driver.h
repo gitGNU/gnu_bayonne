@@ -65,8 +65,7 @@
 #include <bayonne/registry.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 /**
  * A common base class for all telephony drivers.
@@ -327,19 +326,19 @@ public:
      * @return timeslot count.
      */
     inline static unsigned getCount(void)
-        {return ts_count;};
+        {return ts_count;}
 
     inline static unsigned getBoards(void)
-        {return board_count;};
+        {return board_count;}
 
     inline static unsigned getSpans(void)
-        {return span_count;};
+        {return span_count;}
 
     /**
      * Get driver script stepping rate.
      */
     inline static timeout_t getStepping(void)
-        {return stepping;};
+        {return stepping;}
 
     /**
      * Assign driver stat.
@@ -368,9 +367,9 @@ public:
     static void errlog(shell::loglevel_t level, const char *text);
 
     inline keydata *registry(void)
-        {return regfile.begin();};
+        {return regfile.begin();}
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

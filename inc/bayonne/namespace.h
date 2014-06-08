@@ -25,6 +25,10 @@
 #define BAYONNE_NAMESPACE   bayonne
 #define NAMESPACE_BAYONNE   namespace bayonne {
 
+namespace bayonne {
+using namespace ucommon;
+}
+
 /**
  * Common namespace for bayonne server.
  * We use a bayonne specific namespace to easily seperate bayonne

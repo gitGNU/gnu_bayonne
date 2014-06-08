@@ -16,8 +16,7 @@
 #include "driver.h"
 #include <ctype.h>
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 srv::srv(const char *uri_id) :
 uri(uri_id, driver::family, driver::protocol)
@@ -81,3 +80,4 @@ voip::context_t srv::route(char *buf, size_t size, const char *uri)
     return ctx;
 }
 
+} // end namespace

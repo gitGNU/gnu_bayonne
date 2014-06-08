@@ -43,8 +43,7 @@
 #include <bayonne/namespace.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 /**
  * A container for all server related functions.
@@ -165,12 +164,12 @@ public:
         {return (String)(server::args.getsym(id));}
 
     static inline caddr_t memget(size_t size)
-        {return (caddr_t)server::args.zalloc(size);};
+        {return (caddr_t)server::args.zalloc(size);}
 
     static inline char *memcopy(const char *str)
-        {return server::args.dup(str);};
+        {return server::args.dup(str);}
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

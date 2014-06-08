@@ -25,8 +25,7 @@
 #define ALLOW_EVENTS    "allow-events"
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 class __LOCAL registration : public Registration
 {
@@ -164,4 +163,4 @@ public:
     voip::context_t route(char *buf, size_t size, const char *uri);
 };
 
-END_NAMESPACE
+} // end namespace

@@ -15,8 +15,7 @@
 
 #include "driver.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 voip::context_t driver::tcp_context = NULL;
 voip::context_t driver::udp_context = NULL;
@@ -328,15 +327,16 @@ static void init(int argc, char **argv, bool detached, shell::mainproc_t svc = N
     server::release();
 }
 
+} // end namespace
+
 static SERVICE_MAIN(main, argc, argv)
 {
-    signals::service("bayonne");
-    init(argc, argv, true);
+    bayonne::init(argc, argv, true);
 }
 
 PROGRAM_MAIN(argc, argv)
 {
-    init(argc, argv, false, &service_main);
+    bayonne::init(argc, argv, false, &service_main);
     PROGRAM_EXIT(0);
 }
 

@@ -28,8 +28,7 @@
 #include <bayonne/bayonne.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 #if defined(EXOSIP_OPT_BASE_OPTION) && !defined(EXOSIP_OPT_DONT_SEND_101)
 #define EXOSIP_API4
@@ -155,5 +154,4 @@ public:
 #define P_SIPWITCH_NODE		"P-sipwitch-node"	// internodal calling
 #define	P_SIPWITCH_FEATURE	"P-sipwitch-feat"	// feature code reply
 
-
-END_NAMESPACE
+} // end namespace

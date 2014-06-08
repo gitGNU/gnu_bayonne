@@ -45,8 +45,7 @@
 #include <bayonne/server.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 class __EXPORT dbi : public LinkedObject, protected Env
 {
@@ -75,6 +74,6 @@ public:
     static void stop(void);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

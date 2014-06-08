@@ -13,12 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ucommon/secure.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/uri.h>
+#include "common.h"
 
 #ifdef  HAVE_RESOLV_H
 extern "C" {
@@ -42,8 +37,7 @@ typedef union {
 
 #endif
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 uri::uri(const char *uri, int family, int protocol) : Socket::address()
 {
@@ -536,3 +530,4 @@ bool uri::hostid(char *buf, size_t size, const char *uri)
     return true;
 }
 
+} // end namespace

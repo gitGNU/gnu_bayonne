@@ -32,8 +32,7 @@
 #include <bayonne/namespace.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 class __EXPORT uri : protected Socket::address
 {
@@ -61,7 +60,7 @@ public:
     void clear(void);
 
     inline struct sockaddr *operator*() const
-	    {return entry;};
+        {return entry;}
 
     inline operator bool() const
 	    {return entry != NULL;}
@@ -79,6 +78,6 @@ public:
     static unsigned short portid(const char *uri);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

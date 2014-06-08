@@ -16,8 +16,7 @@
 #include "driver.h"
 #include <ctype.h>
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 registration::registration(LinkedObject **list, keydata *keys, unsigned expiration, unsigned myport) :
 Registration(list, keys, "sip:")
@@ -195,3 +194,5 @@ void registration::authenticate(const char *realm)
 {
     voip::add_authentication(context, userid, secret, realm);
 }
+
+} // end namespace

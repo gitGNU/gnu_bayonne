@@ -13,14 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/bayonne.h>
+#include "common.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 static unsigned boards = 0;
 static unsigned spans = 0;
@@ -181,4 +176,4 @@ void Span::hangup(void)
     }
 }
 
-
+} // end namespace

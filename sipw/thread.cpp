@@ -15,8 +15,7 @@
 
 #include "driver.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 static bool shutdown_flag = false;
 static unsigned shutdown_count = 0;
@@ -387,4 +386,4 @@ void background::automatic(void)
         voip::automatic_action(driver::tls_context);
 }
 
-		
+} // end namespace
