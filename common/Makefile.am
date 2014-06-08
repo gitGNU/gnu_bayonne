@@ -14,8 +14,9 @@ AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
 EXTRA_DIST =
 
 lib_LTLIBRARIES = libbayonne.la 
+noinst_HEADERS = common.h
 
 libbayonne_la_LDFLAGS = @BAYONNE_LIBS@ $(RELEASE) 
 libbayonne_la_SOURCES = server.cpp driver.cpp registry.cpp timeslot.cpp \
-	thread.cpp segment.cpp stats.cpp dbi.cpp signals.cpp uri.cpp
+	thread.cpp segment.cpp stats.cpp dbi.cpp psignals.cpp uri.cpp
 
