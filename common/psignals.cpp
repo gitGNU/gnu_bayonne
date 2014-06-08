@@ -13,34 +13,27 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/bayonne.h>
+#include "common.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
-
-NAMESPACE_BAYONNE
+namespace bayonne {
 
 #ifdef HAVE_SIGWAIT
 
-signals signals::thread;
+psignals psignals::thread;
 
-signals::signals() :
+psignals::psignals() :
 JoinableThread()
 {
     shutdown = started = false;
 }
 
-signals::~signals()
+psignals::~psignals()
 {
     if(!shutdown)
         cancel();
 }
 
-void signals::cancel(void)
+void psignals::cancel(void)
 {
     if(started) {
         shutdown = true;
@@ -52,7 +45,7 @@ void signals::cancel(void)
     }
 }
 
-void signals::run(void)
+void psignals::run(void)
 {
     int signo;
     unsigned period = 900;
@@ -94,11 +87,11 @@ void signals::run(void)
     shell::log(shell::DEBUG0, "stopping signal handler");
 }
 
-void signals::service(const char *name)
+void psignals::service(const char *name)
 {
 }
 
-void signals::setup(void)
+void psignals::setup(void)
 {
     sigemptyset(&thread.sigs);
     sigaddset(&thread.sigs, SIGALRM);
@@ -111,12 +104,12 @@ void signals::setup(void)
     signal(SIGPIPE, SIG_IGN);
 }
 
-void signals::start(void)
+void psignals::start(void)
 {
     thread.background();
 }
 
-void signals::stop(void)
+void psignals::stop(void)
 {
     thread.cancel();
 }
@@ -148,7 +141,7 @@ static void WINAPI handler(DWORD sigint)
     }
 }
 
-void signals::service(const char *name)
+void psignals::service(const char *name)
 {
     memset(&status, 0, sizeof(SERVICE_STATUS));
     status.dwServiceType = SERVICE_WIN32;
@@ -157,11 +150,11 @@ void signals::service(const char *name)
     hStatus = ::RegisterServiceCtrlHandler(name, &handler);
 }
 
-void signals::setup(void)
+void psignals::setup(void)
 {
 }
 
-void signals::start(void)
+void psignals::start(void)
 {
     if(!hStatus)
         return;
@@ -170,7 +163,7 @@ void signals::start(void)
     ::SetServiceStatus(hStatus, &status);
 }
 
-void signals::stop(void)
+void psignals::stop(void)
 {
     if(!hStatus)
         return;
@@ -181,23 +174,23 @@ void signals::stop(void)
 
 #else
 
-void signals::service(const char *name)
+void psignals::service(const char *name)
 {
 }
 
-void signals::setup(void)
+void psignals::setup(void)
 {
 }
 
-void signals::start(void)
+void psignals::start(void)
 {
 }
 
-void signals::stop(void)
+void psignals::stop(void)
 {
 }
 
 #endif
 
-END_NAMESPACE
+} // end namespace
 

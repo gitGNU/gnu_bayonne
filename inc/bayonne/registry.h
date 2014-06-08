@@ -47,8 +47,7 @@
 #include <bayonne/server.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 /**
  * A common registration base class.
@@ -96,14 +95,14 @@ public:
      * @return uri of this registration object.
      */
     inline const char *getId(void)
-        {return id;};
+        {return id;}
 
     /**
      * Get time that this registration became active.
      * @return activation time of this registration object.
      */
     inline time_t getActivated(void)
-        {return activated;};
+        {return activated;}
 
     /**
      * Convenience method to extract a host name from a network uri.
@@ -130,6 +129,6 @@ public:
     void release(statmap::stat_t stat);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

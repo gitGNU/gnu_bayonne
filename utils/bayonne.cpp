@@ -21,8 +21,7 @@
 #endif
 #include <bayonne-config.h>
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+using namespace bayonne;
 
 static void version(void)
 {

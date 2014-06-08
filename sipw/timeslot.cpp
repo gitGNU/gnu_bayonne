@@ -16,8 +16,7 @@
 #include "driver.h"
 #include <ctype.h>
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 timeslot::timeslot() : Timeslot()
 {
@@ -276,3 +275,5 @@ void timeslot::disable(event_t *event)
 {
 	event->id = Timeslot::REJECT;
 }
+
+} // end namespace

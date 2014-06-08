@@ -13,23 +13,22 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/bayonne.h>
+#include "common.h"
 #include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef _MSWINDOWS_
+#include <fcntl.h>
+#endif
+
 #ifdef  HAVE_SYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 static const char *replytarget = NULL;
 static const char *plugins = NULL;
@@ -190,7 +189,7 @@ size_t server::attach(void)
 
 void server::release(void)
 {
-    signals::stop();
+    psignals::stop();
     cleanup();
     exit(exit_code);
 }
@@ -350,7 +349,7 @@ retry:
 
 void server::release(void)
 {
-    signals::stop();
+    psignals::stop();
     cleanup();
     exit(exit_code);
 }
@@ -503,6 +502,8 @@ bool server::control(const char *fmt, ...)
     int len;
     bool rtn = true;
     va_list args;
+
+    psignals::service("bayonne");
 
     va_start(args, fmt);
 #ifdef  _MSWINDOWS_
@@ -699,7 +700,7 @@ void server::parse(int argc, char **argv, const char *dname)
         versioninfo();
 
     if(*concurrency < 0)
-        shell::errexit(1, "sipwitch: concurrency: %ld: %s\n",
+        shell::errexit(1, "bayonne: concurrency: %ld: %s\n",
             *concurrency, _TEXT("negative levels invalid"));
 }
 
@@ -794,7 +795,7 @@ void server::startup(shell::mainproc_t proc, bool detached)
     endpwent();
 #endif
 
-    signals::setup();
+    psignals::setup();
     dir::create(rundir, fsys::GROUP_PUBLIC);
     dir::create(prefix, fsys::GROUP_PRIVATE);
     if(fsys::prefix(prefix))
@@ -856,7 +857,7 @@ void server::dispatch(void)
     int pid;
     unsigned count = Driver::getCount();
 
-    signals::start();
+    psignals::start();
     DateTimeString dt;
 
     server::printlog("server starting %s", (const char *)dt);
@@ -1143,4 +1144,4 @@ loading:
     }
 }
 
-
+} // end namespace

@@ -43,8 +43,7 @@
 #include <bayonne/stats.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 /**
  * Common segment base class for boards and spans.
@@ -73,22 +72,22 @@ public:
 	void release(statmap::stat_t stat);
 
 	inline unsigned getCount(void) const
-		{return count;};
+        {return count;}
 
 	inline unsigned getFirst(void) const
-		{return first;};
+        {return first;}
 
 	inline unsigned getInstance(void) const
-		{return instance;};
+        {return instance;}
 
 	inline bool getLive(void) const
-		{return live;};
+        {return live;}
 
 	inline const char *getDescription(void) const
-		{return description;};
+        {return description;}
 
 	inline const char *getScript(void) const
-		{return script;};
+        {return script;}
 };		
 
 class __EXPORT Board : public Segment
@@ -104,10 +103,10 @@ public:
 	Board();	
 
 	inline unsigned getTimeslots(void)
-		{return count;};
+        {return count;}
 
 	inline unsigned getSpans(void)
-		{return spans;};
+        {return spans;}
 
 	static void allocate(void);
 };
@@ -120,6 +119,6 @@ public:
 	void hangup(void);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

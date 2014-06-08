@@ -49,8 +49,7 @@
 #include <bayonne/timeslot.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 class __EXPORT Background : public DetachedThread, public Conditional
 {
@@ -77,6 +76,6 @@ private:
 	void run(void);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

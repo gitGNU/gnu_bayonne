@@ -18,8 +18,7 @@
 #include <bayonne/bayonne.h>
 #include <bayonne-config.h>
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+using namespace bayonne;
 
 class lint : public Script::interp
 {

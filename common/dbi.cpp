@@ -13,14 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <bayonne-config.h>
-#include <ucommon/ucommon.h>
-#include <ccscript.h>
-#include <ucommon/export.h>
-#include <bayonne/bayonne.h>
+#include "common.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 class __LOCAL thread : public DetachedThread, public Conditional, protected Env
 {
@@ -28,13 +23,13 @@ public:
     thread();
 
     inline void lock(void)
-        {Conditional::lock();};
+        {Conditional::lock();}
 
     inline void unlock(void)
-        {Conditional::unlock();};
+        {Conditional::unlock();}
 
     inline void signal(void)
-        {Conditional::signal();};
+        {Conditional::signal();}
 
 private:
     void exit(void);
@@ -152,3 +147,4 @@ void dbi::stop(void)
     run.unlock();
 }
 
+} // end namespace

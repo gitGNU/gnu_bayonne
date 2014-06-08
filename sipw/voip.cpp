@@ -15,8 +15,7 @@
 
 #include "driver.h"
 
-using namespace BAYONNE_NAMESPACE;
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 static int family = AF_INET;
 
@@ -940,3 +939,4 @@ void voip::attach(msg_t msg, const char *type, const char *body)
     attach(msg, type, body, strlen(body));
 }
 
+} // end namespace

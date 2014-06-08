@@ -51,8 +51,7 @@
 #include <bayonne/segment.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 #define TIMESLOT_MAP    "bayonne.tsm"
 
@@ -284,21 +283,21 @@ public:
      * @return associated registration entry or NULL if none.
      */
     inline Registration *getRegistry(void)
-        {return registry;};
+        {return registry;}
 
     /**
      * Get the board entry associated with the timeslot.
      * @return associated board entry or NULL if none.
      */
     inline Board *getBoard(void)
-        {return board;};
+        {return board;}
 
     /**
      * Get the span entry associated with the timeslot.
      * @return associated span entry or NULL if none.
      */
     inline Span *getSpan(void)
-        {return span;};
+        {return span;}
 
     /**
      * Set fields in shared memory segment.  Used by state handlers.
@@ -337,6 +336,6 @@ public:
     static Timeslot *get(long cid);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif

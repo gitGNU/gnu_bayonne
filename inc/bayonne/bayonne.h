@@ -42,7 +42,6 @@
 
 #include <bayonne/namespace.h>
 #include <bayonne/server.h>
-#include <bayonne/signals.h>
 #include <bayonne/registry.h>
 #include <bayonne/segment.h>
 #include <bayonne/timeslot.h>

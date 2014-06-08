@@ -13,25 +13,24 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <bayonne-config.h>
+#include <ucommon/ucommon.h>
+#include <ucommon/secure.h>
+#include <ccscript.h>
+#include <ucommon/export.h>
+#include <bayonne/bayonne.h>
+
 /**
- * Common signal handling.
- * @file bayonne/signals.h
+ * Internal stuff, not seen in external interfaces
+ * @file common.h
  */
 
-#ifndef _BAYONNE_SIGNALS_H_
-#define _BAYONNE_SIGNALS_H_
-
-#ifndef _BAYONNE_NAMESPACE_H_
-#include <bayonne/namespace.h>
-#endif
-
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 #ifdef  HAVE_SIGWAIT
-class __EXPORT signals : private JoinableThread
+class __EXPORT psignals : private JoinableThread
 #else
-class __EXPORT signals
+class __EXPORT psignals
 #endif
 {
 private:
@@ -44,10 +43,10 @@ private:
     void run(void);
     void cancel(void);
 
-    signals();
-    ~signals();
+    psignals();
+    ~psignals();
 
-    static signals thread;
+    static psignals thread;
 #endif
 public:
     static void service(const char *name);
@@ -56,6 +55,5 @@ public:
     static void stop(void);
 };
 
-END_NAMESPACE
+} // end namespace
 
-#endif

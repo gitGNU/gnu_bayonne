@@ -213,8 +213,9 @@ configure_file( bayonne-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/bayonne-confi
 
 file(GLOB runtime_src common/*.cpp)
 file(GLOB runtime_inc inc/bayonne/*.h)
+file(GLOB common_inc common/*.h)
 
-add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc})
+add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc} ${common_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
 add_dependencies(bayonne-runtime ccscript usecure ucommon)
 target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})

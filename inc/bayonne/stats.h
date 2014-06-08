@@ -39,8 +39,7 @@
 #include <bayonne/namespace.h>
 #endif
 
-NAMESPACE_BAYONNE
-using namespace UCOMMON_NAMESPACE;
+namespace bayonne {
 
 #define	STAT_MAP	"bayonne.sta"
 
@@ -74,6 +73,6 @@ public:
 	static statmap *getRegistry(const char *id, unsigned limit = 0);
 };
 
-END_NAMESPACE
+} // end namespace
 
 #endif
