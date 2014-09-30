@@ -14,6 +14,7 @@ PROJECT(bayonne)
 INCLUDE(CheckIncludeFiles)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckFunctionExists)
+INCLUDE(GNUInstallDirs)
 
 set (VERSION 3.0.0)
 
@@ -26,43 +27,7 @@ STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
 
 # when we override default install prefix, assume full path is used...
 
-set(INSTALL_INCLUDEDIR include)
-set(INSTALL_BINDIR bin)
-set(INSTALL_SBINDIR sbin)
-set(INSTALL_LIBEXEC libexec)
-
-if(WIN32)
-    set(INSTALL_MANDIR man)
-    set(INSTALL_DOCDIR doc/${PROJECT_NAME})
-    set(INSTALL_LOCALE locale)
-    set(INSTALL_LIBDIR bin)
-    set(INSTALL_INFODIR info)
-    set(SYSCONFDIR "etc" CACHE PATH "config directory")
-    set(STATEDIR "var" CACHE PATH "state directory")
-else()
-    set(INSTALL_MANDIR share/man)
-    set(INSTALL_LOCALE share/locale)
-    set(INSTALL_DOCDIR share/doc/${PROJECT_NAME})
-    set(INSTALL_INFODIR share/info)
-    set(INSTALL_LIBDIR lib${LIB_POSTFIX})
-    set(SYSCONFDIR "/etc" CACHE PATH "config directory")
-    set(STATEDIR "/var" CACHE PATH "state directory")
-endif()
-
-if(WIN32)
-    set(DEFAULT_CFGPATH "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
-    set(DEFAULT_VARPATH "${CMAKE_INSTALL_PREFIX}/${STATEDIR}")
-    set(DEFAULT_DATADIR ${CMAKE_INSTALL_PREFIX})
-else()
-    set(DEFAULT_CFGPATH ${SYSCONFDIR})
-    set(DEFAULT_VARPATH ${STATEDIR})
-    set(DEFAULT_DATADIR ${CMAKE_INSTALL_PREFIX}/${INSTALL_DATADIR})
-endif()
-
 set(DEFAULT_PAGING 4096)
-set(DEFAULT_LIBPATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIBDIR})
-set(DEFAULT_SCRPATH ${DEFAULT_CFGPATH}/bayonne.d)
-set(DEFAULT_LIBEXEC ${CMAKE_INSTALL_PREFIX}/${INSTALL_LIBEXEC}/bayonne)
 
 if (WIN32)
     set(BUILD_STATIC ON CACHE BOOL "static linking only" FORCE)
@@ -238,8 +203,8 @@ add_dependencies(bayonne-lint bayonne-runtime ucommon)
 target_link_libraries(bayonne-lint bayonne-runtime ucommon ${USES_UCOMMON_LIBRARIES})
 set_target_properties(bayonne-lint PROPERTIES OUTPUT_NAME baylint)
 
-install(TARGETS bayonne-runtime DESTINATION ${INSTALL_LIBDIR})
-install(TARGETS bayonne-control bayonne-lint DESTINATION ${INSTALL_BINDIR})
+install(TARGETS bayonne-runtime DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS bayonne-control bayonne-lint DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
 

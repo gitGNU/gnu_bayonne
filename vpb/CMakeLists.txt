@@ -16,7 +16,7 @@ add_executable(bayonne-vpb ${vpb_src} ${vpb_inc})
 add_dependencies(bayonne-vpb bayonne-runtime ccscript ccaudio2 ucommon)
 target_link_libraries(bayonne-vpb bayonne-runtime ccscript ccaudio2 ucommon vpb ${UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})
 
-install(TARGETS bayonne-vpb DESTINATION ${INSTALL_SBINDIR})
+install(TARGETS bayonne-vpb DESTINATION ${CMAKE_INSTALL_SBINDIR})
 
 
 
