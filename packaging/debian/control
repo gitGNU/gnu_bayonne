@@ -2,8 +2,8 @@ Source: bayonne
 Section: libs
 Priority: optional
 Maintainer: David Sugar <dyfet@gnutelephony.org>
-Build-Depends: debhelper (>= 7.0.50),
-               dpkg-dev (>= 1.13.19),
+Build-Depends: debhelper (>= 9),
+               dpkg-dev (>= 1.16.0),
                libucommon-dev (>= 1:6.0.7),
                libccscript-dev (>= 5.0.0),
                libccaudio2-dev (>= 2.1.0),
@@ -17,7 +17,7 @@ Package: libbayonne-dev
 Section: libdevel
 Architecture: any
 Recommends: bayonne-bin
-Depends: libbayonne (= ${binary:Version}), libucommon-dev, ${misc:Depends}
+Depends: libbayonne3 (= ${binary:Version}), libucommon-dev, ${misc:Depends}
 Description: C++ class framework for telephony development
  GNU Bayonne's runtime telephony library offers support for accessing and
  manipulating telephonic audio files, and access to the core GNU Bayonne
@@ -28,7 +28,7 @@ Description: C++ class framework for telephony development
 Package: bayonne-bin
 Section: libs
 Architecture: any
-Depends: libbayonne (= ${binary:Version}), ${misc:Depends}
+Depends: libbayonne3 (= ${binary:Version}), ${misc:Depends}
 Description: Bayonne telephony tools
  GNU Bayonne offers tools for accessing and manipulating telephony audio
  files.  This package offers several utility programs used for manipulating
@@ -39,15 +39,16 @@ Architecture: any
 Section: debug
 Priority: extra
 Recommends: libbayonne-dev
-Depends: libbayonne (= ${binary:Version}), ${misc:Depends}
-Description: debugging symbols for libbayonne
- This package contains the debugging symbols for libbayonne.  This is
+Depends: libbayonne3 (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for libbayonne3
+ This package contains the debugging symbols for libbayonne3.  This is
  only needed when debugging applications which use the bayonne runtime library.
 
-Package: libbayonne
+Package: libbayonne3
 Section: libs
+Multi-Arch: same
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, ${misc:Pre-Depends}
 Description: Runtime library for bayonne applications and servers.
  GNU bayonne offers support for accessing and manipulating telephony audio
  files and the Bayonne multi-threaded state driven scripting engine.  This 
@@ -60,7 +61,7 @@ Architecture: any
 Provides: bayonne-daemon
 Conflicts: bayonne-daemon
 Recommends: bayonne-bin
-Depends: bayonne, libbayonne (= ${binary:Version}), ${misc:Depends}
+Depends: bayonne, libbayonne3 (= ${binary:Version}), ${misc:Depends}
 Description: Bayonne sip application server
  The Bayonne sip application server is used to run Bayonne scripted
  interactive voice services in conjunction with a sip server.
@@ -71,7 +72,7 @@ Architecture: any
 Provides: bayonne-daemon
 Conflicts: bayonne-daemon
 Recommends: bayonne-bin
-Depends: bayonne, libbayonne (= ${binary:Version}), ${misc:Depends}
+Depends: bayonne, libbayonne3 (= ${binary:Version}), ${misc:Depends}
 Description: Bayonne voicetronix application server
  The Bayonne voicetronix application server is used to run Bayonne scripted
  interactive voice services on voicetronix hardware in conjunction with
