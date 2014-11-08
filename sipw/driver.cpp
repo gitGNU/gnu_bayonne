@@ -25,7 +25,7 @@ int driver::family = AF_INET;
 int driver::protocol = IPPROTO_UDP;
 
 static const char *sip_realm = NULL;
-static const char *sip_schema = "sip:";
+//static const char *sip_schema = "sip:";
 static unsigned expires = 300;
 static const char *iface = NULL;
 static bool started = false;
@@ -140,8 +140,6 @@ void driver::start(void)
 {
     const char *agent = "bayonne-" VERSION "/exosip2";
     const char *err = NULL, *id;
-    char buffer[256];
-    size_t len;
     size_t stack = 0;
     unsigned priority = 1;
 
@@ -205,10 +203,6 @@ void driver::start(void)
 #endif
 
     stats = statmap::create(registries);
-    len = strlen(buffer);
-    snprintf(buffer + len, sizeof(buffer) - len, ":%u", port);
-
-
     Socket::query(family);
 
     if(protocol == IPPROTO_TCP) {
@@ -255,7 +249,6 @@ void driver::start(void)
     thread::activate(priority, stack);
 
     started = true;
-    len = strlen(sip_schema);
 
     linked_pointer<keydata> kp = drv->registry();
 
