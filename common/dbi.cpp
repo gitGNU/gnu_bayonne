@@ -57,7 +57,7 @@ void thread::run(void)
     running = true;
     linked_pointer<dbi> cp;
     LinkedObject *next;
-    FILE *fp;
+    FILE *fp = NULL;
 
     shell::log(shell::DEBUG0, "starting dbi thread");
 
@@ -73,16 +73,15 @@ void thread::run(void)
         else
             Thread::yield();
         cp = runlist;
-        fp = NULL;
         if(runlist && cdr)
             fp = fopen(env("calls"), "a");
         cdr = false;
         runlist = runlast = NULL;
         Conditional::unlock();
-        fp = NULL;
         while(is(cp)) {
             next = cp->getNext();
-            Driver::query(fp, *cp);
+            if(fp)
+                Driver::query(fp, *cp);
             // optional tuples in strdup'd memory...
             if(cp->optional)
                 free(cp->optional);
