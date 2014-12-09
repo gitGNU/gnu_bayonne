@@ -130,8 +130,6 @@ AC_ARG_WITH(initrddir,
 AC_ARG_WITH(pkg-config,
     AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
     PKG_CHECK_MODULES(UCOMMON, ucommon >= $UCOMMON_REQUIRES)
-    UCOMMON_CLINK=`pkg-config --variable=clink ucommon`
-    UCOMMON_MODEL=`pkg-config --variable=model ucommon`
     PKG_CHECK_MODULES(CCSCRIPT, ccscript >= $CCSCRIPT_REQUIRES)
     PKG_CHECK_MODULES(CCAUDIO2, ccaudio2 >= $CCAUDIO2_REQUIRES)
 ],[
@@ -149,8 +147,6 @@ AC_ARG_WITH(pkg-config,
         AC_ERROR("required ccaudio2 library missing")
     fi
 
-    UCOMMON_CLINK=`$UCOMMON --clink`
-    UCOMMON_MODEL=`$UCOMMON --model`
     UCOMMON_CFLAGS=`$UCOMMON --cflags`
     UCOMMON_LIBS=`$UCOMMON --libs`
     CCSCRIPT_CFLAGS=`$CCSCRIPT --cflags`
@@ -158,9 +154,6 @@ AC_ARG_WITH(pkg-config,
     CCAUDIO2_CFLAGS=`$CCAUDIO2 --cflags`
     CCAUDIO2_LIBS=`$CCAUDIO2 --libs`
 ])
-
-if test "$UCOMMON_MODEL" = "CC" ; then
-    LIBTOOL='$(SHELL) $(top_srcdir)/cmodel.sh'" ${LIBTOOL}" ; fi
 
 AC_CHECK_HEADERS(sys/resource.h pwd.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
@@ -218,27 +211,6 @@ if test -z "$BUILD_SUBDIRS" ; then
     AC_ERROR([no buildable targets.  Stopped])
     exit 1
 fi
-
-COMPILER_FLAGS=""
-
-for flag in $CXXFLAGS ; do
-    case "$flag" in
-    -f*exceptions|-f*rtti|-f*check-new|-f*enforce-eh-specs|-finline|-f*except)
-        if test "$UCOMMON_MODEL" = "CXX" ; then
-            COMPILER_FLAGS="$COMPILER_FLAGS $flag" ; fi
-        ;;
-    -fvisibility=*)
-        ;;
-    -I*)
-        COMPILER_FLAGS="$COMPILER_FLAGS $flag"
-        INCLUDE_FLAGS="$INCLUDE_FLAGS $flag"
-        ;;
-    *)
-        COMPILER_FLAGS="$COMPILER_FLAGS $flag"
-        ;;
-    esac
-done
-export CXXFLAGS="$COMPILER_FLAGS"
 
 BAYONNE_FLAGS="$EXPORT_FLAGS $EXOSIP2_FLAGS $CCAUDIO2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
 BAYONNE_LIBS="$EXPORT_LIBS $EXOSIP2_LIBS $CCAUDIO2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
@@ -302,8 +274,6 @@ AC_SUBST(UCOMMON_REQUIRES)
 AC_SUBST(CCSCRIPT_REQUIRES)
 AC_SUBST(CCAUDIO2_REQUIRES)
 AC_SUBST(INITRDDIR)
-AC_SUBST(UCOMMON_MODEL)
-AC_SUBST(UCOMMON_CLINK)
 AC_SUBST(BUILD_SUBDIRS)
 AC_SUBST(EXPORT_FLAGS)
 AC_SUBST(EXPORT_LIBS)

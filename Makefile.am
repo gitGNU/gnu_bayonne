@@ -9,7 +9,7 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
-EXTRA_DIST = autogen.sh *.pc.in cmodel.sh bayonne.spec.in bayonne.spec \
+EXTRA_DIST = autogen.sh *.pc.in bayonne.spec.in bayonne.spec \
 	DRIVERS bayonne-config.in bayonne-config.1 docs/script.tex \
 	bayonne-config.h.cmake CMakeLists.txt
 SUBDIRS = common config utils @BUILD_SUBDIRS@ inc
