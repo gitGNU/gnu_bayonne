@@ -298,7 +298,7 @@ const char *driver::dispatch(char **argv, int pid)
 
 const char *driver::activate(keydata *keys)
 {
-    caddr_t mp = memget(sizeof(registration));
+    void *mp = memget(sizeof(registration));
     registration *reg = new(mp) registration(&registrations, keys, expires, port);
     shell::log(shell::INFO, "registering with %s", reg->getServer());
 

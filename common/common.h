@@ -19,6 +19,7 @@
 #include <ccscript.h>
 #include <ucommon/export.h>
 #include <bayonne/bayonne.h>
+#include <new>
 
 /**
  * Internal stuff, not seen in external interfaces

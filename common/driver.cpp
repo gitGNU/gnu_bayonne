@@ -137,7 +137,7 @@ noscr:
 
     while(is(dir) && dir.read(dirpath + len, sizeof(dirpath) - len) > 0) {
         char *ep = strrchr(dirpath + len, '.');
-        caddr_t mp;
+        void *mp;
         if(!ep)
             continue;
         if(!eq(ep, ".bcs"))
@@ -155,7 +155,7 @@ noscr:
         }
 
         *(ep++) = 0;
-        mp = (caddr_t)zalloc(sizeof(image));
+        mp = zalloc(sizeof(image));
         new(mp) image(img, &image_services, dup(dirpath + len));
     }
     dir.close();
