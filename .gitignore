@@ -20,6 +20,7 @@ test/bayonneScript
 utils/baylint
 utils/bayonne
 sipw/bayonne-sipw
+vpb/bayonne-vpb
 stamp*
 *.obj
 *.lib
