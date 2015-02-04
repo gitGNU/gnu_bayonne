@@ -22,8 +22,17 @@ set(RC_VERSION ${VERSION})
 STRING(REGEX REPLACE "[.]" "," RC_VERSION ${RC_VERSION})
 set(RC_VERSION "${RC_VERSION},0")
 
-set(SOVERSION ${VERSION})
+if(UNIX)
+    execute_process(WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND "./cmake-abi.sh" OUTPUT_VARIABLE LIB_VERSION)
+else()
+    set(LIB_VERSION ${VERSION})
+endif()
+
+set(SOVERSION ${LIB_VERSION})
 STRING(REGEX REPLACE "[.].*$" "" SOVERSION ${SOVERSION})
+if(ABI_MAJORONLY)
+    set(LIB_VERSION ${SOVERSION})
+endif()
 
 # when we override default install prefix, assume full path is used...
 
@@ -182,6 +191,7 @@ file(GLOB common_inc common/*.h)
 
 add_library(bayonne-runtime ${BUILD_RUNTIME_TYPE} ${runtime_src} ${runtime_inc} ${common_inc})
 set_target_properties(bayonne-runtime PROPERTIES OUTPUT_NAME bayonne)
+set_target_properties(bayonne-runtime PROPERTIES VERSION ${LIB_VERSION} SOVERSION ${SOVERSION})
 add_dependencies(bayonne-runtime ccscript usecure ucommon)
 target_link_libraries(bayonne-runtime ccscript ccaudio2 usecure ucommon ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${SECURE_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})
 
