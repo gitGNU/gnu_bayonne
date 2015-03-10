@@ -5,7 +5,7 @@
 
 # Maintainer: David Sugar <dyfet@gnutelephony.org>
 pkgname=bayonne
-pkgver=3.0.0
+pkgver=@VERSION@
 pkgrel=1
 #epoch=
 pkgdesc="A set of script-driven telephony application servers"
@@ -13,7 +13,7 @@ arch=('x86_64' 'i686')
 url="http://www.gnutelephony.org"
 license=('GPL3')
 groups=()
-depends=('ucommon>=6.0.0' 'libexosip2' 'ccscript>=5.0.0' 'ccaudio2>=2.1.0')
+depends=('ucommon>=@USES_UCOMMON_REQUIRED@' 'libexosip2' 'ccscript>=@USES_CCSCRIPT_REQUIRED@' 'ccaudio2>=@USES_CCAUDIO2_REQUIRED@')
 makedepends=()
 options=()
 changelog=

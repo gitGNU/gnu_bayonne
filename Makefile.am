@@ -11,7 +11,7 @@
 AUTOMAKE_OPTIONS = no-dependencies dist-shar dist-zip
 EXTRA_DIST = autogen.sh *.pc.in bayonne.spec.in bayonne.spec \
 	DRIVERS bayonne-config.in bayonne-config.1 docs/script.tex \
-	bayonne-config.h.cmake CMakeLists.txt cmake-abi.sh
+	bayonne-config.h.cmake CMakeLists.txt cmake-abi.sh PKGBUILD.in
 SUBDIRS = common config utils @BUILD_SUBDIRS@ inc
 DIST_SUBDIRS = common config utils sipw vpb inc 
 

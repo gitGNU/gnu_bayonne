@@ -21,7 +21,9 @@ URL: http://www.gnu.org/software/bayonne
 Group: Applications/Communications
 Source: http://www.gnutelephony.org/dist/tarballs/bayonne-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildRequires: ucommon-devel >= 2.1.3
+BuildRequires: ucommon-devel >= @USES_UCOMMON_REQUIRED@
+BuildRequires: ccscript-devel >= @USES_CCSCRIPT_REQUIRED@
+BuildRequires: ccaudio2-devel >= @USES_CCAUDIO2_REQUIRED@
 BuildRequires: libeXosip2-devel >= 3.0.0
 BuildRequires: systemd-devel >= 200
 Requires: %{name}-runtime = %{version}-%{release}

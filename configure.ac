@@ -13,9 +13,9 @@ AC_INIT([bayonne],[3.0.0])
 AC_CONFIG_SRCDIR([autogen.sh])
 
 LT_VERSION="3:0:0"
-UCOMMON_REQUIRES="6.0.7"
-CCSCRIPT_REQUIRES="5.0.0"
-CCAUDIO2_REQUIRES="2.1.0"
+USES_UCOMMON_REQUIRED="6.0.7"
+USES_CCSCRIPT_REQUIRED="5.0.0"
+USES_CCAUDIO2_REQUIRED="2.1.0"
 BUILD_SUBDIRS=""
 
 AC_CONFIG_AUX_DIR(autoconf)
@@ -57,8 +57,8 @@ fi
 export PKG_CONFIG_PATH
 
 INCLUDE_FLAGS=""
-EXPORT_LIBS=""
-EXPORT_FLAGS=""
+PKG_BAYONNE_LIBS=""
+PKG_BAYONNE_FLAGS=""
 BAYONNE_LIBS=""
 BAYONNE_FLAGS=""
 
@@ -129,9 +129,9 @@ AC_ARG_WITH(initrddir,
 
 AC_ARG_WITH(pkg-config,
     AC_HELP_STRING([--with-pkg-config],[enable support for pkg-config]),[
-    PKG_CHECK_MODULES(UCOMMON, ucommon >= $UCOMMON_REQUIRES)
-    PKG_CHECK_MODULES(CCSCRIPT, ccscript >= $CCSCRIPT_REQUIRES)
-    PKG_CHECK_MODULES(CCAUDIO2, ccaudio2 >= $CCAUDIO2_REQUIRES)
+    PKG_CHECK_MODULES(UCOMMON, ucommon >= $USES_UCOMMON_REQUIRED)
+    PKG_CHECK_MODULES(CCSCRIPT, ccscript >= $USES_CCSCRIPT_REQUIRED)
+    PKG_CHECK_MODULES(CCAUDIO2, ccaudio2 >= $USES_CCAUDIO2_REQUIRED)
 ],[
     AC_PATH_PROG([UCOMMON],[ucommon-config],[none])
     if test "$UCOMMON" = "none" ; then
@@ -159,7 +159,7 @@ AC_CHECK_HEADERS(sys/resource.h pwd.h)
 AC_CHECK_FUNCS(setrlimit setpgrp setrlimit getuid mkfifo sigwait)
 
 AC_CHECK_HEADER(resolv.h,[
-    EXPORT_LIBS="$EXPORT_LIBS -lresolv"
+    PKG_BAYONNE_LIBS="$PKG_BAYONNE_LIBS -lresolv"
     AC_DEFINE(HAVE_RESOLV_H, [1], [resolv header])
 ],[])
 
@@ -204,6 +204,15 @@ if test x"$has_eXosip2" = "xyes" ; then
     esac
 fi
 
+PKG_CHECK_MODULES(SYSTEMD, libsystemd-daemon >= 44, [
+    AC_DEFINE(HAVE_SYSTEMD, 1, [systemd daemon support])
+    PKG_BAYONNE_LIBS="$PKG_BAYONNE_LIBS $SYSTEMD_LIBS"
+],[SYSTEMD_LIBS=""])
+
+AC_CHECK_LIB(msvcrt, fopen, [
+    PKG_BAYONNE_LIBS="$PKG_BAYONNE_LIBS -ladvapi32"
+])
+
 if test x"$has_vpbapi" = "xyes" ; then
     BUILD_SUBDIRS="$BUILD_SUBDIRS vpb" ; fi
 
@@ -212,8 +221,8 @@ if test -z "$BUILD_SUBDIRS" ; then
     exit 1
 fi
 
-BAYONNE_FLAGS="$EXPORT_FLAGS $EXOSIP2_FLAGS $CCAUDIO2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
-BAYONNE_LIBS="$EXPORT_LIBS $EXOSIP2_LIBS $CCAUDIO2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
+BAYONNE_FLAGS="$PKG_BAYONNE_FLAGS $EXOSIP2_FLAGS $CCAUDIO2_FLAGS $CCSCRIPT_CFLAGS $UCOMMON_CFLAGS"
+BAYONNE_LIBS="$PKG_BAYONNE_LIBS $EXOSIP2_LIBS $CCAUDIO2_LIBS $CCSCRIPT_LIBS $UCOMMON_LIBS $ac_with_malloc $UCOMMON_CLINK"
 
 if test "$localstatedir" == '${prefix}/var' ; then
     localstatedir="/var" ; fi
@@ -247,7 +256,7 @@ case "$BAYONNE_FLAGS -I/usr/include" in
 *-I${default_incpath}*)
     ;;
 *)
-    EXPORT_FLAGS="$EXPORT_FLAGS -I$default_incpath"
+    PKG_BAYONNE_FLAGS="$PKG_BAYONNE_FLAGS -I$default_incpath"
     ;;
 esac
 
@@ -259,24 +268,15 @@ AC_DEFINE_UNQUOTED(DEFAULT_LIBEXEC, "$default_libexec", [script path])
 AC_DEFINE_UNQUOTED(DEFAULT_DATADIR, "$default_datadir", [data path])
 AC_DEFINE_UNQUOTED(DEFAULT_PAGING, $default_paging, [default page size])
 
-PKG_CHECK_MODULES(SYSTEMD, libsystemd-daemon >= 44, [
-    AC_DEFINE(HAVE_SYSTEMD, 1, [systemd daemon support])
-    BAYONNE_LIBS="$BAYONNE_LIBS $SYSTEMD_LIBS"
-],[SYSTEMD_LIBS=""])
-
-AC_CHECK_LIB(msvcrt, fopen, [
-    BAYONNE_LIBS="$BAYONNE_LIBS -ladvapi32"
-])
-
 AC_SUBST(plugindir)
 AC_SUBST(scriptdir)
-AC_SUBST(UCOMMON_REQUIRES)
-AC_SUBST(CCSCRIPT_REQUIRES)
-AC_SUBST(CCAUDIO2_REQUIRES)
+AC_SUBST(USES_UCOMMON_REQUIRED)
+AC_SUBST(USES_CCSCRIPT_REQUIRED)
+AC_SUBST(USES_CCAUDIO2_REQUIRED)
 AC_SUBST(INITRDDIR)
 AC_SUBST(BUILD_SUBDIRS)
-AC_SUBST(EXPORT_FLAGS)
-AC_SUBST(EXPORT_LIBS)
+AC_SUBST(PKG_BAYONNE_FLAGS)
+AC_SUBST(PKG_BAYONNE_LIBS)
 AC_SUBST(INCLUDE_FLAGS)
 AC_SUBST(BAYONNE_FLAGS)
 AC_SUBST(BAYONNE_LIBS)
@@ -287,6 +287,6 @@ AC_SUBST(CXXFLAGS)
 AC_SUBST(MODFLAGS)
 AC_SUBST(DLOPEN)
 AC_OUTPUT(Makefile common/Makefile utils/Makefile config/Makefile
-sipw/Makefile vpb/Makefile
+sipw/Makefile vpb/Makefile PKGBUILD
 inc/Makefile inc/bayonne/Makefile libbayonne.pc bayonne.spec bayonne-config)
 

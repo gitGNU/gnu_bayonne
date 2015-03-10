@@ -3,6 +3,7 @@ CMakeFiles/
 cmake_*
 Makefile
 Makefile.in
+PKGBUILD
 config.h.in
 config.h
 config.log
@@ -34,6 +35,11 @@ stamp*
 *.la
 *.so.*
 *.so
+*.changes
+*.deb
+*.tar.gz
+*.rpm
+*.zip
 *.authors
 *.kdev4
 *.deps

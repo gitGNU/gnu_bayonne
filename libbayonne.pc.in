@@ -1,7 +1,7 @@
 Name: libbayonne
 Description: Bayonne supporting library for plugins
 Version: @VERSION@
-Requires: ucommon >= @UCOMMON_REQUIRES@
-Libs:  -lbayonne @EXPORT_LIBS@ 
-Cflags: @EXPORT_FLAGS@
+Requires: ucommon >= @USES_UCOMMON_REQUIRED@
+Libs:  -lbayonne @PKG_BAYONNE_LIBS@ 
+Cflags: @PKG_BAYONNE_FLAGS@
  
