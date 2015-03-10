@@ -129,7 +129,7 @@ file(GLOB runtime_src common/*.cpp)
 file(GLOB runtime_inc inc/bayonne/*.h)
 file(GLOB common_inc common/*.h)
 
-pc_libs(PKG_BAYONNE_LIBS ${EXOSIP2_LIBS})
+pc_libs(PKG_BAYONNE_LIBS ${USES_CCSCRIPT_LIBRARIES} ${USES_CCAUDIO2_LIBRARIES} ${USES_UCOMMON_LIBRARIES} ${USES_SYSTEMD_LIBRARIES})
 
 create_headers()
 create_specfile()
