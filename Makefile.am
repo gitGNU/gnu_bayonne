@@ -30,3 +30,26 @@ doc:
 	cd docs ; latex2html -nosubdir -split 0 script.tex
 	cd docs ; lynx --dump script.html >script.text
 
+srpm:	dist
+	rm -f *.rpm
+	rpmbuild  -bs --nodeps --define "_sourcedir ." --define "_srcrpmdir ." --sign bayonne.spec
+
+deb:	dist
+	rm -f *.deb *.debian.tar.gz *.dsc *.changes
+	cape-source --sign bayonne-${VERSION}.tar.gz .
+
+dist-hook:  cleandist
+
+cleandist:
+	@rm -f ${PACKAGE}-[0-9]*.tar.gz
+	@rm -f ${PACKAGE}-[0-9]*.tar.bz2
+	@rm -f ${PACKAGE}-[0-9]*.shar.gz
+	@rm -f ${PACKAGE}-[0-9]*.zip
+	@rm -f ${PACKAGE}-*.rpm
+	@rm -f lib${PACKAGE}*[-_]*.deb
+	@rm -f ${PACKAGE}[-_]*.deb
+	@rm -f ${PACKAGE}_*.gz
+	@rm -f ${PACKAGE}_*.dsc
+	@rm -f *.changes
+
+
