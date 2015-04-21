@@ -17,10 +17,10 @@
 
 namespace bayonne {
 
-class __LOCAL thread : public DetachedThread, public Conditional, protected Env
+class __LOCAL dbithread : public DetachedThread, public Conditional, protected Env
 {
 public:
-    thread();
+    dbithread();
 
     inline void lock(void)
         {Conditional::lock();}
@@ -40,19 +40,19 @@ static LinkedObject *freelist = NULL;
 static LinkedObject *runlist = NULL;
 static dbi *runlast = NULL;
 static Mutex private_locking;
-static thread run;
+static dbithread run;
 static bool running = false;
 static bool cdr = false;
 
-thread::thread() : DetachedThread(), Conditional()
+dbithread::dbithread() : DetachedThread(), Conditional()
 {
 }
 
-void thread::exit(void)
+void dbithread::exit(void)
 {
 }
 
-void thread::run(void)
+void dbithread::run(void)
 {
     running = true;
     linked_pointer<dbi> cp;
