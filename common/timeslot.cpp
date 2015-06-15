@@ -86,6 +86,11 @@ Timeslot::Timeslot() : LinkedObject(&timeslots), Script::interp()
     rings = 0;
 }
 
+void Timeslot::release(void)
+{
+    LinkedObject::release();
+}
+
 void Timeslot::initialize(void)
 {
     digits = voice = NULL;

@@ -90,6 +90,9 @@ public:
 
     typedef void (Timeslot::*handler_t)(event_t *event);
 
+private:
+    void release(void);
+
 protected:
     long cid;
     statmap::stat_t stats;
