@@ -163,4 +163,5 @@ set_target_properties(bayonne-lint PROPERTIES OUTPUT_NAME baylint)
 install(TARGETS bayonne-runtime DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(TARGETS bayonne-control bayonne-lint DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-
+add_make_lint_target()
+add_make_uninstall_target()
