@@ -20,5 +20,5 @@ bayonnectl_LDADD = @UCOMMON_LIBS@
 baylint_SOURCES = baylint.cpp
 baylint_LDADD = ../common/libbayonne.la @BAYONNE_LIBS@
 
-man_MANS = bayonne.8
+man_MANS = bayonnectl.8
 
