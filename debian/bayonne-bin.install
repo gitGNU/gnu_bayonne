@@ -2,8 +2,8 @@ usr/bin/audiotool
 usr/bin/tonetool
 usr/bin/phrasebook
 usr/bin/baylint
-usr/bin/bayonnectl
-usr/share/man/man1/bayonnectl.8
+usr/bin/baycontrol
+usr/share/man/man1/baycontrol.8
 usr/share/man/man1/phrasebook.1
 usr/share/man/man1/baylint.1
 usr/share/man/man1/audiotool.1

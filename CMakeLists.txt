@@ -153,7 +153,7 @@ endif()
 add_executable(bayonne-control utils/bayonne.cpp)
 set_source_dependencies(bayonne-control ucommon)
 target_link_libraries(bayonne-control ucommon ${USES_UCOMMON_LIBRARIES})
-set_target_properties(bayonne-control PROPERTIES OUTPUT_NAME bayonnectl)
+set_target_properties(bayonne-control PROPERTIES OUTPUT_NAME baycontrol)
 
 add_executable(bayonne-lint utils/baylint.cpp)
 set_source_dependencies(bayonne-lint bayonne-runtime ucommon ccscript)

@@ -10,15 +10,15 @@
 
 MAINTAINERCLEANFILES = Makefile.in Makefile
 AM_CXXFLAGS = -I$(top_srcdir)/inc @BAYONNE_FLAGS@
-EXTRA_DIST = bayonnectl.8
+EXTRA_DIST = baycontrol.8
 
-bin_PROGRAMS = bayonnectl baylint
+bin_PROGRAMS = baycontrol baylint
 
-bayonnectl_SOURCES = bayonne.cpp
-bayonnectl_LDADD = @UCOMMON_LIBS@
+baycontrol_SOURCES = baycontrol.cpp
+baycontrol_LDADD = @UCOMMON_LIBS@
 
 baylint_SOURCES = baylint.cpp
 baylint_LDADD = ../common/libbayonne.la @BAYONNE_LIBS@
 
-man_MANS = bayonnectl.8
+man_MANS = baycontrol.8
 
