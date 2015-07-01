@@ -150,7 +150,7 @@ if(HAVE_VPBAPI)
     add_subdirectory(vpb)
 endif()
 
-add_executable(bayonne-control utils/bayonne.cpp)
+add_executable(bayonne-control utils/baycontrol.cpp)
 set_source_dependencies(bayonne-control ucommon)
 target_link_libraries(bayonne-control ucommon ${USES_UCOMMON_LIBRARIES})
 set_target_properties(bayonne-control PROPERTIES OUTPUT_NAME baycontrol)

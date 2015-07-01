@@ -19,7 +19,7 @@ test/bayonneScript
 /baylint
 /bayonne
 utils/baylint
-utils/bayonnectl
+utils/baycontrol
 sipw/bayonne-sipw
 vpb/bayonne-vpb
 stamp*
