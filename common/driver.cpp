@@ -300,9 +300,11 @@ Script *Driver::getOutgoing(const char *name)
         ip.next();
     }
     release(driver);
-    if(Script::find(scr, "@outgoing"))
-        return scr;
-    scr->release();
+    if(scr) {
+        if(Script::find(scr, "@outgoing"))
+            return scr;
+        scr->release();
+    }
     return NULL;
 }
 
@@ -325,9 +327,11 @@ Script *Driver::getIncoming(const char *name)
         ip.next();
     }
     release(driver);
-    if(Script::find(scr, "@incoming"))
-        return scr;
-    scr->release();
+    if(scr) {
+        if(Script::find(scr, "@incoming"))
+            return scr;
+        scr->release();
+    }
     return NULL;
 }
 

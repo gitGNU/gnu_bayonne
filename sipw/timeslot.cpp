@@ -127,12 +127,13 @@ int timeslot::incoming(voip::event_t sevent)
 
 	if(to && targets) {
 		cp = strstr(targets, to->username);
-		if(cp)
-			len = strlen(to->username);
+		len = strlen(to->username);
 
-		if(len && (isspace(cp[len]) || strchr(",;:", cp[len]) || !cp[len])) {
-			scrname = to->username;
-			goto attach;
+		if(cp && len) {
+			if(isspace(cp[len]) || strchr(",;:", cp[len]) || !cp[len])	{
+				scrname = to->username;
+				goto attach;
+			}
 		}
 	
 		// detect diversion even if no diversion header....
