@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: David Sugar <dyfet@gnutelephony.org>
 Build-Depends: debhelper (>= 9),
                dpkg-dev (>= 1.16.0),
-               libucommon-dev (>= 1:6.0.7),
+               libucommon-dev (>= 1:6.4.4),
                libccscript-dev (>= 5.0.0),
                libccaudio2-dev (>= 2.1.0),
                libexosip2-dev (>= 3.6.0),
