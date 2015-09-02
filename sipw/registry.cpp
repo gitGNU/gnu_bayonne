@@ -110,7 +110,7 @@ Registration(list, keys, "sip:")
 
 void registration::confirm(void)
 {
-    Mutex::guard lock(this);
+    __AUTOPROTECT(this);
     if(fwd) {
         fwd->confirm();
         return;
@@ -120,13 +120,12 @@ void registration::confirm(void)
         return;
 
     time(&activated);
-    lock.release();
     shell::debug(3, "registry id %d activated", rid);
 }
 
 void registration::release(void)
 {
-    Mutex::guard lock(this);
+    __AUTOPROTECT(this);
 
     int pid = rid;
 
@@ -141,13 +140,12 @@ void registration::release(void)
     rid = -1;
     context = NULL;
 
-    lock.release();
     shell::debug(3, "registry id %d released", pid);
 }
 
 void registration::failed(void)
 {
-    Mutex::guard lock(this);
+    __AUTOPROTECT(this);
     int pid = rid;
     if(fwd) {
         fwd->failed();
@@ -163,13 +161,12 @@ void registration::failed(void)
     Registration::release();
     rid = -1;
 
-    lock.release();
     shell::debug(3, "registry id %d failed", pid);
 }
 
 void registration::cancel(void)
 {
-    Mutex::guard lock(this);
+    __AUTOPROTECT(this);
     int pid = rid;
     if(fwd) {
         fwd->cancel();
@@ -186,7 +183,6 @@ void registration::cancel(void)
     Registration::release();
     rid = -1;
 
-    lock.release();
     shell::debug(3, "registry id %d terminated", pid);
 }
 
