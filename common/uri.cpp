@@ -260,7 +260,7 @@ void uri::set(const char *uri, int family, int protocol)
 			break;
 
         Socket::address resolv(hbuf, hport);
-        struct sockaddr *sp = resolv.getAddr();
+        const struct sockaddr *sp = resolv.getAddr();
 
         if(sp) {
             uint16_t rand;

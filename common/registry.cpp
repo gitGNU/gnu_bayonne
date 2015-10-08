@@ -59,7 +59,7 @@ const char *Registration::getHostid(const char *id)
 void Registration::getInterface(const char *uri, char *buffer, size_t size)
 {
     struct sockaddr_storage iface;
-    struct sockaddr *address;
+    const struct sockaddr *address;
     Socket::address resolver;
     char *cp;
 
